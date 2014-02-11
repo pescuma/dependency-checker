@@ -56,7 +56,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CsprojReader.cs" />
+    <Compile Include="Dependency.cs" />
+    <Compile Include="DependencyGraph.cs" />
+    <Compile Include="LinqHelper.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Project.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
