@@ -22,6 +22,19 @@ namespace org.pescuma.dotnetdependencychecker
 		}
 
 		[Test]
+		[ExpectedException(typeof (ConfigParserException))]
+		public void TestInvalidLine()
+		{
+			Parse(@"!!!");
+		}
+
+		[Test]
+		public void TestIgnoreCommentedLine()
+		{
+			Parse(@"#");
+		}
+
+		[Test]
 		public void TestOneInput()
 		{
 			var config = Parse(@"input: c:\a");
@@ -34,6 +47,15 @@ namespace org.pescuma.dotnetdependencychecker
 		public void TestOneInputWithoutSpace()
 		{
 			var config = Parse(@"input:c:\a");
+
+			Assert.AreEqual(1, config.Inputs.Count);
+			Assert.AreEqual(@"c:\a", config.Inputs[0]);
+		}
+
+		[Test]
+		public void TestOneInputWithComment()
+		{
+			var config = Parse(@"input: c:\a # bla");
 
 			Assert.AreEqual(1, config.Inputs.Count);
 			Assert.AreEqual(@"c:\a", config.Inputs[0]);

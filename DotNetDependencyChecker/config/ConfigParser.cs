@@ -8,6 +8,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 {
 	public class ConfigParser
 	{
+		private const string COMMENT = "#";
 		private const string DEPENDS = "->";
 		private const string NOT_DEPENDS = "-!->";
 
@@ -39,6 +40,11 @@ namespace org.pescuma.dotnetdependencychecker.config
 			};
 
 			lines.Select(l => l.Trim())
+				.Select(l =>
+				{
+					var pos = l.IndexOf(COMMENT, StringComparison.Ordinal);
+					return pos >= 0 ? l.Substring(0, pos) : l;
+				})
 				.Where(l => !string.IsNullOrEmpty(l))
 				.ForEach(line => ParseLine(lineTypes, line));
 
@@ -47,18 +53,12 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		private static void ParseLine(Dictionary<string, Action<string>> types, string line)
 		{
-			foreach (var type in types)
-			{
-				if (type.Key != "" && !line.StartsWith(type.Key))
-					continue;
+			var type = types.FirstOrDefault(t => t.Key == "" || line.StartsWith(t.Key));
+			if (type.Value == null)
+				throw new ConfigParserException("Unknown line: " + line);
 
-				type.Value(line.Substring(type.Key.Length)
-					.Trim());
-
-				return;
-			}
-
-			throw new ConfigParserException("Unknown line: " + line);
+			type.Value(line.Substring(type.Key.Length)
+				.Trim());
 		}
 
 		private static void ParseInput(Config result, string line)
