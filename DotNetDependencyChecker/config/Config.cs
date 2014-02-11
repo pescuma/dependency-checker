@@ -7,6 +7,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 	{
 		public readonly List<string> Inputs = new List<string>();
 		public readonly List<Group> Groups = new List<Group>();
+		public readonly List<Ignore> Ignores = new List<Ignore>();
 		public readonly List<Rule> Rules = new List<Rule>();
 		public readonly OutputConfig Output = new OutputConfig();
 
@@ -19,6 +20,23 @@ namespace org.pescuma.dotnetdependencychecker.config
 			public Group(string name, Func<Project, bool> matches, string line)
 			{
 				Name = name;
+				Matches = matches;
+				this.line = line;
+			}
+
+			public override string ToString()
+			{
+				return line;
+			}
+		}
+
+		public class Ignore
+		{
+			private readonly string line;
+			public readonly Func<Project, bool> Matches;
+
+			public Ignore(Func<Project, bool> matches, string line)
+			{
 				Matches = matches;
 				this.line = line;
 			}

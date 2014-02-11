@@ -4,11 +4,13 @@
 	{
 		public readonly string Name;
 		public readonly string Path;
+		public readonly bool IsLocal;
 
-		public Project(string name, string path)
+		public Project(string name, string path, bool isLocal)
 		{
 			Name = name;
 			Path = path;
+			IsLocal = isLocal;
 		}
 
 		protected bool Equals(Project other)

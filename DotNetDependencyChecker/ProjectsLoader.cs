@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
 
 namespace org.pescuma.dotnetdependencychecker
 {
 	public class ProjectsLoader
 	{
-		public static DependencyGraph LoadGraph(Config config)
+		public static DependencyGraph LoadGraph(Config config, List<string> warns)
 		{
 			Console.WriteLine("Reading cs projs...");
 
@@ -17,32 +18,28 @@ namespace org.pescuma.dotnetdependencychecker
 			var csprojs = csprojFiles.Select(csprojFile => new CsprojReader(csprojFile))
 				.ToList();
 
-			var localProjs = new HashSet<string>(csprojs.Select(p => p.Name));
-
-			Dump(localProjs, config.Output.LocalProjects);
-
 			var projs = CreateProjects(csprojs)
 				.Distinct()
 				.ToDictionary(p => p.Name, p => p);
 
-			Dump(projs.Values.Select(p => p.Name), config.Output.AllProjects);
-
 			Console.WriteLine("Creating dependency graph...");
 
-			Func<string, bool> ignore = p => false;
+			Func<Project, bool> ignore = p => config.Ignores.Any(i => i.Matches(p));
 
 			var graph = new DependencyGraph();
 
-			projs.Values.Where(p2 => !ignore(p2.Name))
-				.ForEach(p3 => graph.AddVertex(p3));
+			projs.Values.Where(p => !ignore(p))
+				.ForEach(p => graph.AddVertex(p));
 
 			foreach (var csproj in csprojs)
 			{
-				if (ignore(csproj.Name))
+				var proj = projs[csproj.Name];
+
+				if (ignore(proj))
 					continue;
 
 				var deps = CreateDeps(projs, csproj)
-					.Where(d => !ignore(d.Source.Name) && !ignore(d.Target.Name))
+					.Where(d => !ignore(d.Source) && !ignore(d.Target))
 					.ToList();
 
 				var duplicates = deps.GroupBy(i => i)
@@ -52,8 +49,11 @@ namespace org.pescuma.dotnetdependencychecker
 
 				if (duplicates.Count > 0)
 				{
-					Console.WriteLine("WARN: The projext {0} depends more than once on the following projects:", csproj.Name);
-					duplicates.ForEach(d => Console.WriteLine("       - " + d.Target.Name));
+					var warn = new StringBuilder();
+					warn.Append(string.Format("The project {0} depends more than once on the following projects:", csproj.Name));
+					duplicates.ForEach(d => warn.Append("\n  - " + d.Target.Name));
+
+					warns.Add(warn.ToString());
 				}
 
 				deps.Distinct()
@@ -63,17 +63,19 @@ namespace org.pescuma.dotnetdependencychecker
 			return graph;
 		}
 
-		private static IEnumerable<Project> CreateProjects(IEnumerable<CsprojReader> csprojs)
+		private static IEnumerable<Project> CreateProjects(IList<CsprojReader> csprojs)
 		{
+			var localProjs = new HashSet<string>(csprojs.Select(p => p.Name));
+
 			foreach (var csproj in csprojs)
 			{
-				yield return new Project(csproj.Name, csproj.Filename);
+				yield return new Project(csproj.Name, csproj.Filename, localProjs.Contains(csproj.Name));
 
 				foreach (var reference in csproj.ProjectReferences)
-					yield return new Project(reference.Name, reference.Include);
+					yield return new Project(reference.Name, reference.Include, localProjs.Contains(csproj.Name));
 
 				foreach (var reference in csproj.References)
-					yield return new Project(reference.Include.Name, reference.HintPath);
+					yield return new Project(reference.Include.Name, reference.HintPath, localProjs.Contains(csproj.Name));
 			}
 		}
 
@@ -86,18 +88,6 @@ namespace org.pescuma.dotnetdependencychecker
 
 			foreach (var reference in csproj.References)
 				yield return new Dependency(proj, projs[reference.Include.Name], Dependency.Types.DllReference);
-		}
-
-		private static void Dump(IEnumerable<string> projs, List<string> filenames)
-		{
-			if (!filenames.Any())
-				return;
-
-			var names = projs.ToList();
-
-			names.Sort();
-
-			filenames.ForEach(f => File.WriteAllLines(f, names));
 		}
 	}
 }

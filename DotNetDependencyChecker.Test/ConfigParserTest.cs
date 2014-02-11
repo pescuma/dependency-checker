@@ -13,12 +13,22 @@ namespace org.pescuma.dotnetdependencychecker
 
 		private Project ProjWithName(string name)
 		{
-			return new Project(name, null);
+			return new Project(name, null, true);
 		}
 
 		private Project ProjWithPath(string path)
 		{
-			return new Project(null, path);
+			return new Project(null, path, true);
+		}
+
+		private Project LocalProj()
+		{
+			return new Project(null, null, true);
+		}
+
+		private Project NonLocalProj()
+		{
+			return new Project(null, null, false);
 		}
 
 		[Test]
@@ -276,6 +286,28 @@ output local projects: c:\b.out");
 
 			Assert.AreEqual(true, rule.Target(ProjWithName("Baa")));
 			Assert.AreEqual(false, rule.Target(ProjWithName("B")));
+		}
+
+		[Test]
+		public void TestIgnoreSimple()
+		{
+			var config = Parse(@"ignore: A");
+
+			Assert.AreEqual(1, config.Ignores.Count);
+			var ignore = config.Ignores[0];
+			Assert.AreEqual(true, ignore.Matches(ProjWithName("A")));
+			Assert.AreEqual(false, ignore.Matches(ProjWithName("B")));
+		}
+
+		[Test]
+		public void TestIgnoreAllNonLocalProjects()
+		{
+			var config = Parse(@"ignore all non-local projects");
+
+			Assert.AreEqual(1, config.Ignores.Count);
+			var ignore = config.Ignores[0];
+			Assert.AreEqual(false, ignore.Matches(LocalProj()));
+			Assert.AreEqual(true, ignore.Matches(NonLocalProj()));
 		}
 	}
 }
