@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{34CB5A
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetDependencyChecker.Test", "DotNetDependencyChecker.Test\DotNetDependencyChecker.Test.csproj", "{823D0720-F22D-4703-BD39-438CC20DC541}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,10 @@ Global
 		{144B5DFF-3DC8-4E36-A2D7-A0D6DD3F6551}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{144B5DFF-3DC8-4E36-A2D7-A0D6DD3F6551}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{144B5DFF-3DC8-4E36-A2D7-A0D6DD3F6551}.Release|Any CPU.Build.0 = Release|Any CPU
+		{823D0720-F22D-4703-BD39-438CC20DC541}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{823D0720-F22D-4703-BD39-438CC20DC541}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{823D0720-F22D-4703-BD39-438CC20DC541}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{823D0720-F22D-4703-BD39-438CC20DC541}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
