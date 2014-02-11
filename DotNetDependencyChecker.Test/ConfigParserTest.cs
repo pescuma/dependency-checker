@@ -280,6 +280,22 @@ output projects: c:\b.out");
 		}
 
 		[Test]
+		public void TestRuleAllowCircularDependencies()
+		{
+			var config = Parse(@"");
+
+			Assert.AreEqual(false, config.DontAllowCircularDependencies);
+		}
+
+		[Test]
+		public void TestRuleDontAllowCircularDependencies()
+		{
+			var config = Parse(@"rule: don't allow circular dependencies");
+
+			Assert.AreEqual(true, config.DontAllowCircularDependencies);
+		}
+
+		[Test]
 		public void TestIgnoreSimple()
 		{
 			var config = Parse(@"ignore: A");

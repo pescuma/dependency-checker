@@ -66,6 +66,7 @@
     <Compile Include="Project.cs" />
     <Compile Include="ProjectsLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RulesMatcher.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

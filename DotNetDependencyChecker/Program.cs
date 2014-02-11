@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using org.pescuma.dotnetdependencychecker.config;
-using QuickGraph.Algorithms;
 
 namespace org.pescuma.dotnetdependencychecker
 {
@@ -38,26 +37,11 @@ namespace org.pescuma.dotnetdependencychecker
 
 			Dump(graph.Vertices.Select(p => p.Name), config.Output.Projects);
 
-			IDictionary<Project, int> components;
-			graph.StronglyConnectedComponents(out components);
+			var errors = RulesMatcher.Validate(graph, config);
 
-			var circularDependencies = components.Select(c => new { Proj = c.Key, Group = c.Value })
-				.GroupBy(c => c.Group)
-				.Where(g => g.Count() > 1)
-				.ToList();
+			errors.ForEach(e => Console.WriteLine("\n[ERROR] " + e));
 
-			if (circularDependencies.Count > 0)
-			{
-				Console.WriteLine();
-				foreach (var g in circularDependencies)
-				{
-					Console.WriteLine("Circular dependency group:");
-					foreach (var p in g)
-						Console.WriteLine("  - " + p.Proj.Name);
-					Console.WriteLine();
-				}
-			}
-
+			Console.WriteLine();
 			return 0;
 		}
 

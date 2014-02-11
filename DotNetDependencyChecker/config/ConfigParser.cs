@@ -142,6 +142,12 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		private static void ParseRule(Config result, string line)
 		{
+			if (line == "don't allow circular dependencies")
+			{
+				result.DontAllowCircularDependencies = true;
+				return;
+			}
+
 			var pos = line.IndexOf(NOT_DEPENDS, StringComparison.Ordinal);
 			if (pos >= 0)
 			{

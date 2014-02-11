@@ -9,6 +9,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 		public readonly List<Group> Groups = new List<Group>();
 		public readonly List<Ignore> Ignores = new List<Ignore>();
 		public readonly List<Rule> Rules = new List<Rule>();
+		public bool DontAllowCircularDependencies;
 		public readonly OutputConfig Output = new OutputConfig();
 
 		public class Group
