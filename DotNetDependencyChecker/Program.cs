@@ -26,6 +26,8 @@ namespace org.pescuma.dotnetdependencychecker
 				return -1;
 			}
 
+			var graph = ProjectsLoader.LoadGraph(config);
+
 			return 0;
 		}
 	}

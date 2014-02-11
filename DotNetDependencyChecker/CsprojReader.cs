@@ -10,16 +10,18 @@ namespace org.pescuma.dotnetdependencychecker
 	// http://stackoverflow.com/questions/4649989/reading-a-csproj-file-in-c-sharp
 	public class CsprojReader
 	{
-		private readonly string path;
+		private readonly string folder;
 		private readonly XmlDocument xmldoc;
 		private readonly XmlNamespaceManager mgr;
 
 		public readonly string Name;
+		public readonly string Filename;
 
 		public CsprojReader(string csproj)
 		{
-			path = Path.GetDirectoryName(csproj);
+			folder = Path.GetDirectoryName(csproj);
 			Name = Path.GetFileNameWithoutExtension(csproj);
+			Filename = Path.GetFullPath(csproj);
 
 			xmldoc = new XmlDocument();
 			xmldoc.Load(csproj);
@@ -98,6 +100,18 @@ namespace org.pescuma.dotnetdependencychecker
 					return new AssemblyName(result);
 				}
 			}
+
+			public string HintPath
+			{
+				get
+				{
+					var result = node["HintPath"];
+					if (result == null)
+						return null;
+
+					return Path.GetFullPath(result.InnerText);
+				}
+			}
 		}
 
 		public class ProjectReference
@@ -125,7 +139,7 @@ namespace org.pescuma.dotnetdependencychecker
 						return null;
 
 					if (!Path.IsPathRooted(result))
-						result = Path.Combine(reader.path, result);
+						result = Path.Combine(reader.folder, result);
 
 					return Path.GetFullPath(result);
 				}
