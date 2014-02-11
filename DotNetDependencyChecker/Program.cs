@@ -36,10 +36,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 			warns.ForEach(w => Console.WriteLine("\n[warn] " + w));
 
-			Dump(graph.Vertices.Where(p => p.IsLocal)
-				.Select(p => p.Name), config.Output.LocalProjects);
-
-			Dump(graph.Vertices.Select(p => p.Name), config.Output.AllProjects);
+			Dump(graph.Vertices.Select(p => p.Name), config.Output.Projects);
 
 			IDictionary<Project, int> components;
 			graph.StronglyConnectedComponents(out components);

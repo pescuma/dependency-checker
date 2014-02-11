@@ -34,8 +34,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 			{
 				{ "input:", line => ParseInput(result, line) },
 				{ "group:", line => ParseGroup(result, line) },
-				{ "output local projects:", line => ParseOutputLocalProjects(result, line) },
-				{ "output all projects:", line => ParseOutputAllLocalProjects(result, line) },
+				{ "output projects:", line => ParseOutputProjects(result, line) },
 				{ "output groups:", line => ParseOutputGroups(result, line) },
 				{ "output dependencies:", line => ParseOutputDependencies(result, line) },
 				{ "rule:", line => ParseRule(result, line) },
@@ -126,14 +125,9 @@ namespace org.pescuma.dotnetdependencychecker.config
 			return proj => line.Equals(proj.Name, StringComparison.CurrentCultureIgnoreCase);
 		}
 
-		private static void ParseOutputLocalProjects(Config result, string line)
+		private static void ParseOutputProjects(Config result, string line)
 		{
-			result.Output.LocalProjects.Add(Path.GetFullPath(line));
-		}
-
-		private static void ParseOutputAllLocalProjects(Config result, string line)
-		{
-			result.Output.AllProjects.Add(Path.GetFullPath(line));
+			result.Output.Projects.Add(Path.GetFullPath(line));
 		}
 
 		private static void ParseOutputGroups(Config result, string line)

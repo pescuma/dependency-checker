@@ -70,8 +70,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		public class OutputConfig
 		{
-			public readonly List<string> LocalProjects = new List<string>();
-			public readonly List<string> AllProjects = new List<string>();
+			public readonly List<string> Projects = new List<string>();
 			public readonly List<string> Groups = new List<string>();
 			public readonly List<string> Dependencies = new List<string>();
 		}

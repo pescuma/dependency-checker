@@ -189,32 +189,23 @@ group: My name -> B");
 		}
 
 		[Test]
-		public void TestOutputLocalProjects()
+		public void TestOutputProjects()
 		{
-			var config = Parse(@"output local projects: c:\lp.txt");
+			var config = Parse(@"output projects: c:\lp.txt");
 
-			Assert.AreEqual(1, config.Output.LocalProjects.Count);
-			Assert.AreEqual(@"c:\lp.txt", config.Output.LocalProjects[0]);
+			Assert.AreEqual(1, config.Output.Projects.Count);
+			Assert.AreEqual(@"c:\lp.txt", config.Output.Projects[0]);
 		}
 
 		[Test]
-		public void TestOutputLocalProjectsTwoTimes()
+		public void TestOutputProjectsTwoTimes()
 		{
-			var config = Parse(@"output local projects: c:\lp.txt
-output local projects: c:\b.out");
+			var config = Parse(@"output projects: c:\lp.txt
+output projects: c:\b.out");
 
-			Assert.AreEqual(2, config.Output.LocalProjects.Count);
-			Assert.AreEqual(@"c:\lp.txt", config.Output.LocalProjects[0]);
-			Assert.AreEqual(@"c:\b.out", config.Output.LocalProjects[1]);
-		}
-
-		[Test]
-		public void TestOutputAllProjects()
-		{
-			var config = Parse(@"output all projects: c:\lp.txt");
-
-			Assert.AreEqual(1, config.Output.AllProjects.Count);
-			Assert.AreEqual(@"c:\lp.txt", config.Output.AllProjects[0]);
+			Assert.AreEqual(2, config.Output.Projects.Count);
+			Assert.AreEqual(@"c:\lp.txt", config.Output.Projects[0]);
+			Assert.AreEqual(@"c:\b.out", config.Output.Projects[1]);
 		}
 
 		[Test]
