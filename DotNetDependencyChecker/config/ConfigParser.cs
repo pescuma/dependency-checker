@@ -28,6 +28,10 @@ namespace org.pescuma.dotnetdependencychecker.config
 			{
 				{ "input:", line => ParseInput(result, line) },
 				{ "group:", line => ParseGroup(result, line) },
+				{ "output local projects:", line => ParseOutputLocalProjects(result, line) },
+				{ "output all projects:", line => ParseOutputAllLocalProjects(result, line) },
+				{ "output groups:", line => ParseOutputGroups(result, line) },
+				{ "output dependencies:", line => ParseOutputDependencies(result, line) },
 			};
 
 			lines.Select(l => l.Trim())
@@ -49,6 +53,8 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 				return;
 			}
+
+			throw new ConfigParserException("Unknown line: " + line);
 		}
 
 		private static void ParseInput(Config result, string line)
@@ -107,9 +113,29 @@ namespace org.pescuma.dotnetdependencychecker.config
 					|| proj.Path.StartsWith(pathWithSlash, StringComparison.CurrentCultureIgnoreCase);
 		}
 
-		private static Func<Project, bool> ParseSimpleMatch(string l)
+		private static Func<Project, bool> ParseSimpleMatch(string line)
 		{
-			return proj => l.Equals(proj.Name, StringComparison.CurrentCultureIgnoreCase);
+			return proj => line.Equals(proj.Name, StringComparison.CurrentCultureIgnoreCase);
+		}
+
+		private static void ParseOutputLocalProjects(Config result, string line)
+		{
+			result.Output.LocalProjects.Add(Path.GetFullPath(line));
+		}
+
+		private static void ParseOutputAllLocalProjects(Config result, string line)
+		{
+			result.Output.AllProjects.Add(Path.GetFullPath(line));
+		}
+
+		private static void ParseOutputGroups(Config result, string line)
+		{
+			result.Output.Groups.Add(Path.GetFullPath(line));
+		}
+
+		private static void ParseOutputDependencies(Config result, string line)
+		{
+			result.Output.Dependencies.Add(Path.GetFullPath(line));
 		}
 	}
 }

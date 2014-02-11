@@ -31,6 +31,15 @@ namespace org.pescuma.dotnetdependencychecker
 		}
 
 		[Test]
+		public void TestOneInputWithoutSpace()
+		{
+			var config = Parse(@"input:c:\a");
+
+			Assert.AreEqual(1, config.Inputs.Count);
+			Assert.AreEqual(@"c:\a", config.Inputs[0]);
+		}
+
+		[Test]
 		public void TestTwoInput()
 		{
 			var config = Parse(@"input: c:\a
@@ -68,7 +77,7 @@ input: c:\b");
 			var config = Parse(@"group: My name -> A.Project.Name");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(ProjWithName(("a.pRoJect.Name")));
+			Assert.AreEqual(true, group.Matches(ProjWithName("a.pRoJect.Name")));
 		}
 
 		[Test]
@@ -136,6 +145,55 @@ group: My name -> B");
 
 			Assert.AreEqual(true, config.Groups[0].Matches(ProjWithName("A")));
 			Assert.AreEqual(true, config.Groups[1].Matches(ProjWithName("B")));
+		}
+
+		[Test]
+		public void TestOutputLocalProjects()
+		{
+			var config = Parse(@"output local projects: c:\lp.txt");
+
+			Assert.AreEqual(1, config.Output.LocalProjects.Count);
+			Assert.AreEqual(@"c:\lp.txt", config.Output.LocalProjects[0]);
+		}
+
+		[Test]
+		public void TestOutputLocalProjectsTwoTimes()
+		{
+			var config = Parse(@"output local projects: c:\lp.txt
+output local projects: c:\b.out");
+
+			Assert.AreEqual(2, config.Output.LocalProjects.Count);
+			Assert.AreEqual(@"c:\lp.txt", config.Output.LocalProjects[0]);
+			Assert.AreEqual(@"c:\b.out", config.Output.LocalProjects[1]);
+		}
+
+		[Test]
+		public void TestOutputAllProjects()
+		{
+			var config = Parse(@"output all projects: c:\lp.txt");
+
+			Assert.AreEqual(1, config.Output.AllProjects.Count);
+			Assert.AreEqual(@"c:\lp.txt", config.Output.AllProjects[0]);
+		}
+
+		[Test]
+		public void TestOutputGroups()
+		{
+			var config = Parse(@"output groups: c:\lp.txt");
+
+			Assert.AreEqual(1, config.Output.Groups.Count);
+			Assert.AreEqual(@"c:\lp.txt", config.Output.Groups[0]);
+
+			Assert.AreEqual(0, config.Groups.Count);
+		}
+
+		[Test]
+		public void TestOutputDependencies()
+		{
+			var config = Parse(@"output dependencies: c:\lp.txt");
+
+			Assert.AreEqual(1, config.Output.Dependencies.Count);
+			Assert.AreEqual(@"c:\lp.txt", config.Output.Dependencies[0]);
 		}
 	}
 }
