@@ -11,6 +11,16 @@ namespace org.pescuma.dotnetdependencychecker
 			return ConfigParser.ParseLines(configFileContents.Split('\n'));
 		}
 
+		private Project ProjWithName(string name)
+		{
+			return new Project(name, null);
+		}
+
+		private Project ProjWithPath(string path)
+		{
+			return new Project(null, path);
+		}
+
 		[Test]
 		public void TestOneInput()
 		{
@@ -48,8 +58,8 @@ input: c:\b");
 			var config = Parse(@"group: My name -> A.Project.Name");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(new Project("A.Project.Name", null)));
-			Assert.AreEqual(false, group.Matches(new Project("X", null)));
+			Assert.AreEqual(true, group.Matches(ProjWithName("A.Project.Name")));
+			Assert.AreEqual(false, group.Matches(ProjWithName("X")));
 		}
 
 		[Test]
@@ -58,7 +68,7 @@ input: c:\b");
 			var config = Parse(@"group: My name -> A.Project.Name");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(new Project("a.pRoJect.Name", null)));
+			Assert.AreEqual(true, group.Matches(ProjWithName(("a.pRoJect.Name")));
 		}
 
 		[Test]
@@ -67,8 +77,8 @@ input: c:\b");
 			var config = Parse(@"group: My name -> re: Ab+");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(new Project("Abbb", null)));
-			Assert.AreEqual(false, group.Matches(new Project("A", null)));
+			Assert.AreEqual(true, group.Matches(ProjWithName("Abbb")));
+			Assert.AreEqual(false, group.Matches(ProjWithName("A")));
 		}
 
 		[Test]
@@ -77,7 +87,7 @@ input: c:\b");
 			var config = Parse(@"group: My name -> re: Ab+");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(new Project("abbb", null)));
+			Assert.AreEqual(true, group.Matches(ProjWithName("abbb")));
 		}
 
 		[Test]
@@ -86,8 +96,8 @@ input: c:\b");
 			var config = Parse(@"group: My name -> path: C:\a");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(new Project(null, @"C:\a")));
-			Assert.AreEqual(false, group.Matches(new Project(null, @"C:\b")));
+			Assert.AreEqual(true, group.Matches(ProjWithPath(@"C:\a")));
+			Assert.AreEqual(false, group.Matches(ProjWithPath(@"C:\b")));
 		}
 
 		[Test]
@@ -96,7 +106,7 @@ input: c:\b");
 			var config = Parse(@"group: My name -> path: C:\a");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(new Project(null, @"c:\A")));
+			Assert.AreEqual(true, group.Matches(ProjWithPath(@"c:\A")));
 		}
 
 		[Test]
@@ -105,8 +115,8 @@ input: c:\b");
 			var config = Parse(@"group: My name -> path: C:\a");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(new Project(null, @"C:\a\X")));
-			Assert.AreEqual(false, group.Matches(new Project(null, @"C:\b\X")));
+			Assert.AreEqual(true, group.Matches(ProjWithPath(@"C:\a\X")));
+			Assert.AreEqual(false, group.Matches(ProjWithPath(@"C:\b\X")));
 		}
 
 		[Test]
@@ -115,7 +125,17 @@ input: c:\b");
 			var config = Parse(@"group: My name -> path: C:\a");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(new Project(null, @"c:\A\X")));
+			Assert.AreEqual(true, group.Matches(ProjWithPath(@"c:\A\X")));
+		}
+
+		[Test]
+		public void TestGroupsKeepFileOrder()
+		{
+			var config = Parse(@"group: My name -> A
+group: My name -> B");
+
+			Assert.AreEqual(true, config.Groups[0].Matches(ProjWithName("A")));
+			Assert.AreEqual(true, config.Groups[1].Matches(ProjWithName("B")));
 		}
 	}
 }
