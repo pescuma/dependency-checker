@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>org.pescuma.dotnetdependencychecker</RootNamespace>
-    <AssemblyName>DotNetDependencyChecker</AssemblyName>
+    <AssemblyName>dotnet-dependency-checker</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -55,6 +55,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="config\Config.cs" />
+    <Compile Include="config\ConfigParser.cs" />
+    <Compile Include="config\ConfigParserException.cs" />
     <Compile Include="CsprojReader.cs" />
     <Compile Include="Dependency.cs" />
     <Compile Include="DependencyGraph.cs" />

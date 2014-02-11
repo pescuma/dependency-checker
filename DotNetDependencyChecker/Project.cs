@@ -3,10 +3,12 @@
 	public class Project
 	{
 		public readonly string Name;
+		public readonly string Path;
 
-		public Project(string name)
+		public Project(string name, string path)
 		{
-			this.Name = name;
+			Name = name;
+			Path = path;
 		}
 
 		protected bool Equals(Project other)
