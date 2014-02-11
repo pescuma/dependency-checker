@@ -8,6 +8,9 @@ namespace org.pescuma.dotnetdependencychecker.config
 {
 	public class ConfigParser
 	{
+		private const string DEPENDS = "->";
+		private const string NOT_DEPENDS = "-!->";
+
 		public static Config Parse(string filename)
 		{
 			filename = Path.GetFullPath(filename);
@@ -32,6 +35,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 				{ "output all projects:", line => ParseOutputAllLocalProjects(result, line) },
 				{ "output groups:", line => ParseOutputGroups(result, line) },
 				{ "output dependencies:", line => ParseOutputDependencies(result, line) },
+				{ "rule:", line => ParseRule(result, line) },
 			};
 
 			lines.Select(l => l.Trim())
@@ -64,19 +68,19 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		private static void ParseGroup(Config result, string line)
 		{
-			var pos = line.IndexOf("->", StringComparison.Ordinal);
+			var pos = line.IndexOf(DEPENDS, StringComparison.Ordinal);
 			if (pos < 0)
-				throw new ConfigParserException("Invalid group line (should contain name -> contents): " + line);
+				throw new ConfigParserException("Invalid group line (should contain Name " + DEPENDS + " Contents): " + line);
 
 			var name = line.Substring(0, pos)
 				.Trim();
 
-			var matchLine = line.Substring(pos + 2)
+			var matchLine = line.Substring(pos + DEPENDS.Length)
 				.Trim();
 
 			var matcher = ParseMatcher(matchLine);
 
-			result.Groups.Add(new Config.GroupRule(name, matcher));
+			result.Groups.Add(new Config.Group(name, matcher));
 		}
 
 		private static Func<Project, bool> ParseMatcher(string matchLine)
@@ -136,6 +140,35 @@ namespace org.pescuma.dotnetdependencychecker.config
 		private static void ParseOutputDependencies(Config result, string line)
 		{
 			result.Output.Dependencies.Add(Path.GetFullPath(line));
+		}
+
+		private static void ParseRule(Config result, string line)
+		{
+			var pos = line.IndexOf(NOT_DEPENDS, StringComparison.Ordinal);
+			if (pos >= 0)
+			{
+				var left = ParseMatcher(line.Substring(0, pos)
+					.Trim());
+				var right = ParseMatcher(line.Substring(pos + NOT_DEPENDS.Length)
+					.Trim());
+
+				result.Rules.Add(new Config.Rule(left, right, false));
+				return;
+			}
+
+			pos = line.IndexOf(DEPENDS, StringComparison.Ordinal);
+			if (pos >= 0)
+			{
+				var left = ParseMatcher(line.Substring(0, pos)
+					.Trim());
+				var right = ParseMatcher(line.Substring(pos + DEPENDS.Length)
+					.Trim());
+
+				result.Rules.Add(new Config.Rule(left, right, true));
+				return;
+			}
+
+			throw new ConfigParserException("Invalid rule: " + line);
 		}
 	}
 }

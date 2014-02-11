@@ -195,5 +195,56 @@ output local projects: c:\b.out");
 			Assert.AreEqual(1, config.Output.Dependencies.Count);
 			Assert.AreEqual(@"c:\lp.txt", config.Output.Dependencies[0]);
 		}
+
+		[Test]
+		public void TestAllowRuleSimple()
+		{
+			var config = Parse(@"rule: A -> B");
+
+			Assert.AreEqual(1, config.Rules.Count);
+
+			var rule = config.Rules[0];
+			Assert.AreEqual(true, rule.Allow);
+
+			Assert.AreEqual(true, rule.Source(ProjWithName("A")));
+			Assert.AreEqual(false, rule.Source(ProjWithName("B")));
+
+			Assert.AreEqual(false, rule.Target(ProjWithName("A")));
+			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+		}
+
+		[Test]
+		public void TestDenyRuleSimple()
+		{
+			var config = Parse(@"rule: A -!-> B");
+
+			Assert.AreEqual(1, config.Rules.Count);
+
+			var rule = config.Rules[0];
+			Assert.AreEqual(false, rule.Allow);
+
+			Assert.AreEqual(true, rule.Source(ProjWithName("A")));
+			Assert.AreEqual(false, rule.Source(ProjWithName("B")));
+
+			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+			Assert.AreEqual(false, rule.Target(ProjWithName("A")));
+		}
+
+		[Test]
+		public void TestAllowRuleWithBothREs()
+		{
+			var config = Parse(@"rule: re: Ab+ -> re: Ba+");
+
+			Assert.AreEqual(1, config.Rules.Count);
+
+			var rule = config.Rules[0];
+			Assert.AreEqual(true, rule.Allow);
+
+			Assert.AreEqual(true, rule.Source(ProjWithName("Abb")));
+			Assert.AreEqual(false, rule.Source(ProjWithName("A")));
+
+			Assert.AreEqual(true, rule.Target(ProjWithName("Baa")));
+			Assert.AreEqual(false, rule.Target(ProjWithName("B")));
+		}
 	}
 }
