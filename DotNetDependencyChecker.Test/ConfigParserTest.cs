@@ -53,9 +53,18 @@ namespace org.pescuma.dotnetdependencychecker
 		}
 
 		[Test]
+		public void TestOneInputRemoveTabs()
+		{
+			var config = Parse("input:\tc:\\a\t");
+
+			Assert.AreEqual(1, config.Inputs.Count);
+			Assert.AreEqual(@"c:\a", config.Inputs[0]);
+		}
+
+		[Test]
 		public void TestOneInputWithComment()
 		{
-			var config = Parse(@"input: c:\a # bla");
+			var config = Parse(@"input: c:\a   # bla");
 
 			Assert.AreEqual(1, config.Inputs.Count);
 			Assert.AreEqual(@"c:\a", config.Inputs[0]);
