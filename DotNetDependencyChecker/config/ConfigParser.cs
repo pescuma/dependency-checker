@@ -10,7 +10,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 	{
 		private const string COMMENT = "#";
 		private const string DEPENDS = "->";
-		private const string NOT_DEPENDS = "-!->";
+		private const string NOT_DEPENDS = "-X->";
 
 		public static Config Parse(string filename)
 		{

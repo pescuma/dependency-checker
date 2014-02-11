@@ -238,7 +238,7 @@ output local projects: c:\b.out");
 		[Test]
 		public void TestDenyRuleSimple()
 		{
-			var config = Parse(@"rule: A -!-> B");
+			var config = Parse(@"rule: A -X-> B");
 
 			Assert.AreEqual(1, config.Rules.Count);
 
