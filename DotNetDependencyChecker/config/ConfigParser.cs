@@ -80,7 +80,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 			var matcher = ParseMatcher(matchLine);
 
-			result.Groups.Add(new Config.Group(name, matcher));
+			result.Groups.Add(new Config.Group(name, matcher, line));
 		}
 
 		private static Func<Project, bool> ParseMatcher(string matchLine)
@@ -152,7 +152,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 				var right = ParseMatcher(line.Substring(pos + NOT_DEPENDS.Length)
 					.Trim());
 
-				result.Rules.Add(new Config.Rule(left, right, false));
+				result.Rules.Add(new Config.Rule(left, right, false, line));
 				return;
 			}
 
@@ -164,7 +164,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 				var right = ParseMatcher(line.Substring(pos + DEPENDS.Length)
 					.Trim());
 
-				result.Rules.Add(new Config.Rule(left, right, true));
+				result.Rules.Add(new Config.Rule(left, right, true, line));
 				return;
 			}
 

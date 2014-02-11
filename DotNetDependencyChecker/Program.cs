@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using org.pescuma.dotnetdependencychecker.config;
+using QuickGraph.Algorithms;
 
 namespace org.pescuma.dotnetdependencychecker
 {
@@ -27,6 +30,26 @@ namespace org.pescuma.dotnetdependencychecker
 			}
 
 			var graph = ProjectsLoader.LoadGraph(config);
+
+			IDictionary<Project, int> components;
+			graph.StronglyConnectedComponents(out components);
+
+			var circularDependencies = components.Select(c => new { Proj = c.Key, Group = c.Value })
+				.GroupBy(c => c.Group)
+				.Where(g => g.Count() > 1)
+				.ToList();
+
+			if (circularDependencies.Count > 0)
+			{
+				Console.WriteLine();
+				foreach (var g in circularDependencies)
+				{
+					Console.WriteLine("Circular dependency group:");
+					foreach (var p in g)
+						Console.WriteLine("  - " + p.Proj.Name);
+					Console.WriteLine();
+				}
+			}
 
 			return 0;
 		}

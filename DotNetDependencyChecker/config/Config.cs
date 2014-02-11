@@ -12,27 +12,41 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		public class Group
 		{
+			private readonly string line;
 			public readonly string Name;
 			public readonly Func<Project, bool> Matches;
 
-			public Group(string name, Func<Project, bool> matches)
+			public Group(string name, Func<Project, bool> matches, string line)
 			{
 				Name = name;
 				Matches = matches;
+				this.line = line;
+			}
+
+			public override string ToString()
+			{
+				return line;
 			}
 		}
 
 		public class Rule
 		{
+			private readonly string line;
 			public readonly Func<Project, bool> Source;
 			public readonly Func<Project, bool> Target;
 			public readonly bool Allow;
 
-			public Rule(Func<Project, bool> source, Func<Project, bool> target, bool allow)
+			public Rule(Func<Project, bool> source, Func<Project, bool> target, bool allow, string line)
 			{
 				Source = source;
 				Target = target;
-				this.Allow = allow;
+				Allow = allow;
+				this.line = line;
+			}
+
+			public override string ToString()
+			{
+				return line;
 			}
 		}
 
