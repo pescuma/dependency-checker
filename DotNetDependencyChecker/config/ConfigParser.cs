@@ -15,6 +15,13 @@ namespace org.pescuma.dotnetdependencychecker.config
 			if (!File.Exists(filename))
 				throw new ConfigParserException("Config file doesn't exits: " + filename);
 
+			var lines = File.ReadAllLines(filename);
+
+			return ParseLines(lines);
+		}
+
+		public static Config ParseLines(string[] lines)
+		{
 			var result = new Config();
 
 			var lineTypes = new Dictionary<string, Action<string>>
@@ -23,8 +30,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 				{ "group:", line => ParseGroup(result, line) },
 			};
 
-			File.ReadAllLines(filename)
-				.Select(l => l.Trim())
+			lines.Select(l => l.Trim())
 				.Where(l => !string.IsNullOrEmpty(l))
 				.ForEach(line => ParseLine(lineTypes, line));
 
@@ -92,9 +98,13 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		private static Func<Project, bool> ParsePath(string line)
 		{
-			var path = Path.GetFullPath(line) + "\\";
+			var path = Path.GetFullPath(line);
+			var pathWithSlash = Path.GetFullPath(line) + "\\";
 
-			return proj => proj.Path.StartsWith(path, StringComparison.CurrentCultureIgnoreCase);
+			return
+				proj =>
+					path.Equals(proj.Path, StringComparison.CurrentCultureIgnoreCase)
+					|| proj.Path.StartsWith(pathWithSlash, StringComparison.CurrentCultureIgnoreCase);
 		}
 
 		private static Func<Project, bool> ParseSimpleMatch(string l)
