@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
-using QuickGraph.Algorithms;
 
 namespace org.pescuma.dotnetdependencychecker
 {
@@ -13,8 +11,7 @@ namespace org.pescuma.dotnetdependencychecker
 		{
 			var result = new List<string>();
 
-			if (config.DontAllowCircularDependencies)
-				ValidateCircularReferences(result, graph);
+			config.Rules.ForEach(r => r.Start(result, graph));
 
 			var deps = graph.Edges.ToList();
 			deps.Sort((d1, d2) =>
@@ -28,33 +25,14 @@ namespace org.pescuma.dotnetdependencychecker
 
 			foreach (var dep in deps)
 			{
-				var rule = config.Rules.FirstOrDefault(r => r.Source(dep.Source) && r.Target(dep.Target));
-
-				if (rule != null && !rule.Allow)
-					result.Add(string.Format("Dependence between {0} and {1} not allowed", dep.Source.ToGui(), dep.Target.ToGui()));
+				foreach (var rule in config.Rules)
+					if (rule.Process(result, dep))
+						break;
 			}
+
+			config.Rules.ForEach(r => r.Finish(result, graph));
 
 			return result;
-		}
-
-		private static void ValidateCircularReferences(List<string> result, DependencyGraph graph)
-		{
-			IDictionary<Project, int> components;
-			graph.StronglyConnectedComponents(out components);
-
-			var circularDependencies = components.Select(c => new { Proj = c.Key, Group = c.Value })
-				.GroupBy(c => c.Group)
-				.Where(g => g.Count() > 1);
-
-			foreach (var g in circularDependencies)
-			{
-				var err = new StringBuilder();
-				err.Append("Circular dependency group:");
-				g.ForEach(p => err.Append("\n  - ")
-					.Append(p.Proj.Name));
-
-				result.Add(err.ToString());
-			}
 		}
 	}
 }

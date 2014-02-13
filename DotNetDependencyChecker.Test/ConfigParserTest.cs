@@ -235,7 +235,7 @@ output projects: c:\b.out");
 
 			Assert.AreEqual(1, config.Rules.Count);
 
-			var rule = config.Rules[0];
+			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(true, rule.Allow);
 
 			Assert.AreEqual(true, rule.Source(ProjWithName("A")));
@@ -252,7 +252,7 @@ output projects: c:\b.out");
 
 			Assert.AreEqual(1, config.Rules.Count);
 
-			var rule = config.Rules[0];
+			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(false, rule.Allow);
 
 			Assert.AreEqual(true, rule.Source(ProjWithName("A")));
@@ -269,7 +269,7 @@ output projects: c:\b.out");
 
 			Assert.AreEqual(1, config.Rules.Count);
 
-			var rule = config.Rules[0];
+			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(true, rule.Allow);
 
 			Assert.AreEqual(true, rule.Source(ProjWithName("Abb")));
@@ -280,19 +280,14 @@ output projects: c:\b.out");
 		}
 
 		[Test]
-		public void TestRuleAllowCircularDependencies()
-		{
-			var config = Parse(@"");
-
-			Assert.AreEqual(false, config.DontAllowCircularDependencies);
-		}
-
-		[Test]
 		public void TestRuleDontAllowCircularDependencies()
 		{
 			var config = Parse(@"rule: don't allow circular dependencies");
 
-			Assert.AreEqual(true, config.DontAllowCircularDependencies);
+			Assert.AreEqual(1, config.Rules.Count);
+
+			var rule = config.Rules[0];
+			Assert.AreEqual(true, rule is NoCircularDepenendenciesRule);
 		}
 
 		[Test]

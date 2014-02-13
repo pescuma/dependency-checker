@@ -30,38 +30,45 @@ namespace org.pescuma.dotnetdependencychecker.config
 		{
 			var result = new Config();
 
-			var lineTypes = new Dictionary<string, Action<string>>
+			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
-				{ "input:", line => ParseInput(result, line) },
-				{ "group:", line => ParseGroup(result, line) },
-				{ "output projects:", line => ParseOutputProjects(result, line) },
-				{ "output groups:", line => ParseOutputGroups(result, line) },
-				{ "output dependencies:", line => ParseOutputDependencies(result, line) },
-				{ "rule:", line => ParseRule(result, line) },
-				{ "ignore:", line => ParseIgnore(result, line) },
-				{ IGNORE_ALL_NON_LOCAL_PROJECTS, line => ParseIgnoreAllNonLocalProjects(result, line) },
+				{ "input:", (line, location) => ParseInput(result, line) },
+				{ "group:", (line, location) => ParseGroup(result, line, location) },
+				{ "output projects:", (line, location) => ParseOutputProjects(result, line) },
+				{ "output groups:", (line, location) => ParseOutputGroups(result, line) },
+				{ "output dependencies:", (line, location) => ParseOutputDependencies(result, line) },
+				{ "rule:", (line, location) => ParseRule(result, line, location) },
+				{ "ignore:", (line, location) => ParseIgnore(result, line, location) },
+				{ IGNORE_ALL_NON_LOCAL_PROJECTS, (line, location) => ParseIgnoreAllNonLocalProjects(result, line, location) },
 			};
 
-			lines.Select(l => l.Trim())
-				.Select(l =>
-				{
-					var pos = l.IndexOf(COMMENT, StringComparison.Ordinal);
-					return pos >= 0 ? l.Substring(0, pos) : l;
-				})
-				.Where(l => !string.IsNullOrEmpty(l))
-				.ForEach(line => ParseLine(lineTypes, line));
+			foreach (var item in lines.Indexed())
+			{
+				var location = new ConfigLocation(item.Index, item.Item);
+				var line = item.Item.Trim();
+
+				var pos = line.IndexOf(COMMENT, StringComparison.Ordinal);
+				if (pos >= 0)
+					line = line.Substring(0, pos)
+						.Trim();
+
+				if (string.IsNullOrWhiteSpace(line))
+					continue;
+
+				ParseLine(lineTypes, line, location);
+			}
 
 			return result;
 		}
 
-		private static void ParseLine(Dictionary<string, Action<string>> types, string line)
+		private static void ParseLine(Dictionary<string, Action<string, ConfigLocation>> types, string line, ConfigLocation location)
 		{
 			var type = types.FirstOrDefault(t => t.Key == "" || line.StartsWith(t.Key));
 			if (type.Value == null)
-				throw new ConfigParserException("Unknown line: " + line);
+				throw new ConfigParserException(location, "Unknown line");
 
 			type.Value(line.Substring(type.Key.Length)
-				.Trim());
+				.Trim(), location);
 		}
 
 		private static void ParseInput(Config result, string line)
@@ -69,11 +76,11 @@ namespace org.pescuma.dotnetdependencychecker.config
 			result.Inputs.Add(line);
 		}
 
-		private static void ParseGroup(Config result, string line)
+		private static void ParseGroup(Config result, string line, ConfigLocation location)
 		{
 			var pos = line.IndexOf(DEPENDS, StringComparison.Ordinal);
 			if (pos < 0)
-				throw new ConfigParserException("Invalid group line (should contain Name " + DEPENDS + " Contents): " + line);
+				throw new ConfigParserException(location, "Invalid group (should contain Name " + DEPENDS + " Contents)");
 
 			var name = line.Substring(0, pos)
 				.Trim();
@@ -81,23 +88,23 @@ namespace org.pescuma.dotnetdependencychecker.config
 			var matchLine = line.Substring(pos + DEPENDS.Length)
 				.Trim();
 
-			var matcher = ParseMatcher(matchLine);
+			var matcher = ParseMatcher(matchLine, location);
 
 			result.Groups.Add(new Config.Group(name, matcher, line));
 		}
 
-		private static Func<Project, bool> ParseMatcher(string matchLine)
+		private static Func<Project, bool> ParseMatcher(string matchLine, ConfigLocation location)
 		{
 			Func<Project, bool> result = null;
 
-			var lineTypes = new Dictionary<string, Action<string>>
+			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
-				{ "re:", l => result = ParseRE(l) },
-				{ "path:", l => result = ParsePath(l) },
-				{ "", l => result = ParseSimpleMatch(l) },
+				{ "re:", (line, loc) => result = ParseRE(line) },
+				{ "path:", (line, loc) => result = ParsePath(line) },
+				{ "", (line, loc) => result = ParseSimpleMatch(line) },
 			};
 
-			ParseLine(lineTypes, matchLine);
+			ParseLine(lineTypes, matchLine, location);
 
 			return result;
 		}
@@ -142,52 +149,49 @@ namespace org.pescuma.dotnetdependencychecker.config
 			result.Output.Dependencies.Add(Path.GetFullPath(line));
 		}
 
-		private static void ParseRule(Config result, string line)
+		private static void ParseRule(Config result, string line, ConfigLocation location)
 		{
 			if (line == "don't allow circular dependencies")
 			{
-				result.DontAllowCircularDependencies = true;
+				result.Rules.Add(new NoCircularDepenendenciesRule(location));
 				return;
 			}
 
-			var pos = line.IndexOf(NOT_DEPENDS, StringComparison.Ordinal);
-			if (pos >= 0)
-			{
-				var left = ParseMatcher(line.Substring(0, pos)
-					.Trim());
-				var right = ParseMatcher(line.Substring(pos + NOT_DEPENDS.Length)
-					.Trim());
-
-				result.Rules.Add(new Config.Rule(left, right, false, line));
+			if (ParseRule(result, line, location, NOT_DEPENDS))
 				return;
-			}
 
-			pos = line.IndexOf(DEPENDS, StringComparison.Ordinal);
-			if (pos >= 0)
-			{
-				var left = ParseMatcher(line.Substring(0, pos)
-					.Trim());
-				var right = ParseMatcher(line.Substring(pos + DEPENDS.Length)
-					.Trim());
-
-				result.Rules.Add(new Config.Rule(left, right, true, line));
+			if (ParseRule(result, line, location, DEPENDS))
 				return;
-			}
 
-			throw new ConfigParserException("Invalid rule: " + line);
+			throw new ConfigParserException(location, "Invalid rule");
 		}
 
-		private static void ParseIgnore(Config result, string line)
+		private static bool ParseRule(Config result, string line, ConfigLocation location, string separator)
 		{
-			var matcher = ParseMatcher(line);
+			var pos = line.IndexOf(separator, StringComparison.Ordinal);
+			if (pos < 0)
+				return false;
+
+			var left = ParseMatcher(line.Substring(0, pos)
+				.Trim(), location);
+			var right = ParseMatcher(line.Substring(pos + separator.Length)
+				.Trim(), location);
+
+			result.Rules.Add(new DepenendencyRule(left, right, separator == DEPENDS, location));
+			return true;
+		}
+
+		private static void ParseIgnore(Config result, string line, ConfigLocation location)
+		{
+			var matcher = ParseMatcher(line, location);
 
 			result.Ignores.Add(new Config.Ignore(matcher, line));
 		}
 
-		private static void ParseIgnoreAllNonLocalProjects(Config result, string line)
+		private static void ParseIgnoreAllNonLocalProjects(Config result, string line, ConfigLocation location)
 		{
 			if (line != "")
-				throw new ConfigParserException("Invalid line: " + IGNORE_ALL_NON_LOCAL_PROJECTS + " " + line);
+				throw new ConfigParserException(location, "The line has more text than it should");
 
 			result.Ignores.Add(new Config.Ignore(proj => !proj.IsLocal, IGNORE_ALL_NON_LOCAL_PROJECTS));
 		}

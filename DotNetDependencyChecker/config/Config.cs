@@ -9,7 +9,6 @@ namespace org.pescuma.dotnetdependencychecker.config
 		public readonly List<Group> Groups = new List<Group>();
 		public readonly List<Ignore> Ignores = new List<Ignore>();
 		public readonly List<Rule> Rules = new List<Rule>();
-		public bool DontAllowCircularDependencies;
 		public readonly OutputConfig Output = new OutputConfig();
 
 		public class Group
@@ -39,27 +38,6 @@ namespace org.pescuma.dotnetdependencychecker.config
 			public Ignore(Func<Project, bool> matches, string line)
 			{
 				Matches = matches;
-				this.line = line;
-			}
-
-			public override string ToString()
-			{
-				return line;
-			}
-		}
-
-		public class Rule
-		{
-			private readonly string line;
-			public readonly Func<Project, bool> Source;
-			public readonly Func<Project, bool> Target;
-			public readonly bool Allow;
-
-			public Rule(Func<Project, bool> source, Func<Project, bool> target, bool allow, string line)
-			{
-				Source = source;
-				Target = target;
-				Allow = allow;
 				this.line = line;
 			}
 
