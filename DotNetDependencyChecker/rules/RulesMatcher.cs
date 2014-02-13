@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dotnetdependencychecker.config;
 
-namespace org.pescuma.dotnetdependencychecker
+namespace org.pescuma.dotnetdependencychecker.rules
 {
 	public class RulesMatcher
 	{

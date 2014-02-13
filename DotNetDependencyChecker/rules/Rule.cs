@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace org.pescuma.dotnetdependencychecker
+namespace org.pescuma.dotnetdependencychecker.rules
 {
 	public interface Rule
 	{

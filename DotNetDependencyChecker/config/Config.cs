@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker.config
 {

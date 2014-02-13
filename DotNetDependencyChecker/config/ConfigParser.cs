@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker.config
 {
@@ -44,7 +45,8 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 			foreach (var item in lines.Indexed())
 			{
-				var location = new ConfigLocation(item.Index, item.Item);
+				// Line number starts in 1
+				var location = new ConfigLocation(item.Index + 1, item.Item);
 				var line = item.Item.Trim();
 
 				var pos = line.IndexOf(COMMENT, StringComparison.Ordinal);
@@ -153,7 +155,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 		{
 			if (line == "don't allow circular dependencies")
 			{
-				result.Rules.Add(new NoCircularDepenendenciesRule(location));
+				result.Rules.Add(new NoCircularDepenendenciesRule(Severity.Error, location));
 				return;
 			}
 
@@ -177,7 +179,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 			var right = ParseMatcher(line.Substring(pos + separator.Length)
 				.Trim(), location);
 
-			result.Rules.Add(new DepenendencyRule(left, right, separator == DEPENDS, location));
+			result.Rules.Add(new DepenendencyRule(Severity.Error, left, right, separator == DEPENDS, location));
 			return true;
 		}
 

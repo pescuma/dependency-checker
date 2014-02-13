@@ -4,15 +4,18 @@ using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
 using QuickGraph.Algorithms;
 
-namespace org.pescuma.dotnetdependencychecker
+namespace org.pescuma.dotnetdependencychecker.rules
 {
 	public class NoCircularDepenendenciesRule : Rule
 	{
-		private readonly ConfigLocation location;
+		// HACK [pescuma] Fields are public for tests
+		public readonly Severity Severity;
+		public readonly ConfigLocation Location;
 
-		public NoCircularDepenendenciesRule(ConfigLocation location)
+		public NoCircularDepenendenciesRule(Severity severity, ConfigLocation location)
 		{
-			this.location = location;
+			Severity = severity;
+			Location = location;
 		}
 
 		public List<RuleMatch> Process(DependencyGraph graph)
@@ -42,7 +45,7 @@ namespace org.pescuma.dotnetdependencychecker
 				projs.ForEach(p => err.Append("\n  - ")
 					.Append(p.Name));
 
-				result.Add(new RuleMatch(false, err.ToString(), location, deps));
+				result.Add(new RuleMatch(false, Severity, err.ToString(), Location, deps));
 			}
 
 			return result;

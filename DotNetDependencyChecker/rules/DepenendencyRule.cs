@@ -2,22 +2,24 @@ using System;
 using System.Collections.Generic;
 using org.pescuma.dotnetdependencychecker.config;
 
-namespace org.pescuma.dotnetdependencychecker
+namespace org.pescuma.dotnetdependencychecker.rules
 {
 	public class DepenendencyRule : Rule
 	{
 		// HACK [pescuma] Fields are public for tests
+		public readonly Severity Severity;
 		public readonly Func<Project, bool> Source;
 		public readonly Func<Project, bool> Target;
 		public readonly bool Allow;
-		private readonly ConfigLocation location;
+		public readonly ConfigLocation Location;
 
-		public DepenendencyRule(Func<Project, bool> source, Func<Project, bool> target, bool allow, ConfigLocation location)
+		public DepenendencyRule(Severity severity, Func<Project, bool> source, Func<Project, bool> target, bool allow, ConfigLocation location)
 		{
+			Severity = severity;
 			Source = source;
 			Target = target;
 			Allow = allow;
-			this.location = location;
+			Location = location;
 		}
 
 		public List<RuleMatch> Process(DependencyGraph graph)
@@ -30,8 +32,8 @@ namespace org.pescuma.dotnetdependencychecker
 			if (!Source(dep.Source) || !Target(dep.Target))
 				return null;
 
-			return new RuleMatch(Allow,
-				string.Format("Dependence between {0} and {1} {2}allowed", dep.Source.ToGui(), dep.Target.ToGui(), Allow ? "" : "not "), location, dep);
+			var messsage = string.Format("Dependence between {0} and {1} {2}allowed", dep.Source.ToGui(), dep.Target.ToGui(), Allow ? "" : "not ");
+			return new RuleMatch(Allow, Severity, messsage, Location, dep);
 		}
 	}
 }

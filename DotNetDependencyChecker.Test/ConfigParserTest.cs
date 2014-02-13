@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker
 {
@@ -310,6 +311,15 @@ output projects: c:\b.out");
 			var ignore = config.Ignores[0];
 			Assert.AreEqual(false, ignore.Matches(LocalProj()));
 			Assert.AreEqual(true, ignore.Matches(NonLocalProj()));
+		}
+
+		[Test]
+		public void TestRuleLocation()
+		{
+			var config = Parse(@"rule: a -> B");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(1, rule.Location.LineNum);
 		}
 	}
 }
