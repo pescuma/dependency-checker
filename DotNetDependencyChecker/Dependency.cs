@@ -5,6 +5,7 @@ namespace org.pescuma.dotnetdependencychecker
 	public class Dependency : Edge<Project>
 	{
 		public readonly Types Type;
+		public readonly Location Location;
 
 		public enum Types
 		{
@@ -12,10 +13,11 @@ namespace org.pescuma.dotnetdependencychecker
 			DllReference
 		}
 
-		public Dependency(Project source, Project target, Types type)
+		public Dependency(Project source, Project target, Types type, Location location)
 			: base(source, target)
 		{
 			Type = type;
+			Location = location;
 		}
 
 		protected bool Equals(Dependency other)

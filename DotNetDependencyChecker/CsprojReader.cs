@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace org.pescuma.dotnetdependencychecker
 {
@@ -11,8 +12,7 @@ namespace org.pescuma.dotnetdependencychecker
 	public class CsprojReader
 	{
 		private readonly string folder;
-		private readonly XmlDocument xmldoc;
-		private readonly XmlNamespaceManager mgr;
+		private readonly XDocument xdoc;
 
 		public readonly string Name;
 		public readonly string Filename;
@@ -23,11 +23,7 @@ namespace org.pescuma.dotnetdependencychecker
 			Name = Path.GetFileNameWithoutExtension(csproj);
 			Filename = Path.GetFullPath(csproj);
 
-			xmldoc = new XmlDocument();
-			xmldoc.Load(csproj);
-
-			mgr = new XmlNamespaceManager(xmldoc.NameTable);
-			mgr.AddNamespace("x", "http://schemas.microsoft.com/developer/msbuild/2003");
+			xdoc = XDocument.Load(csproj, LoadOptions.SetLineInfo);
 		}
 
 		public Guid ProjectGuid
@@ -35,7 +31,7 @@ namespace org.pescuma.dotnetdependencychecker
 			get
 			{
 				return new Guid(Nodes("ProjectGuid")
-					.Select(n => n.InnerText)
+					.Select(n => n.Value)
 					.First());
 			}
 		}
@@ -58,35 +54,43 @@ namespace org.pescuma.dotnetdependencychecker
 			}
 		}
 
-		private IEnumerable<XmlNode> Nodes(string name)
+		private IEnumerable<XElement> Nodes(string name)
 		{
-			var result = xmldoc.SelectNodes("//x:" + name, mgr);
-			if (result == null)
-				return new List<XmlNode>();
-
-			return result.Cast<XmlNode>();
+			XNamespace ns = "http://schemas.microsoft.com/developer/msbuild/2003";
+			return xdoc.Descendants(ns + name);
 		}
 
-		private static string Attribute(XmlNode node, string name)
+		private static XElement Node(XElement node, string name)
 		{
-			var attributes = node.Attributes;
-			if (attributes == null)
+			XNamespace ns = "http://schemas.microsoft.com/developer/msbuild/2003";
+			return node.Element(ns + name);
+		}
+
+		private static string Attribute(XElement node, string name)
+		{
+			var attr = node.Attribute(name);
+			if (attr == null)
 				return null;
 
-			var item = attributes.GetNamedItem(name);
-			if (item == null)
-				return null;
-
-			return item.Value;
+			return attr.Value;
 		}
 
 		public class Reference
 		{
-			private readonly XmlNode node;
+			private readonly XElement node;
 
-			public Reference(XmlNode node)
+			public Reference(XElement node)
 			{
 				this.node = node;
+			}
+
+			public int LineNumber
+			{
+				get
+				{
+					var info = (IXmlLineInfo) node;
+					return info.LineNumber;
+				}
 			}
 
 			public AssemblyName Include
@@ -105,11 +109,11 @@ namespace org.pescuma.dotnetdependencychecker
 			{
 				get
 				{
-					var result = node["HintPath"];
+					var result = Node(node, "HintPath");
 					if (result == null)
 						return null;
 
-					return Path.GetFullPath(result.InnerText);
+					return Path.GetFullPath(result.Value);
 				}
 			}
 		}
@@ -117,12 +121,21 @@ namespace org.pescuma.dotnetdependencychecker
 		public class ProjectReference
 		{
 			private readonly CsprojReader reader;
-			private readonly XmlNode node;
+			private readonly XElement node;
 
-			public ProjectReference(CsprojReader reader, XmlNode node)
+			public ProjectReference(CsprojReader reader, XElement node)
 			{
 				this.reader = reader;
 				this.node = node;
+			}
+
+			public int LineNumber
+			{
+				get
+				{
+					var info = (IXmlLineInfo) node;
+					return info.LineNumber;
+				}
 			}
 
 			public string Name

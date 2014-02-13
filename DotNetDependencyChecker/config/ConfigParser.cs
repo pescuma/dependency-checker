@@ -112,12 +112,14 @@ namespace org.pescuma.dotnetdependencychecker.config
 		private static Func<Project, bool> ParsePath(string line)
 		{
 			var path = Path.GetFullPath(line);
-			var pathWithSlash = Path.GetFullPath(line) + "\\";
 
-			return
-				proj =>
-					path.Equals(proj.Path, StringComparison.CurrentCultureIgnoreCase)
-					|| proj.Path.StartsWith(pathWithSlash, StringComparison.CurrentCultureIgnoreCase);
+			return proj => PathMatches(proj.LocalPath, path) || proj.Paths.Any(pp => PathMatches(pp, path));
+		}
+
+		private static bool PathMatches(string fullPath, string beginPath)
+		{
+			return fullPath.Equals(beginPath, StringComparison.CurrentCultureIgnoreCase)
+			       || fullPath.StartsWith(beginPath + "\\", StringComparison.CurrentCultureIgnoreCase);
 		}
 
 		private static Func<Project, bool> ParseSimpleMatch(string line)

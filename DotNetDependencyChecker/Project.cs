@@ -1,16 +1,38 @@
-﻿namespace org.pescuma.dotnetdependencychecker
+﻿using System.Collections.Generic;
+
+namespace org.pescuma.dotnetdependencychecker
 {
 	public class Project
 	{
 		public readonly string Name;
-		public readonly string Path;
-		public readonly bool IsLocal;
+		public readonly string LocalPath;
+		public readonly List<string> Paths = new List<string>();
 
-		public Project(string name, string path, bool isLocal)
+		public Project(string name, string localPath)
 		{
 			Name = name;
-			Path = path;
-			IsLocal = isLocal;
+			LocalPath = localPath;
+
+			if (localPath != null)
+				Paths.Add(LocalPath);
+		}
+
+		public bool IsLocal
+		{
+			get { return LocalPath != null; }
+		}
+
+		public string ToGui()
+		{
+			if (LocalPath != null)
+				return string.Format("{0}({1})", Name, LocalPath);
+			else
+				return Name;
+		}
+
+		public override string ToString()
+		{
+			return Name;
 		}
 
 		protected bool Equals(Project other)
@@ -32,11 +54,6 @@
 		public override int GetHashCode()
 		{
 			return (Name != null ? Name.GetHashCode() : 0);
-		}
-
-		public override string ToString()
-		{
-			return Name;
 		}
 	}
 }

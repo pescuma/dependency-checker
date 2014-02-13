@@ -17,10 +17,24 @@ namespace org.pescuma.dotnetdependencychecker
 				return -1;
 			}
 
-			Config config;
 			try
 			{
-				config = ConfigParser.Parse(args[0]);
+				var config = ConfigParser.Parse(args[0]);
+
+				var warns = new List<string>();
+
+				var graph = ProjectsLoader.LoadGraph(config, warns);
+
+				warns.ForEach(w => Console.WriteLine("\n[warn] " + w));
+
+				Dump(graph.Vertices.Select(p => p.ToGui()), config.Output.Projects);
+
+				var errors = RulesMatcher.Validate(graph, config);
+
+				errors.ForEach(e => Console.WriteLine("\n[ERROR] " + e));
+
+				Console.WriteLine();
+				return 0;
 			}
 			catch (ConfigParserException e)
 			{
@@ -28,21 +42,12 @@ namespace org.pescuma.dotnetdependencychecker
 				Console.WriteLine();
 				return -1;
 			}
-
-			var warns = new List<string>();
-
-			var graph = ProjectsLoader.LoadGraph(config, warns);
-
-			warns.ForEach(w => Console.WriteLine("\n[warn] " + w));
-
-			Dump(graph.Vertices.Select(p => p.Name), config.Output.Projects);
-
-			var errors = RulesMatcher.Validate(graph, config);
-
-			errors.ForEach(e => Console.WriteLine("\n[ERROR] " + e));
-
-			Console.WriteLine();
-			return 0;
+			catch (ConfigException e)
+			{
+				Console.WriteLine("Error: " + e.Message);
+				Console.WriteLine();
+				return -1;
+			}
 		}
 
 		private static void Dump(IEnumerable<string> projs, List<string> filenames)
