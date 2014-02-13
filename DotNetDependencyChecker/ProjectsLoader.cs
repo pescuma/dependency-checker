@@ -4,12 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker
 {
 	public class ProjectsLoader
 	{
-		public static DependencyGraph LoadGraph(Config config, List<string> warns)
+		public static DependencyGraph LoadGraph(Config config, List<RuleMatch> warns)
 		{
 			Console.WriteLine("Reading cs projs...");
 
@@ -23,13 +24,18 @@ namespace org.pescuma.dotnetdependencychecker
 				.Where(csproj => !ignore(ToProject(csproj)))
 				.ToList();
 
-			var msg = TestProjectsWithSame(csprojs, p => p.Name, "name");
-			if (msg != null)
-				throw new ConfigException(msg);
+			var matches = TestProjectsWithSame(csprojs, p => p.Name, "name");
+			if (matches.Any())
+			{
+				var msg = new StringBuilder();
+				msg.Append("You have multiple projects with the same name. You have to fix it or ignore some of those to be able to process them.\n"
+				           + "The affected projects are:");
+				matches.ForEach(m => msg.Append("\n\n")
+					.Append(m.Messsage));
+				throw new ConfigException(msg.ToString());
+			}
 
-			msg = TestProjectsWithSame(csprojs, p => p.ProjectGuid.ToString(), "GUI");
-			if (msg != null)
-				warns.Add(msg);
+			warns.AddRange(TestProjectsWithSame(csprojs, p => p.ProjectGuid.ToString(), "GUI"));
 
 			var projs = CreateProjects(csprojs);
 
@@ -58,11 +64,15 @@ namespace org.pescuma.dotnetdependencychecker
 
 				if (duplicates.Count > 0)
 				{
+					duplicates.Sort(Dependency.NaturalOrdering);
+
 					var warn = new StringBuilder();
-					warn.Append(string.Format("The project {0} depends more than once on the following projects:", csproj.Name));
+					warn.Append("The project ")
+						.Append(csproj.Name)
+						.Append(" depends more than once on the following projects:");
 					duplicates.ForEach(d => warn.Append("\n  - " + d.Target.Name));
 
-					warns.Add(warn.ToString());
+					warns.Add(new RuleMatch(false, Severity.Info, warn.ToString(), null, new List<Project> { proj }, duplicates));
 				}
 
 				deps.ForEach(d => graph.AddEdge(d));
@@ -71,7 +81,7 @@ namespace org.pescuma.dotnetdependencychecker
 			return graph;
 		}
 
-		private static string TestProjectsWithSame(List<CsprojReader> csprojs, Func<CsprojReader, string> id, string name)
+		private static List<RuleMatch> TestProjectsWithSame(List<CsprojReader> csprojs, Func<CsprojReader, string> id, string name)
 		{
 			var csprojsWithSameName = csprojs.GroupBy(id)
 				.Where(g => g.Count() > 1)
@@ -80,18 +90,27 @@ namespace org.pescuma.dotnetdependencychecker
 			if (!csprojsWithSameName.Any())
 				return null;
 
-			var err = new StringBuilder();
-			err.Append("You have multiple projects with the same ")
-				.Append(name)
-				.Append(":");
+			var result = new List<RuleMatch>();
+
 			foreach (var g in csprojsWithSameName)
 			{
-				err.Append("\n")
-					.Append(g.Key);
+				var err = new StringBuilder();
+				err.Append("You have multiple projects with the ")
+					.Append(name)
+					.Append(" ")
+					.Append(g.Key)
+					.Append(":");
 				g.ForEach(p => err.Append("\n  - ")
 					.Append(p.Filename));
+
+				var projs = g.Select(ToProject)
+					.ToList();
+				projs.Sort(Project.NaturalOrdering);
+
+				result.Add(new RuleMatch(false, Severity.Warn, err.ToString(), null, projs, null));
 			}
-			return err.ToString();
+
+			return result;
 		}
 
 		private static Dictionary<string, Project> CreateProjects(IList<CsprojReader> csprojs)

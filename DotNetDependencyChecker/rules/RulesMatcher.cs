@@ -6,7 +6,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 {
 	public class RulesMatcher
 	{
-		public static List<RuleMatch> Validate(DependencyGraph graph, Config config)
+		public static List<RuleMatch> Match(DependencyGraph graph, Config config)
 		{
 			var result = new List<RuleMatch>();
 

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using org.pescuma.dotnetdependencychecker.config;
 
 namespace org.pescuma.dotnetdependencychecker.rules
@@ -10,20 +9,21 @@ namespace org.pescuma.dotnetdependencychecker.rules
 		public readonly Severity Severity;
 		public readonly string Messsage;
 		public readonly ConfigLocation Location;
+		public readonly List<Project> Projects;
 		public readonly List<Dependency> Dependencies;
 
-		public RuleMatch(bool allowed, Severity severity, string messsage, ConfigLocation location, List<Dependency> dependencies)
+		public RuleMatch(bool allowed, Severity severity, string messsage, ConfigLocation location, List<Project> projects,
+			List<Dependency> dependencies)
 		{
 			Allowed = allowed;
-			this.Severity = severity;
+			Severity = severity;
 			Messsage = messsage;
 			Location = location;
-			Dependencies = dependencies;
-		}
+			Projects = projects ?? new List<Project>();
+			Dependencies = dependencies ?? new List<Dependency>();
 
-		public RuleMatch(bool allowed, Severity severity, string messsage, ConfigLocation location, params Dependency[] dependencies)
-			: this(allowed, severity, messsage, location, dependencies.ToList())
-		{
+			Projects.Sort(Project.NaturalOrdering);
+			Dependencies.Sort(Dependency.NaturalOrdering);
 		}
 	}
 }

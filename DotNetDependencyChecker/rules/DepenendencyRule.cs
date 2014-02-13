@@ -33,7 +33,10 @@ namespace org.pescuma.dotnetdependencychecker.rules
 				return null;
 
 			var messsage = string.Format("Dependence between {0} and {1} {2}allowed", dep.Source.ToGui(), dep.Target.ToGui(), Allow ? "" : "not ");
-			return new RuleMatch(Allow, Severity, messsage, Location, dep);
+			var projs = new List<Project> { dep.Source, dep.Target };
+			var dependencies = new List<Dependency> { dep };
+
+			return new RuleMatch(Allow, Severity, messsage, Location, projs, dependencies);
 		}
 	}
 }

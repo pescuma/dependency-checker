@@ -20,21 +20,22 @@ namespace org.pescuma.dotnetdependencychecker
 
 			try
 			{
+				var errors = new List<RuleMatch>();
+
 				var config = ConfigParser.Parse(args[0]);
 
-				var warns = new List<string>();
-
-				var graph = ProjectsLoader.LoadGraph(config, warns);
-
-				warns.ForEach(w => Console.WriteLine("\n[warn] " + w));
+				var graph = ProjectsLoader.LoadGraph(config, errors);
 
 				Dump(graph.Vertices.Select(p => p.ToGui()), config.Output.Projects);
 
-				var errors = RulesMatcher.Validate(graph, config);
+				errors.AddRange(RulesMatcher.Match(graph, config)
+					.Where(e => !e.Allowed));
 
-				errors.Where(e => !e.Allowed)
-					.ForEach(e => Console.WriteLine("\n[{0}] {1}", e.Severity.ToString()
+				if (errors.Any())
+					errors.ForEach(e => Console.WriteLine("\n[{0}] {1}", e.Severity.ToString()
 						.ToLower(), e.Messsage));
+				else
+					Console.WriteLine("No errors found");
 
 				Console.WriteLine();
 				return 0;
