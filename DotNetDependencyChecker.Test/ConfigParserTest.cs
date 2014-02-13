@@ -314,12 +314,32 @@ output projects: c:\b.out");
 		}
 
 		[Test]
-		public void TestRuleLocation()
+		public void TestRuleLocation_FirstLine()
 		{
-			var config = Parse(@"rule: a -> B");
+			var config = Parse("rule: a -> B");
 
 			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(1, rule.Location.LineNum);
+			Assert.AreEqual("rule: a -> B", rule.Location.LineText);
+		}
+
+		[Test]
+		public void TestRuleLocation_SecondLine()
+		{
+			var config = Parse("\nrule: a -> B");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(2, rule.Location.LineNum);
+			Assert.AreEqual("rule: a -> B", rule.Location.LineText);
+		}
+
+		[Test]
+		public void TestRuleSeverity_None()
+		{
+			var config = Parse("rule: a -> B");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Error, rule.Severity);
 		}
 	}
 }
