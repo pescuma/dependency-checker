@@ -341,5 +341,80 @@ output projects: c:\b.out");
 			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(Severity.Error, rule.Severity);
 		}
+
+		[Test]
+		public void TestRuleSeverity_Warning()
+		{
+			var config = Parse("rule: a -> B [warning]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Warn, rule.Severity);
+			Assert.AreEqual(true, rule.Source(ProjWithName("a")));
+			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+		}
+
+		[Test]
+		public void TestRuleSeverity_Error()
+		{
+			var config = Parse("rule: a -> B [error]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Error, rule.Severity);
+			Assert.AreEqual(true, rule.Source(ProjWithName("a")));
+			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+		}
+
+		[Test]
+		public void TestRuleSeverity_Info()
+		{
+			var config = Parse("rule: a -> B [info]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Info, rule.Severity);
+			Assert.AreEqual(true, rule.Source(ProjWithName("a")));
+			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+		}
+
+		[Test]
+		public void TestRuleSeverity_CaseInsensitive()
+		{
+			var config = Parse("rule: a -> B [iNfO]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Info, rule.Severity);
+			Assert.AreEqual(true, rule.Source(ProjWithName("a")));
+			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+		}
+
+		[Test]
+		public void TestRuleSeverity_WithTabs()
+		{
+			var config = Parse("rule: a -> B\t\t\t \t[iNfO]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Info, rule.Severity);
+			Assert.AreEqual(true, rule.Source(ProjWithName("a")));
+			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+		}
+
+		[Test]
+		public void TestRuleSeverity_NoSpace()
+		{
+			var config = Parse("rule: a -> B[iNfO]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Info, rule.Severity);
+			Assert.AreEqual(true, rule.Source(ProjWithName("a")));
+			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+		}
+
+		[Test]
+		public void TestNoCircularDependenciesRuleSeverity()
+		{
+			var config = Parse("rule: don't allow circular dependencies [info]");
+
+			var rule = (NoCircularDepenendenciesRule) config.Rules[0];
+			Assert.AreEqual(Severity.Info, rule.Severity);
+		}
 	}
 }

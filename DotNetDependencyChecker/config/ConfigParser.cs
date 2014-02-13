@@ -153,22 +153,42 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		private static void ParseRule(Config result, string line, ConfigLocation location)
 		{
+			var severities = new Dictionary<string, Severity>
+			{
+				{ "info", Severity.Info },
+				{ "warning", Severity.Warn },
+				{ "error", Severity.Error },
+			};
+
+			var severity = Severity.Error;
+			foreach (var s in severities)
+			{
+				var suffix = "[" + s.Key + "]";
+				if (line.EndsWith(suffix, StringComparison.CurrentCultureIgnoreCase))
+				{
+					severity = s.Value;
+					line = line.Substring(0, line.Length - suffix.Length)
+						.Trim();
+					break;
+				}
+			}
+
 			if (line == "don't allow circular dependencies")
 			{
-				result.Rules.Add(new NoCircularDepenendenciesRule(Severity.Error, location));
+				result.Rules.Add(new NoCircularDepenendenciesRule(severity, location));
 				return;
 			}
 
-			if (ParseRule(result, line, location, NOT_DEPENDS))
+			if (ParseRule(result, line, location, NOT_DEPENDS, severity))
 				return;
 
-			if (ParseRule(result, line, location, DEPENDS))
+			if (ParseRule(result, line, location, DEPENDS, severity))
 				return;
 
 			throw new ConfigParserException(location, "Invalid rule");
 		}
 
-		private static bool ParseRule(Config result, string line, ConfigLocation location, string separator)
+		private static bool ParseRule(Config result, string line, ConfigLocation location, string separator, Severity severity)
 		{
 			var pos = line.IndexOf(separator, StringComparison.Ordinal);
 			if (pos < 0)
@@ -179,7 +199,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 			var right = ParseMatcher(line.Substring(pos + separator.Length)
 				.Trim(), location);
 
-			result.Rules.Add(new DepenendencyRule(Severity.Error, left, right, separator == DEPENDS, location));
+			result.Rules.Add(new DepenendencyRule(severity, left, right, separator == DEPENDS, location));
 			return true;
 		}
 
