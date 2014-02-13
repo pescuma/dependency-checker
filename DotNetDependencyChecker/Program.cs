@@ -32,7 +32,9 @@ namespace org.pescuma.dotnetdependencychecker
 
 				var errors = RulesMatcher.Validate(graph, config);
 
-				errors.ForEach(e => Console.WriteLine("\n[ERROR] " + e));
+				errors.Where(e => !e.Allowed)
+					.ForEach(e => Console.WriteLine("\n[{0}] {1}", e.Severity.ToString()
+						.ToLower(), e.Messsage));
 
 				Console.WriteLine();
 				return 0;
