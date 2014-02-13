@@ -63,13 +63,16 @@
     <Compile Include="CsprojReader.cs" />
     <Compile Include="Dependency.cs" />
     <Compile Include="DependencyGraph.cs" />
+    <Compile Include="DepenendencyRule.cs" />
     <Compile Include="LinqHelper.cs" />
     <Compile Include="Location.cs" />
+    <Compile Include="NoCircularDepenendenciesRule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Project.cs" />
     <Compile Include="ProjectsLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rule.cs" />
+    <Compile Include="RuleMatch.cs" />
     <Compile Include="RulesMatcher.cs" />
   </ItemGroup>
   <ItemGroup>
