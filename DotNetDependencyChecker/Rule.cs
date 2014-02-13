@@ -2,20 +2,43 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using org.pescuma.dotnetdependencychecker.config;
 using QuickGraph.Algorithms;
 
 namespace org.pescuma.dotnetdependencychecker
 {
-	public interface Rule
+	public class RuleMatch
 	{
-		void Start(List<string> result, DependencyGraph graph);
-		bool Process(List<string> result, Dependency dep);
-		void Finish(List<string> result, DependencyGraph graph);
+		public readonly bool Allowed;
+		public readonly string Messsage;
+		public readonly ConfigLocation Location;
+		public readonly List<Dependency> Dependencies;
+
+		public RuleMatch(bool allowed, string messsage, ConfigLocation location, List<Dependency> dependencies)
+		{
+			Allowed = allowed;
+			Messsage = messsage;
+			Location = location;
+			Dependencies = dependencies;
+		}
+
+		public RuleMatch(bool allowed, string messsage, ConfigLocation location, params Dependency[] dependencies)
+			: this(allowed, messsage, location, dependencies.ToList())
+		{
+		}
 	}
 
-	// Fields are public for tests
+	public interface Rule
+	{
+		List<RuleMatch> Process(DependencyGraph graph);
+
+		/// <returns>null if didn't match</returns>
+		RuleMatch Process(Dependency dep);
+	}
+
 	public class DepenendencyRule : Rule
 	{
+		// HACK [pescuma] Fields are public for tests
 		public readonly Func<Project, bool> Source;
 		public readonly Func<Project, bool> Target;
 		public readonly bool Allow;
@@ -23,29 +46,24 @@ namespace org.pescuma.dotnetdependencychecker
 
 		public DepenendencyRule(Func<Project, bool> source, Func<Project, bool> target, bool allow, ConfigLocation location)
 		{
-			this.Source = source;
-			this.Target = target;
-			this.Allow = allow;
+			Source = source;
+			Target = target;
+			Allow = allow;
 			this.location = location;
 		}
 
-		public void Start(List<string> result, DependencyGraph graph)
+		public List<RuleMatch> Process(DependencyGraph graph)
 		{
+			return null;
 		}
 
-		public bool Process(List<string> result, Dependency dep)
+		public RuleMatch Process(Dependency dep)
 		{
 			if (!Source(dep.Source) || !Target(dep.Target))
-				return false;
+				return null;
 
-			if (!Allow)
-				result.Add(string.Format("Dependence between {0} and {1} not allowed", dep.Source.ToGui(), dep.Target.ToGui()));
-
-			return true;
-		}
-
-		public void Finish(List<string> result, DependencyGraph graph)
-		{
+			return new RuleMatch(Allow,
+				string.Format("Dependence between {0} and {1} {2}allowed", dep.Source.ToGui(), dep.Target.ToGui(), Allow ? "" : "not "), location, dep);
 		}
 	}
 
@@ -58,8 +76,10 @@ namespace org.pescuma.dotnetdependencychecker
 			this.location = location;
 		}
 
-		public void Start(List<string> result, DependencyGraph graph)
+		public List<RuleMatch> Process(DependencyGraph graph)
 		{
+			var result = new List<RuleMatch>();
+
 			IDictionary<Project, int> components;
 			graph.StronglyConnectedComponents(out components);
 
@@ -69,34 +89,29 @@ namespace org.pescuma.dotnetdependencychecker
 
 			foreach (var g in circularDependencies)
 			{
+				var projs = g.Select(i => i.Proj)
+					.ToList();
+				projs.Sort(Project.NaturalOrdering);
+
+				var projsSet = new HashSet<Project>(projs);
+				var deps = graph.Edges.Where(e => projsSet.Contains(e.Source) && projsSet.Contains(e.Target))
+					.ToList();
+				deps.Sort(Dependency.NaturalOrdering);
+
 				var err = new StringBuilder();
 				err.Append("Circular dependency found:");
-				g.ForEach(p => err.Append("\n  - ")
-					.Append(p.Proj.Name));
+				projs.ForEach(p => err.Append("\n  - ")
+					.Append(p.Name));
 
-				result.Add(err.ToString());
+				result.Add(new RuleMatch(false, err.ToString(), location, deps));
 			}
+
+			return result;
 		}
 
-		public bool Process(List<string> result, Dependency dep)
+		public RuleMatch Process(Dependency dep)
 		{
-			return false;
-		}
-
-		public void Finish(List<string> result, DependencyGraph graph)
-		{
-		}
-	}
-
-	public class ConfigLocation
-	{
-		public readonly int LineNum;
-		public readonly string LineText;
-
-		public ConfigLocation(int lineNum, string lineText)
-		{
-			LineNum = lineNum;
-			LineText = lineText;
+			return null;
 		}
 	}
 }

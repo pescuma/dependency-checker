@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace org.pescuma.dotnetdependencychecker
 {
 	public class Project
 	{
+		public static Comparison<Project> NaturalOrdering =
+			(p1, p2) => string.Compare(p1.Name, p2.Name, StringComparison.CurrentCultureIgnoreCase);
+
 		public readonly string Name;
 		public readonly string LocalPath;
 		public readonly List<string> Paths = new List<string>();

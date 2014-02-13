@@ -1,9 +1,19 @@
-﻿using QuickGraph;
+﻿using System;
+using QuickGraph;
 
 namespace org.pescuma.dotnetdependencychecker
 {
 	public class Dependency : Edge<Project>
 	{
+		public static Comparison<Dependency> NaturalOrdering = (d1, d2) =>
+		{
+			var comp = string.Compare(d1.Source.Name, d2.Source.Name, StringComparison.CurrentCultureIgnoreCase);
+			if (comp != 0)
+				return comp;
+
+			return string.Compare(d1.Target.Name, d2.Target.Name, StringComparison.CurrentCultureIgnoreCase);
+		};
+
 		public readonly Types Type;
 		public readonly Location Location;
 
