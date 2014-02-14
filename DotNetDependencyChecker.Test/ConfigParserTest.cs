@@ -14,22 +14,22 @@ namespace org.pescuma.dotnetdependencychecker
 
 		private Project ProjWithName(string name)
 		{
-			return new Project(name, null);
+			return new Project(name, null, null, null, true);
 		}
 
 		private Project ProjWithPath(string path)
 		{
-			return new Project(null, path);
+			return new Project(null, null, null, path, true);
 		}
 
 		private Project LocalProj()
 		{
-			return new Project(null, "PATH");
+			return new Project(null, null, null, null, true);
 		}
 
 		private Project NonLocalProj()
 		{
-			return new Project(null, null);
+			return new Project(null, null, null, null, false);
 		}
 
 		[Test]

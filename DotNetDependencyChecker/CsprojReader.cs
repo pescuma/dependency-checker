@@ -36,12 +36,22 @@ namespace org.pescuma.dotnetdependencychecker
 			}
 		}
 
+		public string AssemblyName
+		{
+			get
+			{
+				return Nodes("AssemblyName")
+					.Select(n => n.Value)
+					.First();
+			}
+		}
+
 		public IEnumerable<Reference> References
 		{
 			get
 			{
 				return Nodes("Reference")
-					.Select(n => new Reference(n));
+					.Select(n => new Reference(this, n));
 			}
 		}
 
@@ -77,10 +87,12 @@ namespace org.pescuma.dotnetdependencychecker
 
 		public class Reference
 		{
+			private readonly CsprojReader reader;
 			private readonly XElement node;
 
-			public Reference(XElement node)
+			public Reference(CsprojReader reader, XElement node)
 			{
+				this.reader = reader;
 				this.node = node;
 			}
 
@@ -113,7 +125,14 @@ namespace org.pescuma.dotnetdependencychecker
 					if (result == null)
 						return null;
 
-					return Path.GetFullPath(result.Value);
+					var path = result.Value;
+					if (string.IsNullOrWhiteSpace(path))
+						return null;
+
+					if (!Path.IsPathRooted(path))
+						path = Path.Combine(reader.folder, path);
+
+					return Path.GetFullPath(path);
 				}
 			}
 		}
@@ -143,12 +162,21 @@ namespace org.pescuma.dotnetdependencychecker
 				get { return Path.GetFileNameWithoutExtension(Include); }
 			}
 
+			public Guid ProjectGuid
+			{
+				get
+				{
+					return new Guid(Node(node, "Project")
+						.Value);
+				}
+			}
+
 			public string Include
 			{
 				get
 				{
 					var result = Attribute(node, "Include");
-					if (result == null)
+					if (string.IsNullOrWhiteSpace(result))
 						return null;
 
 					if (!Path.IsPathRooted(result))

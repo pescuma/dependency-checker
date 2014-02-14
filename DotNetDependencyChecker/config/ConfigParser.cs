@@ -122,7 +122,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 		{
 			var path = Path.GetFullPath(line);
 
-			return proj => PathMatches(proj.LocalPath, path) || proj.Paths.Any(pp => PathMatches(pp, path));
+			return proj => proj.Paths.Any(pp => PathMatches(pp, path));
 		}
 
 		private static bool PathMatches(string fullPath, string beginPath)

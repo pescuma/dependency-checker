@@ -10,168 +10,211 @@ namespace org.pescuma.dotnetdependencychecker
 {
 	public class ProjectsLoader
 	{
-		public static DependencyGraph LoadGraph(Config config, List<RuleMatch> warns)
+		private readonly Config config;
+		private readonly List<RuleMatch> warnings;
+		private Func<Project, bool> ignore;
+		private HashSet<Project> projs;
+		private List<Dependency> dependencies;
+		private List<ProcessingProject> processing;
+
+		public ProjectsLoader(Config config, List<RuleMatch> warnings)
 		{
+			this.config = config;
+			this.warnings = warnings;
+		}
+
+		public DependencyGraph LoadGraph()
+		{
+			projs = new HashSet<Project>();
+			dependencies = new List<Dependency>();
+			ignore = p => config.Ignores.Any(i => i.Matches(p));
+
 			Console.WriteLine("Reading cs projs...");
 
 			var csprojFiles = config.Inputs.SelectMany(folder => Directory.GetFiles(folder, "*.csproj", SearchOption.AllDirectories))
 				.Select(Path.GetFullPath)
 				.Distinct();
 
-			Func<Project, bool> ignore = p => config.Ignores.Any(i => i.Matches(p));
-
-			var csprojs = csprojFiles.Select(csprojFile => new CsprojReader(csprojFile))
-				.Where(csproj => !ignore(ToProject(csproj)))
-				.ToList();
-
-			var matches = TestProjectsWithSame(csprojs, p => p.Name, "name");
-			if (matches.Any())
+			processing = csprojFiles.Select(csprojFile =>
 			{
-				var msg = new StringBuilder();
-				msg.Append("You have multiple projects with the same name. You have to fix it or ignore some of those to be able to process them.\n"
-				           + "The affected projects are:");
-				matches.ForEach(m => msg.Append("\n\n")
-					.Append(m.Messsage));
-				throw new ConfigException(msg.ToString());
-			}
+				var csproj = new CsprojReader(csprojFile);
+				var project = new Project(csproj.Name, csproj.AssemblyName, csproj.ProjectGuid, csproj.Filename, true);
+				var ignored = config.Ignores.Any(i => i.Matches(project));
 
-			warns.AddRange(TestProjectsWithSame(csprojs, p => p.ProjectGuid.ToString(), "GUI"));
-
-			var projs = CreateProjects(csprojs);
+				return new ProcessingProject(csproj, project, ignored);
+			})
+				.ToList();
 
 			Console.WriteLine("Creating dependency graph...");
 
+			processing.Where(i => !i.Ignored)
+				.Select(i => i.Project)
+				.ForEach(p => projs.Add(p));
+
+			CreateProjectReferences();
+
+			CreateDLLReferences();
+
 			var graph = new DependencyGraph();
-
-			projs.Values.Where(p => !ignore(p))
-				.ForEach(p => graph.AddVertex(p));
-
-			foreach (var csproj in csprojs)
-			{
-				var proj = projs[csproj.Name];
-
-				if (ignore(proj))
-					continue;
-
-				var deps = CreateDeps(projs, csproj)
-					.Where(d => !ignore(d.Source) && !ignore(d.Target))
-					.ToList();
-
-				var duplicates = deps.GroupBy(i => i)
-					.Where(g => g.Count() > 1)
-					.Select(g => g.Key)
-					.ToList();
-
-				if (duplicates.Count > 0)
-				{
-					duplicates.Sort(Dependency.NaturalOrdering);
-
-					var warn = new StringBuilder();
-					warn.Append("The project ")
-						.Append(csproj.Name)
-						.Append(" depends more than once on the following projects:");
-					duplicates.ForEach(d => warn.Append("\n  - " + d.Target.Name));
-
-					warns.Add(new RuleMatch(false, Severity.Info, warn.ToString(), null, new List<Project> { proj }, duplicates));
-				}
-
-				deps.ForEach(d => graph.AddEdge(d));
-			}
-
+			projs.ForEach(p => graph.AddVertex(p));
+			dependencies.ForEach(d => graph.AddEdge(d));
 			return graph;
 		}
 
-		private static List<RuleMatch> TestProjectsWithSame(List<CsprojReader> csprojs, Func<CsprojReader, string> id, string name)
+		private class ProcessingProject
 		{
-			var csprojsWithSameName = csprojs.GroupBy(id)
-				.Where(g => g.Count() > 1)
-				.ToList();
+			public readonly CsprojReader Csproj;
+			public readonly Project Project;
+			public readonly bool Ignored;
 
-			if (!csprojsWithSameName.Any())
-				return null;
-
-			var result = new List<RuleMatch>();
-
-			foreach (var g in csprojsWithSameName)
+			public ProcessingProject(CsprojReader csproj, Project project, bool ignored)
 			{
-				var err = new StringBuilder();
-				err.Append("You have multiple projects with the ")
-					.Append(name)
-					.Append(" ")
-					.Append(g.Key)
-					.Append(":");
-				g.ForEach(p => err.Append("\n  - ")
-					.Append(p.Filename));
-
-				var projs = g.Select(ToProject)
-					.ToList();
-				projs.Sort(Project.NaturalOrdering);
-
-				result.Add(new RuleMatch(false, Severity.Warn, err.ToString(), null, projs, null));
+				Csproj = csproj;
+				Project = project;
+				Ignored = ignored;
 			}
-
-			return result;
 		}
 
-		private static Dictionary<string, Project> CreateProjects(IList<CsprojReader> csprojs)
+		private void CreateProjectReferences()
 		{
-			var projs = new Dictionary<string, Project>();
-
-			foreach (var csproj in csprojs)
-				projs.Add(csproj.Name, ToProject(csproj));
-
-			foreach (var csproj in csprojs)
+			foreach (var item in processing.Where(i => !i.Ignored))
 			{
-				foreach (var reference in csproj.ProjectReferences)
-				{
-					var name = reference.Name;
+				var csproj = item.Csproj;
+				var proj = item.Project;
 
-					Project proj;
-					if (!projs.TryGetValue(name, out proj))
-					{
-						proj = new Project(name, null);
-						projs.Add(name, proj);
-					}
+				foreach (var csref in csproj.ProjectReferences)
+				{
+					var reference = csref;
+
+					// Dummy reference for logs in case of errors
+					var dep = new Dependency(proj, null, Dependency.Types.ProjectReference, new Location(csproj.Filename, reference.LineNumber));
+
+					var referenceProj = FindOrCreateProject(proj, dep, //
+						p => p.Name == reference.Name && p.Guid == reference.ProjectGuid,
+						string.Format("named {0} with GUI {1}", reference.Name, reference.ProjectGuid), //
+						() => TryReadExternalProject(reference, dep));
+
+					if (referenceProj == null)
+						continue;
 
 					proj.Paths.Add(reference.Include);
+
+					dependencies.Add(dep.WithTarget(referenceProj));
 				}
+			}
+		}
+
+		private void CreateDLLReferences()
+		{
+			foreach (var item in processing.Where(i => !i.Ignored))
+			{
+				var csproj = item.Csproj;
+				var proj = item.Project;
 
 				foreach (var reference in csproj.References)
 				{
 					var name = reference.Include.Name;
 
-					Project proj;
-					if (!projs.TryGetValue(name, out proj))
-					{
-						proj = new Project(name, null);
-						projs.Add(name, proj);
-					}
+					// Dummy reference for logs in case of errors
+					var dep = new Dependency(proj, null, Dependency.Types.ProjectReference, new Location(csproj.Filename, reference.LineNumber));
 
-					if (!string.IsNullOrWhiteSpace(reference.HintPath))
-						proj.Paths.Add(reference.HintPath);
+					var referenceProj = FindOrCreateProject(proj, dep, //
+						p => p.AssemblyName == name, "with assembly name " + name, //
+						() => new Project(name, name, null, null, false));
+
+					if (referenceProj == null)
+						continue;
+
+					if (reference.HintPath != null)
+						referenceProj.Paths.Add(reference.HintPath);
+
+					dependencies.Add(dep.WithTarget(referenceProj));
 				}
 			}
-
-			return projs;
 		}
 
-		private static Project ToProject(CsprojReader csproj)
+		private Project FindOrCreateProject(Project proj, Dependency dep, Func<Project, bool> matches, string refName,
+			Func<Project> createNewProject)
 		{
-			return new Project(csproj.Name, csproj.Filename);
+			var candidates = processing.Where(p => !p.Ignored && matches(p.Project))
+				.Select(i => i.Project)
+				.ToList();
+
+			if (candidates.Count == 1)
+				return candidates.First();
+
+			if (candidates.Count > 1)
+			{
+				warnings.Add(CreateMultipleReferencesWarning(proj, dep, refName, candidates));
+				return null;
+			}
+
+			// candidates.Count < 1
+
+			if (processing.Any(p => p.Ignored && matches(p.Project)))
+				// The project exists but was ignored
+				return null;
+
+			var result = createNewProject();
+			if (ignore(result))
+				return null;
+
+			projs.Add(result);
+
+			return result;
 		}
 
-		private static IEnumerable<Dependency> CreateDeps(Dictionary<string, Project> projs, CsprojReader csproj)
+		private RuleMatch CreateMultipleReferencesWarning(Project proj, Dependency dep, string refName, List<Project> candidates)
 		{
-			var proj = projs[csproj.Name];
+			var msg = new StringBuilder();
 
-			foreach (var reference in csproj.ProjectReferences)
-				yield return
-					new Dependency(proj, projs[reference.Name], Dependency.Types.ProjectReference, new Location(csproj.Filename, reference.LineNumber));
+			msg.Append(string.Format("The project {0} references the project {1}, but there are {2} projects that match:", proj.Name, refName,
+				candidates.Count));
 
-			foreach (var reference in csproj.References)
-				yield return
-					new Dependency(proj, projs[reference.Include.Name], Dependency.Types.DllReference, new Location(csproj.Filename, reference.LineNumber))
-					;
+			candidates.ForEach(c =>
+			{
+				msg.Append("\n  - ");
+				if (c.CsprojPath != null)
+				{
+					msg.Append(c.CsprojPath);
+				}
+				else
+				{
+					msg.Append(c.Name);
+
+					if (c.AssemblyName != c.Name)
+						msg.Append(", Assembly name: ")
+							.Append(c.AssemblyName);
+
+					if (c.Guid != null)
+						msg.Append(", GUID: ")
+							.Append(c.Guid);
+				}
+			});
+
+			msg.Append("\nThis dependecy will be ignored.");
+
+			return new RuleMatch(false, Severity.Error, msg.ToString(), null, new List<Project> { proj }.Concat(candidates),
+				new List<Dependency> { dep });
+		}
+
+		private Project TryReadExternalProject(CsprojReader.ProjectReference reference, Dependency dep)
+		{
+			string filename = reference.Include;
+			try
+			{
+				var csproj = new CsprojReader(filename);
+				return new Project(csproj.Name, csproj.AssemblyName, csproj.ProjectGuid, filename, false);
+			}
+			catch (IOException)
+			{
+				var result = new Project(reference.Name, reference.Name, reference.ProjectGuid, null, false, filename);
+
+				var msg = string.Format("Could not load project {0}: guessing assembly name to be the same as project name", filename);
+				warnings.Add(new RuleMatch(false, Severity.Warn, msg, null, dep.WithTarget(result)));
+
+				return result;
+			}
 		}
 	}
 }

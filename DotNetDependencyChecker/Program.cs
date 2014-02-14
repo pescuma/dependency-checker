@@ -24,9 +24,9 @@ namespace org.pescuma.dotnetdependencychecker
 
 				var config = ConfigParser.Parse(args[0]);
 
-				var graph = ProjectsLoader.LoadGraph(config, errors);
+				var graph = new ProjectsLoader(config, errors).LoadGraph();
 
-				Dump(graph.Vertices.Select(p => p.ToGui()), config.Output.Projects);
+				Dump(graph.Vertices.Select(p => p.Name), config.Output.Projects);
 
 				errors.AddRange(RulesMatcher.Match(graph, config)
 					.Where(e => !e.Allowed));

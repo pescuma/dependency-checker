@@ -61,5 +61,10 @@ namespace org.pescuma.dotnetdependencychecker
 		{
 			return string.Format("{0} => {1} ({2})", Source.Name, Target.Name, Type);
 		}
+
+		public Dependency WithTarget(Project otherTarget)
+		{
+			return new Dependency(Source, otherTarget, Type, Location);
+		}
 	}
 }
