@@ -7,6 +7,9 @@ namespace org.pescuma.dotnetdependencychecker
 	{
 		public static List<T> AsList<T>(this T el)
 		{
+			if (Equals(el, null))
+				return null;
+
 			return new List<T> { el };
 		}
 
