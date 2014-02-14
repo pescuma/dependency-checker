@@ -42,7 +42,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 				err.Append("Circular dependency found:");
 				projs.Sort(Project.NaturalOrdering);
 				projs.ForEach(p => err.Append("\n  - ")
-					.Append(p.Name));
+					.Append(p.GetNameAndPath()));
 
 				result.Add(new RuleMatch(false, Severity, err.ToString(), Location, projs, deps));
 			}

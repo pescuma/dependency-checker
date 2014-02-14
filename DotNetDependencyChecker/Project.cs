@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace org.pescuma.dotnetdependencychecker
 {
@@ -62,6 +63,40 @@ namespace org.pescuma.dotnetdependencychecker
 		{
 			return string.Format("{0}[{1},{2}, csproj: {3}, {4}, Paths: {5}]", Name, AssemblyName, Guid, CsprojPath, IsLocal ? "Local" : "Not local",
 				Paths);
+		}
+
+		// Helpers for messages
+
+		public string GetNameAndPath()
+		{
+			if (CsprojPath != null)
+				return string.Format("{0} ({1})", Name, CsprojPath);
+			else
+				return Name;
+		}
+
+		public string GetCsprojOrFullID()
+		{
+			var msg = new StringBuilder();
+
+			if (CsprojPath != null)
+			{
+				msg.Append(CsprojPath);
+			}
+			else
+			{
+				msg.Append(Name);
+
+				if (AssemblyName != Name)
+					msg.Append(", Assembly name: ")
+						.Append(AssemblyName);
+
+				if (Guid != null)
+					msg.Append(", GUID: ")
+						.Append(Guid);
+			}
+
+			return msg.ToString();
 		}
 	}
 }

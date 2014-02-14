@@ -80,36 +80,12 @@ namespace org.pescuma.dotnetdependencychecker
 					.Append(sameProjs.Count)
 					.Append(" projects that have the same:");
 				sameProjs.ForEach(p => msg.Append("\n  - ")
-					.Append(ToGui(p)));
+					.Append(p.GetCsprojOrFullID()));
 
 				throw new ConfigException(msg.ToString());
 			}
 
 			projs.Add(newProj);
-		}
-
-		private string ToGui(Project proj)
-		{
-			var msg = new StringBuilder();
-
-			if (proj.CsprojPath != null)
-			{
-				msg.Append(proj.CsprojPath);
-			}
-			else
-			{
-				msg.Append(proj.Name);
-
-				if (proj.AssemblyName != proj.Name)
-					msg.Append(", Assembly name: ")
-						.Append(proj.AssemblyName);
-
-				if (proj.Guid != null)
-					msg.Append(", GUID: ")
-						.Append(proj.Guid);
-			}
-
-			return msg.ToString();
 		}
 
 		private void CreateProjectReferences()
@@ -187,9 +163,9 @@ namespace org.pescuma.dotnetdependencychecker
 				var msg = new StringBuilder();
 
 				msg.Append(string.Format("The project {0} references the project {1} but it could not be loaded. Using project{2} {3} instead:",
-					GetProjAndPath(proj), filename, result.Count > 1 ? "s" : "", refName));
+					proj.GetNameAndPath(), filename, result.Count > 1 ? "s" : "", refName));
 				result.ForEach(p => msg.Append("\n  - ")
-					.Append(p.CsprojPath));
+					.Append(p.GetCsprojOrFullID()));
 
 				var allProjs = result.Concat(proj.AsList())
 					.ToList();
@@ -209,7 +185,7 @@ namespace org.pescuma.dotnetdependencychecker
 			var msg =
 				string.Format(
 					"The project {0} references the project {1} but it could not be loaded. Guessing assembly name to be the same as project name.",
-					GetProjAndPath(proj), reference.Include);
+					proj.GetNameAndPath(), reference.Include);
 			warnings.Add(new RuleMatch(false, Severity.Warn, msg, null, dep.WithTarget(result)));
 
 			AddProject(result);
@@ -286,22 +262,14 @@ namespace org.pescuma.dotnetdependencychecker
 		{
 			var msg = new StringBuilder();
 
-			msg.Append(string.Format("The project {0} references the project {1}, but there are {2} projects that match:", GetProjAndPath(proj),
+			msg.Append(string.Format("The project {0} references the project {1}, but there are {2} projects that match:", proj.GetNameAndPath(),
 				refName, candidates.Count));
 			candidates.ForEach(c => msg.Append("\n  - ")
-				.Append(ToGui(c)));
+				.Append(c.GetCsprojOrFullID()));
 			msg.Append("\nMultiple dependencies will be created.");
 
 			return new RuleMatch(false, Severity.Warn, msg.ToString(), null, proj.AsList()
 				.Concat(candidates), dep.AsList());
-		}
-
-		private object GetProjAndPath(Project proj)
-		{
-			if (proj.CsprojPath != null)
-				return string.Format("{0} ({1})", proj.Name, proj.CsprojPath);
-			else
-				return proj.Name;
 		}
 
 		private class ProcessingProject

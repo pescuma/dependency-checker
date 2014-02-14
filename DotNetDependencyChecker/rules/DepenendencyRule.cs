@@ -32,7 +32,8 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			if (!Source(dep.Source) || !Target(dep.Target))
 				return null;
 
-			var messsage = string.Format("Dependence between {0} and {1} {2}allowed", dep.Source.Name, dep.Target.Name, Allow ? "" : "not ");
+			var messsage = string.Format("Dependence between {0} and {1} {2}allowed", dep.Source.GetNameAndPath(), dep.Target.GetNameAndPath(),
+				Allow ? "" : "not ");
 			var projs = new List<Project> { dep.Source, dep.Target };
 			var dependencies = new List<Dependency> { dep };
 
