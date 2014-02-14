@@ -33,18 +33,18 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		public class Ignore
 		{
-			private readonly string line;
 			public readonly Func<Project, bool> Matches;
+			private readonly ConfigLocation location;
 
-			public Ignore(Func<Project, bool> matches, string line)
+			public Ignore(Func<Project, bool> matches, ConfigLocation location)
 			{
 				Matches = matches;
-				this.line = line;
+				this.location = location;
 			}
 
 			public override string ToString()
 			{
-				return line;
+				return location.LineText;
 			}
 		}
 

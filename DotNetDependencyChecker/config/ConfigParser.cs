@@ -9,8 +9,6 @@ namespace org.pescuma.dotnetdependencychecker.config
 {
 	public class ConfigParser
 	{
-		private const string IGNORE_ALL_NON_LOCAL_PROJECTS = "ignore all non-local projects";
-
 		private const string COMMENT = "#";
 		private const string DEPENDS = "->";
 		private const string NOT_DEPENDS = "-X->";
@@ -40,7 +38,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 				{ "output dependencies:", (line, location) => ParseOutputDependencies(result, line) },
 				{ "rule:", (line, location) => ParseRule(result, line, location) },
 				{ "ignore:", (line, location) => ParseIgnore(result, line, location) },
-				{ IGNORE_ALL_NON_LOCAL_PROJECTS, (line, location) => ParseIgnoreAllNonLocalProjects(result, line, location) },
+				{ "ignore all references not in includes", (line, location) => ParseIgnoreAllNonLocalProjects(result, line, location) },
 			};
 
 			foreach (var item in lines.Indexed())
@@ -207,7 +205,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 		{
 			var matcher = ParseMatcher(line, location);
 
-			result.Ignores.Add(new Config.Ignore(matcher, line));
+			result.Ignores.Add(new Config.Ignore(matcher, location));
 		}
 
 		private static void ParseIgnoreAllNonLocalProjects(Config result, string line, ConfigLocation location)
@@ -215,7 +213,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 			if (line != "")
 				throw new ConfigParserException(location, "The line has more text than it should");
 
-			result.Ignores.Add(new Config.Ignore(proj => !proj.IsLocal, IGNORE_ALL_NON_LOCAL_PROJECTS));
+			result.Ignores.Add(new Config.Ignore(proj => !proj.IsLocal, location));
 		}
 	}
 }

@@ -305,7 +305,7 @@ output projects: c:\b.out");
 		[Test]
 		public void TestIgnoreAllNonLocalProjects()
 		{
-			var config = Parse(@"ignore all non-local projects");
+			var config = Parse("ignore all references not in includes");
 
 			Assert.AreEqual(1, config.Ignores.Count);
 			var ignore = config.Ignores[0];
