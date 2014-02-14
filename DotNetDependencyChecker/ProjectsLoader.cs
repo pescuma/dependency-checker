@@ -53,6 +53,9 @@ namespace org.pescuma.dotnetdependencychecker
 
 			CreateDLLReferences();
 
+			projs.Sort(Project.NaturalOrdering);
+			dependencies.Sort(Dependency.NaturalOrdering);
+
 			var graph = new DependencyGraph();
 			projs.ForEach(p => graph.AddVertex(p));
 			dependencies.ForEach(d => graph.AddEdge(d));

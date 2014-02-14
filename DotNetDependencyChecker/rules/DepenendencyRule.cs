@@ -4,30 +4,22 @@ using org.pescuma.dotnetdependencychecker.config;
 
 namespace org.pescuma.dotnetdependencychecker.rules
 {
-	public class DepenendencyRule : Rule
+	public class DepenendencyRule : BaseRule
 	{
 		// HACK [pescuma] Fields are public for tests
-		public readonly Severity Severity;
 		public readonly Func<Project, bool> Source;
 		public readonly Func<Project, bool> Target;
 		public readonly bool Allow;
-		public readonly ConfigLocation Location;
 
 		public DepenendencyRule(Severity severity, Func<Project, bool> source, Func<Project, bool> target, bool allow, ConfigLocation location)
+			: base(severity, location)
 		{
-			Severity = severity;
 			Source = source;
 			Target = target;
 			Allow = allow;
-			Location = location;
 		}
 
-		public List<RuleMatch> Process(DependencyGraph graph)
-		{
-			return null;
-		}
-
-		public RuleMatch Process(Dependency dep)
+		public override RuleMatch Process(DependencyGraph graph, Dependency dep)
 		{
 			if (!Source(dep.Source) || !Target(dep.Target))
 				return null;

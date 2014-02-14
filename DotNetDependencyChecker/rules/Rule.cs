@@ -6,7 +6,9 @@ namespace org.pescuma.dotnetdependencychecker.rules
 	{
 		List<RuleMatch> Process(DependencyGraph graph);
 
+		List<RuleMatch> Process(DependencyGraph graph, Project proj);
+
 		/// <returns>null if didn't match</returns>
-		RuleMatch Process(Dependency dep);
+		RuleMatch Process(DependencyGraph graph, Dependency dep);
 	}
 }

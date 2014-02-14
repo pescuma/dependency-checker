@@ -6,19 +6,14 @@ using QuickGraph.Algorithms;
 
 namespace org.pescuma.dotnetdependencychecker.rules
 {
-	public class NoCircularDepenendenciesRule : Rule
+	public class NoCircularDepenendenciesRule : BaseRule
 	{
-		// HACK [pescuma] Fields are public for tests
-		public readonly Severity Severity;
-		public readonly ConfigLocation Location;
-
 		public NoCircularDepenendenciesRule(Severity severity, ConfigLocation location)
+			: base(severity, location)
 		{
-			Severity = severity;
-			Location = location;
 		}
 
-		public List<RuleMatch> Process(DependencyGraph graph)
+		public override List<RuleMatch> Process(DependencyGraph graph)
 		{
 			var result = new List<RuleMatch>();
 
@@ -48,11 +43,6 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			}
 
 			return result;
-		}
-
-		public RuleMatch Process(Dependency dep)
-		{
-			return null;
 		}
 	}
 }

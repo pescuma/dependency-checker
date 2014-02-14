@@ -149,17 +149,30 @@ namespace org.pescuma.dotnetdependencychecker.config
 			result.Output.Dependencies.Add(Path.GetFullPath(line));
 		}
 
-		private static void ParseRule(Config result, string line, ConfigLocation location)
+		private static readonly Dictionary<string, Severity> SEVERITIES = new Dictionary<string, Severity>
 		{
-			var severities = new Dictionary<string, Severity>
+			{ "info", Severity.Info },
+			{ "warning", Severity.Warn },
+			{ "error", Severity.Error },
+		};
+
+		private static readonly Dictionary<string, Func<Severity, ConfigLocation, Rule>> CUSTOM_RULES =
+			new Dictionary<string, Func<Severity, ConfigLocation, Rule>>
 			{
-				{ "info", Severity.Info },
-				{ "warning", Severity.Warn },
-				{ "error", Severity.Error },
+				{ "don't allow circular dependencies", (s, l) => new NoCircularDepenendenciesRule(s, l) },
+				{ "no two projects with same name", (s, l) => new UniqueProjectRule(p => true, p => p.Name, "name", s, l) },
+				{ "no two projects with same guid", (s, l) => new UniqueProjectRule(p => p.Guid != null, p => p.Guid.ToString(), "GUID", s, l) },
+				{
+					"no two projects with same name and guid",
+					(s, l) => new UniqueProjectRule(p => p.Guid != null, p => p.Name + "\n" + p.Guid, "name and GUID", s, l)
+				},
+				{ "avoid same dependency twice", (s, l) => new UniqueDependenciesRule(s, l) },
 			};
 
+		private static void ParseRule(Config result, string line, ConfigLocation location)
+		{
 			var severity = Severity.Error;
-			foreach (var s in severities)
+			foreach (var s in SEVERITIES)
 			{
 				var suffix = "[" + s.Key + "]";
 				if (line.EndsWith(suffix, StringComparison.CurrentCultureIgnoreCase))
@@ -171,9 +184,10 @@ namespace org.pescuma.dotnetdependencychecker.config
 				}
 			}
 
-			if (line == "don't allow circular dependencies")
+			Func<Severity, ConfigLocation, Rule> factory;
+			if (CUSTOM_RULES.TryGetValue(line.ToLower(), out factory))
 			{
-				result.Rules.Add(new NoCircularDepenendenciesRule(severity, location));
+				result.Rules.Add(factory(severity, location));
 				return;
 			}
 

@@ -17,6 +17,19 @@ namespace org.pescuma.dotnetdependencychecker.rules
 					result.AddRange(matches);
 			}
 
+			var projs = graph.Vertices.ToList();
+			projs.Sort(Project.NaturalOrdering);
+
+			foreach (var proj in projs)
+			{
+				foreach (var rule in config.Rules)
+				{
+					var matches = rule.Process(graph, proj);
+					if (matches != null)
+						result.AddRange(matches);
+				}
+			}
+
 			var deps = graph.Edges.ToList();
 			deps.Sort(Dependency.NaturalOrdering);
 
@@ -24,7 +37,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			{
 				foreach (var rule in config.Rules)
 				{
-					var match = rule.Process(dep);
+					var match = rule.Process(graph, dep);
 					if (match != null)
 					{
 						result.Add(match);
