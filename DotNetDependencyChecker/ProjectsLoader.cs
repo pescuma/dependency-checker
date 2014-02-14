@@ -210,7 +210,8 @@ namespace org.pescuma.dotnetdependencychecker
 					// Dummy reference for logs in case of errors
 					var dep = new Dependency(proj, null, Dependency.Types.ProjectReference, new Location(csproj.Filename, reference.LineNumber));
 
-					var referenceProjs = FindProjects(proj, dep, p => p.AssemblyName == name, "with assembly name " + name);
+					var referenceProjs = FindProjects(proj, dep, p => name.Equals(p.AssemblyName, StringComparison.CurrentCultureIgnoreCase),
+						"with assembly name " + name);
 
 					if (referenceProjs == null)
 					{
