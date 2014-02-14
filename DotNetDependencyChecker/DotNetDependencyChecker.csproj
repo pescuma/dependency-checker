@@ -78,6 +78,7 @@
     <Compile Include="rules\RuleMatch.cs" />
     <Compile Include="rules\RulesMatcher.cs" />
     <Compile Include="rules\Severity.cs" />
+    <Compile Include="utils\PathUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

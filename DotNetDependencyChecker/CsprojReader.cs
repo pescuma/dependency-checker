@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Linq;
+using org.pescuma.dotnetdependencychecker.utils;
 
 namespace org.pescuma.dotnetdependencychecker
 {
@@ -121,18 +122,15 @@ namespace org.pescuma.dotnetdependencychecker
 			{
 				get
 				{
-					var result = Node(node, "HintPath");
-					if (result == null)
+					var hintPath = Node(node, "HintPath");
+					if (hintPath == null)
 						return null;
 
-					var path = result.Value;
-					if (string.IsNullOrWhiteSpace(path))
+					var result = hintPath.Value;
+					if (string.IsNullOrWhiteSpace(result))
 						return null;
 
-					if (!Path.IsPathRooted(path))
-						path = Path.Combine(reader.folder, path);
-
-					return Path.GetFullPath(path);
+					return PathUtils.ToAbsolute(reader.folder, result);
 				}
 			}
 		}
@@ -179,10 +177,7 @@ namespace org.pescuma.dotnetdependencychecker
 					if (string.IsNullOrWhiteSpace(result))
 						return null;
 
-					if (!Path.IsPathRooted(result))
-						result = Path.Combine(reader.folder, result);
-
-					return Path.GetFullPath(result);
+					return PathUtils.ToAbsolute(reader.folder, result);
 				}
 			}
 		}

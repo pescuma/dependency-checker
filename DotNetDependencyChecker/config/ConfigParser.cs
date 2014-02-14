@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using org.pescuma.dotnetdependencychecker.rules;
+using org.pescuma.dotnetdependencychecker.utils;
 
 namespace org.pescuma.dotnetdependencychecker.config
 {
@@ -13,6 +14,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 		private const string DEPENDS = "->";
 		private const string NOT_DEPENDS = "-X->";
 
+		private string basePath = "";
 		private Config config;
 
 		public Config Parse(string filename)
@@ -24,11 +26,12 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 			var lines = File.ReadAllLines(filename);
 
-			return ParseLines(lines);
+			return ParseLines(filename, lines);
 		}
 
-		public Config ParseLines(string[] lines)
+		public Config ParseLines(string filename, string[] lines)
 		{
+			basePath = Path.GetDirectoryName(filename);
 			config = new Config();
 
 			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
@@ -120,7 +123,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		private Func<Project, bool> ParsePath(string line)
 		{
-			var path = Path.GetFullPath(line);
+			var path = PathUtils.ToAbsolute(basePath, line);
 
 			return proj => proj.Paths.Any(pp => PathMatches(pp, path));
 		}

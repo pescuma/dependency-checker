@@ -9,7 +9,7 @@ namespace org.pescuma.dotnetdependencychecker
 	{
 		private Config Parse(string configFileContents)
 		{
-			return new ConfigParser().ParseLines(configFileContents.Split('\n'));
+			return new ConfigParser().ParseLines(@"c:\config.txt", configFileContents.Split('\n'));
 		}
 
 		private Project ProjWithName(string name)
