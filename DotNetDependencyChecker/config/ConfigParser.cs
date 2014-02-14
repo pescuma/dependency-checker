@@ -13,7 +13,9 @@ namespace org.pescuma.dotnetdependencychecker.config
 		private const string DEPENDS = "->";
 		private const string NOT_DEPENDS = "-X->";
 
-		public static Config Parse(string filename)
+		private Config config;
+
+		public Config Parse(string filename)
 		{
 			filename = Path.GetFullPath(filename);
 
@@ -25,20 +27,20 @@ namespace org.pescuma.dotnetdependencychecker.config
 			return ParseLines(lines);
 		}
 
-		public static Config ParseLines(string[] lines)
+		public Config ParseLines(string[] lines)
 		{
-			var result = new Config();
+			config = new Config();
 
 			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
-				{ "input:", (line, location) => ParseInput(result, line) },
-				{ "group:", (line, location) => ParseGroup(result, line, location) },
-				{ "output projects:", (line, location) => ParseOutputProjects(result, line) },
-				{ "output groups:", (line, location) => ParseOutputGroups(result, line) },
-				{ "output dependencies:", (line, location) => ParseOutputDependencies(result, line) },
-				{ "rule:", (line, location) => ParseRule(result, line, location) },
-				{ "ignore:", (line, location) => ParseIgnore(result, line, location) },
-				{ "ignore all references not in includes", (line, location) => ParseIgnoreAllNonLocalProjects(result, line, location) },
+				{ "input:", ParseInput },
+				{ "group:", ParseGroup },
+				{ "output projects:", ParseOutputProjects },
+				{ "output groups:", ParseOutputGroups },
+				{ "output dependencies:", ParseOutputDependencies },
+				{ "rule:", ParseRule },
+				{ "ignore:", ParseIgnore },
+				{ "ignore all references not in includes", ParseIgnoreAllNonLocalProjects },
 			};
 
 			foreach (var item in lines.Indexed())
@@ -58,10 +60,10 @@ namespace org.pescuma.dotnetdependencychecker.config
 				ParseLine(lineTypes, line, location);
 			}
 
-			return result;
+			return config;
 		}
 
-		private static void ParseLine(Dictionary<string, Action<string, ConfigLocation>> types, string line, ConfigLocation location)
+		private void ParseLine(Dictionary<string, Action<string, ConfigLocation>> types, string line, ConfigLocation location)
 		{
 			var type = types.FirstOrDefault(t => t.Key == "" || line.StartsWith(t.Key));
 			if (type.Value == null)
@@ -71,12 +73,12 @@ namespace org.pescuma.dotnetdependencychecker.config
 				.Trim(), location);
 		}
 
-		private static void ParseInput(Config result, string line)
+		private void ParseInput(string line, ConfigLocation configLocation)
 		{
-			result.Inputs.Add(line);
+			config.Inputs.Add(line);
 		}
 
-		private static void ParseGroup(Config result, string line, ConfigLocation location)
+		private void ParseGroup(string line, ConfigLocation location)
 		{
 			var pos = line.IndexOf(DEPENDS, StringComparison.Ordinal);
 			if (pos < 0)
@@ -90,10 +92,10 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 			var matcher = ParseMatcher(matchLine, location);
 
-			result.Groups.Add(new Config.Group(name, matcher, line));
+			config.Groups.Add(new Config.Group(name, matcher, line));
 		}
 
-		private static Func<Project, bool> ParseMatcher(string matchLine, ConfigLocation location)
+		private Func<Project, bool> ParseMatcher(string matchLine, ConfigLocation location)
 		{
 			Func<Project, bool> result = null;
 
@@ -109,14 +111,14 @@ namespace org.pescuma.dotnetdependencychecker.config
 			return result;
 		}
 
-		private static Func<Project, bool> ParseRE(string line)
+		private Func<Project, bool> ParseRE(string line)
 		{
 			var re = new Regex("^" + line + "$", RegexOptions.IgnoreCase);
 
 			return proj => re.IsMatch(proj.Name);
 		}
 
-		private static Func<Project, bool> ParsePath(string line)
+		private Func<Project, bool> ParsePath(string line)
 		{
 			var path = Path.GetFullPath(line);
 
@@ -129,24 +131,24 @@ namespace org.pescuma.dotnetdependencychecker.config
 			       || fullPath.StartsWith(beginPath + "\\", StringComparison.CurrentCultureIgnoreCase);
 		}
 
-		private static Func<Project, bool> ParseSimpleMatch(string line)
+		private Func<Project, bool> ParseSimpleMatch(string line)
 		{
 			return proj => line.Equals(proj.Name, StringComparison.CurrentCultureIgnoreCase);
 		}
 
-		private static void ParseOutputProjects(Config result, string line)
+		private void ParseOutputProjects(string line, ConfigLocation configLocation)
 		{
-			result.Output.Projects.Add(Path.GetFullPath(line));
+			config.Output.Projects.Add(Path.GetFullPath(line));
 		}
 
-		private static void ParseOutputGroups(Config result, string line)
+		private void ParseOutputGroups(string line, ConfigLocation configLocation)
 		{
-			result.Output.Groups.Add(Path.GetFullPath(line));
+			config.Output.Groups.Add(Path.GetFullPath(line));
 		}
 
-		private static void ParseOutputDependencies(Config result, string line)
+		private void ParseOutputDependencies(string line, ConfigLocation configLocation)
 		{
-			result.Output.Dependencies.Add(Path.GetFullPath(line));
+			config.Output.Dependencies.Add(Path.GetFullPath(line));
 		}
 
 		private static readonly Dictionary<string, Severity> SEVERITIES = new Dictionary<string, Severity>
@@ -169,7 +171,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 				{ "avoid same dependency twice", (s, l) => new UniqueDependenciesRule(s, l) },
 			};
 
-		private static void ParseRule(Config result, string line, ConfigLocation location)
+		private void ParseRule(string line, ConfigLocation location)
 		{
 			var severity = Severity.Error;
 			foreach (var s in SEVERITIES)
@@ -187,20 +189,20 @@ namespace org.pescuma.dotnetdependencychecker.config
 			Func<Severity, ConfigLocation, Rule> factory;
 			if (CUSTOM_RULES.TryGetValue(line.ToLower(), out factory))
 			{
-				result.Rules.Add(factory(severity, location));
+				config.Rules.Add(factory(severity, location));
 				return;
 			}
 
-			if (ParseRule(result, line, location, NOT_DEPENDS, severity))
+			if (ParseRule(line, location, NOT_DEPENDS, severity))
 				return;
 
-			if (ParseRule(result, line, location, DEPENDS, severity))
+			if (ParseRule(line, location, DEPENDS, severity))
 				return;
 
 			throw new ConfigParserException(location, "Invalid rule");
 		}
 
-		private static bool ParseRule(Config result, string line, ConfigLocation location, string separator, Severity severity)
+		private bool ParseRule(string line, ConfigLocation location, string separator, Severity severity)
 		{
 			var pos = line.IndexOf(separator, StringComparison.Ordinal);
 			if (pos < 0)
@@ -211,23 +213,25 @@ namespace org.pescuma.dotnetdependencychecker.config
 			var right = ParseMatcher(line.Substring(pos + separator.Length)
 				.Trim(), location);
 
-			result.Rules.Add(new DepenendencyRule(severity, left, right, separator == DEPENDS, location));
+			config.Rules.Add(new DepenendencyRule(severity, left, right, separator == DEPENDS, location));
+
 			return true;
 		}
 
-		private static void ParseIgnore(Config result, string line, ConfigLocation location)
+		private void ParseIgnore(string line, ConfigLocation location)
 		{
 			var matcher = ParseMatcher(line, location);
 
-			result.Ignores.Add(new Config.Ignore(matcher, location));
+			config.Ignores.Add(new Config.Ignore(matcher, location));
 		}
 
-		private static void ParseIgnoreAllNonLocalProjects(Config result, string line, ConfigLocation location)
+		private void ParseIgnoreAllNonLocalProjects(string line, ConfigLocation location)
 		{
 			if (line != "")
 				throw new ConfigParserException(location, "The line has more text than it should");
 
-			result.Ignores.Add(new Config.Ignore(proj => !proj.IsLocal, location));
+			config.Ignores.Add(new Config.Ignore(
+				proj => proj.CsprojPath == null || !config.Inputs.Any(input => PathMatches(proj.CsprojPath, input)), location));
 		}
 	}
 }

@@ -9,27 +9,17 @@ namespace org.pescuma.dotnetdependencychecker
 	{
 		private Config Parse(string configFileContents)
 		{
-			return ConfigParser.ParseLines(configFileContents.Split('\n'));
+			return new ConfigParser().ParseLines(configFileContents.Split('\n'));
 		}
 
 		private Project ProjWithName(string name)
 		{
-			return new Project(name, null, null, null, true);
+			return new Project(name, null, null, null);
 		}
 
 		private Project ProjWithPath(string path)
 		{
-			return new Project(null, null, null, path, true);
-		}
-
-		private Project LocalProj()
-		{
-			return new Project(null, null, null, null, true);
-		}
-
-		private Project NonLocalProj()
-		{
-			return new Project(null, null, null, null, false);
+			return new Project(null, null, null, path);
 		}
 
 		[Test]
@@ -305,12 +295,25 @@ output projects: c:\b.out");
 		[Test]
 		public void TestIgnoreAllNonLocalProjects()
 		{
-			var config = Parse("ignore all references not in includes");
+			var config = Parse("input: c:\\a\n" + //
+			                   "ignore all references not in includes");
 
 			Assert.AreEqual(1, config.Ignores.Count);
 			var ignore = config.Ignores[0];
-			Assert.AreEqual(false, ignore.Matches(LocalProj()));
-			Assert.AreEqual(true, ignore.Matches(NonLocalProj()));
+			Assert.AreEqual(false, ignore.Matches(ProjWithPath(@"c:\a\p.csproj")));
+			Assert.AreEqual(true, ignore.Matches(ProjWithPath(@"c:\b\p.csproj")));
+		}
+
+		[Test]
+		public void TestIgnoreAllNonLocalProjectsCaseInsensitive()
+		{
+			var config = Parse("input: C:\\A\n" + //
+			                   "ignore all references not in includes");
+
+			Assert.AreEqual(1, config.Ignores.Count);
+			var ignore = config.Ignores[0];
+			Assert.AreEqual(false, ignore.Matches(ProjWithPath(@"c:\a\p.csproj")));
+			Assert.AreEqual(true, ignore.Matches(ProjWithPath(@"c:\b\p.csproj")));
 		}
 
 		[Test]

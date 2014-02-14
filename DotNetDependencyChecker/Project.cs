@@ -13,21 +13,17 @@ namespace org.pescuma.dotnetdependencychecker
 		public readonly string AssemblyName;
 		public readonly Guid? Guid;
 		public readonly string CsprojPath;
-		public readonly bool IsLocal;
 		public readonly HashSet<string> Paths = new HashSet<string>();
 
-		public Project(string name, string assemblyName, Guid? guid, string csprojPath, bool isLocal, params string[] paths)
+		public Project(string name, string assemblyName, Guid? guid, string csprojPath)
 		{
 			Name = name;
 			AssemblyName = assemblyName;
 			Guid = guid;
 			CsprojPath = csprojPath;
-			IsLocal = isLocal;
 
 			if (csprojPath != null)
 				Paths.Add(csprojPath);
-
-			paths.ForEach(p => Paths.Add(p));
 		}
 
 		protected bool Equals(Project other)
@@ -61,8 +57,27 @@ namespace org.pescuma.dotnetdependencychecker
 
 		public override string ToString()
 		{
-			return string.Format("{0}[{1},{2}, csproj: {3}, {4}, Paths: {5}]", Name, AssemblyName, Guid, CsprojPath, IsLocal ? "Local" : "Not local",
-				Paths);
+			var result = new StringBuilder();
+
+			result.Append(Name)
+				.Append("[");
+
+			if (AssemblyName != null)
+				result.Append(AssemblyName)
+					.Append(", ");
+
+			if (Guid != null)
+				result.Append(Guid)
+					.Append(", ");
+
+			if (CsprojPath != null)
+				result.Append(CsprojPath)
+					.Append(", ");
+
+			result.Append("Paths: ")
+				.Append(string.Join(", ", Paths));
+
+			return result.ToString();
 		}
 
 		// Helpers for messages

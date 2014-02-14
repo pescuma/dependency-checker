@@ -38,7 +38,7 @@ namespace org.pescuma.dotnetdependencychecker
 			processing = csprojFiles.Select(csprojFile =>
 			{
 				var csproj = new CsprojReader(csprojFile);
-				var project = new Project(csproj.Name, csproj.AssemblyName, csproj.ProjectGuid, csproj.Filename, true);
+				var project = new Project(csproj.Name, csproj.AssemblyName, csproj.ProjectGuid, csproj.Filename);
 				var ignored = config.Ignores.Any(i => i.Matches(project));
 
 				return new ProcessingProject(csproj, project, ignored);
@@ -149,7 +149,7 @@ namespace org.pescuma.dotnetdependencychecker
 			try
 			{
 				var reader = new CsprojReader(filename);
-				return new Project(reader.Name, reader.AssemblyName, reader.ProjectGuid, filename, false);
+				return new Project(reader.Name, reader.AssemblyName, reader.ProjectGuid, filename);
 			}
 			catch (IOException)
 			{
@@ -180,7 +180,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 		private Project CreateFakeProject(Project proj, Dependency dep, CsprojReader.ProjectReference reference)
 		{
-			var result = new Project(reference.Name, reference.Name, reference.ProjectGuid, reference.Include, false);
+			var result = new Project(reference.Name, reference.Name, reference.ProjectGuid, reference.Include);
 
 			if (ignore(result))
 				return null;
@@ -215,7 +215,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 					if (referenceProjs == null)
 					{
-						var refProj = new Project(name, name, null, null, false);
+						var refProj = new Project(name, name, null, null);
 						if (ignore(refProj))
 							continue;
 

@@ -22,7 +22,7 @@ namespace org.pescuma.dotnetdependencychecker
 			{
 				var warnings = new List<RuleMatch>();
 
-				var config = ConfigParser.Parse(args[0]);
+				var config = new ConfigParser().Parse(args[0]);
 
 				var graph = new ProjectsLoader(config, warnings).LoadGraph();
 
