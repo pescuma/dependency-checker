@@ -60,7 +60,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 		public override string ToString()
 		{
-			return string.Format("{0}[{1},{2}, csproj: {3}, {4}, Paths: {5}", Name, AssemblyName, Guid, CsprojPath, IsLocal ? "Local" : "Not local",
+			return string.Format("{0}[{1},{2}, csproj: {3}, {4}, Paths: {5}]", Name, AssemblyName, Guid, CsprojPath, IsLocal ? "Local" : "Not local",
 				Paths);
 		}
 	}

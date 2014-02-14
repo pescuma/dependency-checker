@@ -5,6 +5,11 @@ namespace org.pescuma.dotnetdependencychecker
 {
 	public static class LinqHelper
 	{
+		public static List<T> AsList<T>(this T el)
+		{
+			return new List<T> { el };
+		}
+
 		public static void ForEach<T>(this IEnumerable<T> list, Action<T> cb)
 		{
 			foreach (var i in list)

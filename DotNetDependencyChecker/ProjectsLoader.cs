@@ -13,7 +13,7 @@ namespace org.pescuma.dotnetdependencychecker
 		private readonly Config config;
 		private readonly List<RuleMatch> warnings;
 		private Func<Project, bool> ignore;
-		private HashSet<Project> projs;
+		private List<Project> projs;
 		private List<Dependency> dependencies;
 		private List<ProcessingProject> processing;
 
@@ -25,7 +25,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 		public DependencyGraph LoadGraph()
 		{
-			projs = new HashSet<Project>();
+			projs = new List<Project>();
 			dependencies = new List<Dependency>();
 			ignore = p => config.Ignores.Any(i => i.Matches(p));
 
@@ -47,9 +47,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 			Console.WriteLine("Creating dependency graph...");
 
-			processing.Where(i => !i.Ignored)
-				.Select(i => i.Project)
-				.ForEach(p => projs.Add(p));
+			CreateInitialProjects();
 
 			CreateProjectReferences();
 
@@ -61,18 +59,57 @@ namespace org.pescuma.dotnetdependencychecker
 			return graph;
 		}
 
-		private class ProcessingProject
+		private void CreateInitialProjects()
 		{
-			public readonly CsprojReader Csproj;
-			public readonly Project Project;
-			public readonly bool Ignored;
+			processing.Where(i => !i.Ignored)
+				.Select(i => i.Project)
+				.ForEach(AddProject);
+		}
 
-			public ProcessingProject(CsprojReader csproj, Project project, bool ignored)
+		private void AddProject(Project newProj)
+		{
+			var sameProjs = projs.Where(p => p.Equals(newProj))
+				.ToList();
+
+			if (sameProjs.Any())
 			{
-				Csproj = csproj;
-				Project = project;
-				Ignored = ignored;
+				sameProjs.Add(newProj);
+
+				var msg = new StringBuilder();
+				msg.Append("There are ")
+					.Append(sameProjs.Count)
+					.Append(" projects that have the same:");
+				sameProjs.ForEach(p => msg.Append("\n  - ")
+					.Append(ToGui(p)));
+
+				throw new ConfigException(msg.ToString());
 			}
+
+			projs.Add(newProj);
+		}
+
+		private string ToGui(Project proj)
+		{
+			var msg = new StringBuilder();
+
+			if (proj.CsprojPath != null)
+			{
+				msg.Append(proj.CsprojPath);
+			}
+			else
+			{
+				msg.Append(proj.Name);
+
+				if (proj.AssemblyName != proj.Name)
+					msg.Append(", Assembly name: ")
+						.Append(proj.AssemblyName);
+
+				if (proj.Guid != null)
+					msg.Append(", GUID: ")
+						.Append(proj.Guid);
+			}
+
+			return msg.ToString();
 		}
 
 		private void CreateProjectReferences()
@@ -89,17 +126,16 @@ namespace org.pescuma.dotnetdependencychecker
 					// Dummy reference for logs in case of errors
 					var dep = new Dependency(proj, null, Dependency.Types.ProjectReference, new Location(csproj.Filename, reference.LineNumber));
 
-					var referenceProj = FindOrCreateProject(proj, dep, //
-						p => p.Name == reference.Name && p.Guid == reference.ProjectGuid,
-						string.Format("named {0} with GUI {1}", reference.Name, reference.ProjectGuid), //
+					var referenceProjs = FindOrCreateProjects(proj, dep, //
+						p => p.CsprojPath == reference.Include, reference.Include, //
 						() => TryReadExternalProject(reference, dep));
 
-					if (referenceProj == null)
+					if (referenceProjs == null)
 						continue;
 
-					proj.Paths.Add(reference.Include);
+					referenceProjs.ForEach(rf => rf.Paths.Add(reference.Include));
 
-					dependencies.Add(dep.WithTarget(referenceProj));
+					referenceProjs.ForEach(rf => dependencies.Add(dep.WithTarget(rf)));
 				}
 			}
 		}
@@ -118,35 +154,40 @@ namespace org.pescuma.dotnetdependencychecker
 					// Dummy reference for logs in case of errors
 					var dep = new Dependency(proj, null, Dependency.Types.ProjectReference, new Location(csproj.Filename, reference.LineNumber));
 
-					var referenceProj = FindOrCreateProject(proj, dep, //
+					var referenceProjs = FindOrCreateProjects(proj, dep, //
 						p => p.AssemblyName == name, "with assembly name " + name, //
 						() => new Project(name, name, null, null, false));
 
-					if (referenceProj == null)
+					if (referenceProjs == null)
 						continue;
 
 					if (reference.HintPath != null)
-						referenceProj.Paths.Add(reference.HintPath);
+						referenceProjs.ForEach(rf => rf.Paths.Add(reference.HintPath));
 
-					dependencies.Add(dep.WithTarget(referenceProj));
+					referenceProjs.ForEach(rf => dependencies.Add(dep.WithTarget(rf)));
 				}
 			}
 		}
 
-		private Project FindOrCreateProject(Project proj, Dependency dep, Func<Project, bool> matches, string refName,
+		private List<Project> FindOrCreateProjects(Project proj, Dependency dep, Func<Project, bool> matches, string refName,
 			Func<Project> createNewProject)
 		{
 			var candidates = processing.Where(p => !p.Ignored && matches(p.Project))
 				.Select(i => i.Project)
 				.ToList();
 
+			if (!candidates.Any())
+				// Search new projects too
+				candidates = projs.Where(matches)
+					.ToList();
+
 			if (candidates.Count == 1)
-				return candidates.First();
+				return candidates;
 
 			if (candidates.Count > 1)
 			{
 				warnings.Add(CreateMultipleReferencesWarning(proj, dep, refName, candidates));
-				return null;
+				return candidates;
 			}
 
 			// candidates.Count < 1
@@ -159,9 +200,9 @@ namespace org.pescuma.dotnetdependencychecker
 			if (ignore(result))
 				return null;
 
-			projs.Add(result);
+			AddProject(result);
 
-			return result;
+			return result.AsList();
 		}
 
 		private RuleMatch CreateMultipleReferencesWarning(Project proj, Dependency dep, string refName, List<Project> candidates)
@@ -170,32 +211,12 @@ namespace org.pescuma.dotnetdependencychecker
 
 			msg.Append(string.Format("The project {0} references the project {1}, but there are {2} projects that match:", proj.Name, refName,
 				candidates.Count));
+			candidates.ForEach(c => msg.Append("\n  - ")
+				.Append(ToGui(c)));
+			msg.Append("\nMultiple dependencies will be created.");
 
-			candidates.ForEach(c =>
-			{
-				msg.Append("\n  - ");
-				if (c.CsprojPath != null)
-				{
-					msg.Append(c.CsprojPath);
-				}
-				else
-				{
-					msg.Append(c.Name);
-
-					if (c.AssemblyName != c.Name)
-						msg.Append(", Assembly name: ")
-							.Append(c.AssemblyName);
-
-					if (c.Guid != null)
-						msg.Append(", GUID: ")
-							.Append(c.Guid);
-				}
-			});
-
-			msg.Append("\nThis dependecy will be ignored.");
-
-			return new RuleMatch(false, Severity.Error, msg.ToString(), null, new List<Project> { proj }.Concat(candidates),
-				new List<Dependency> { dep });
+			return new RuleMatch(false, Severity.Warn, msg.ToString(), null, proj.AsList()
+				.Concat(candidates), dep.AsList());
 		}
 
 		private Project TryReadExternalProject(CsprojReader.ProjectReference reference, Dependency dep)
@@ -208,12 +229,31 @@ namespace org.pescuma.dotnetdependencychecker
 			}
 			catch (IOException)
 			{
-				var result = new Project(reference.Name, reference.Name, reference.ProjectGuid, null, false, filename);
+				var result = new Project(reference.Name, reference.Name, reference.ProjectGuid, filename, false);
 
 				var msg = string.Format("Could not load project {0}: guessing assembly name to be the same as project name", filename);
 				warnings.Add(new RuleMatch(false, Severity.Warn, msg, null, dep.WithTarget(result)));
 
 				return result;
+			}
+		}
+
+		private class ProcessingProject
+		{
+			public readonly CsprojReader Csproj;
+			public readonly Project Project;
+			public readonly bool Ignored;
+
+			public ProcessingProject(CsprojReader csproj, Project project, bool ignored)
+			{
+				Csproj = csproj;
+				Project = project;
+				Ignored = ignored;
+			}
+
+			public override string ToString()
+			{
+				return Csproj.Filename + (Ignored ? " [ignored]" : "");
 			}
 		}
 	}
