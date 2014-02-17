@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using org.pescuma.dotnetdependencychecker.config;
 using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.rules;
@@ -15,12 +16,12 @@ namespace org.pescuma.dotnetdependencychecker
 
 		private Project ProjWithName(string name)
 		{
-			return new Project(name, null, null, null);
+			return new Project(name, "NO ASSEMBLY NAME", new Guid(), "CSPROJ");
 		}
 
 		private Project ProjWithPath(string path)
 		{
-			return new Project(null, null, null, path);
+			return new Project("NO NAME", "NO ASSEMBLY NAME", new Guid(), path);
 		}
 
 		[Test]

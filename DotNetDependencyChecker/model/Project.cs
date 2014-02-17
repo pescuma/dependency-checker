@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using org.pescuma.dotnetdependencychecker.utils;
 
 namespace org.pescuma.dotnetdependencychecker.model
 {
-	public class Project : Dependable
+	public class Project : Assembly, Dependable
 	{
-		public static Comparison<Project> NaturalOrdering =
-			(p1, p2) => string.Compare(p1.Name, p2.Name, StringComparison.CurrentCultureIgnoreCase);
-
 		public readonly string Name;
-		public readonly string AssemblyName;
-		public readonly Guid? Guid;
+		public readonly Guid Guid;
 		public readonly string CsprojPath;
-		public readonly HashSet<string> Paths = new HashSet<string>();
 
 		IEnumerable<string> Dependable.Names
 		{
@@ -27,26 +23,22 @@ namespace org.pescuma.dotnetdependencychecker.model
 			}
 		}
 
-		IEnumerable<string> Dependable.Paths
+		public Project(string name, string assemblyName, Guid guid, string csprojPath)
+			: base(assemblyName)
 		{
-			get { return Paths; }
-		}
+			Argument.ThrowIfNull(name);
+			Argument.ThrowIfNull(csprojPath);
 
-		public Project(string name, string assemblyName, Guid? guid, string csprojPath)
-		{
 			Name = name;
-			AssemblyName = assemblyName;
 			Guid = guid;
 			CsprojPath = csprojPath;
 
-			if (csprojPath != null)
-				Paths.Add(csprojPath);
+			Paths.Add(csprojPath);
 		}
 
 		protected bool Equals(Project other)
 		{
-			return string.Equals(Name, other.Name) && string.Equals(AssemblyName, other.AssemblyName) && Guid.Equals(other.Guid)
-			       && string.Equals(CsprojPath, other.CsprojPath);
+			return base.Equals(other) && string.Equals(Name, other.Name) && Guid.Equals(other.Guid) && string.Equals(CsprojPath, other.CsprojPath);
 		}
 
 		public override bool Equals(object obj)
@@ -64,8 +56,8 @@ namespace org.pescuma.dotnetdependencychecker.model
 		{
 			unchecked
 			{
-				var hashCode = (Name != null ? Name.GetHashCode() : 0);
-				hashCode = (hashCode * 397) ^ (AssemblyName != null ? AssemblyName.GetHashCode() : 0);
+				var hashCode = base.GetHashCode();
+				hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
 				hashCode = (hashCode * 397) ^ Guid.GetHashCode();
 				hashCode = (hashCode * 397) ^ (CsprojPath != null ? CsprojPath.GetHashCode() : 0);
 				return hashCode;
@@ -83,9 +75,8 @@ namespace org.pescuma.dotnetdependencychecker.model
 				result.Append(AssemblyName)
 					.Append(", ");
 
-			if (Guid != null)
-				result.Append(Guid)
-					.Append(", ");
+			result.Append(Guid)
+				.Append(", ");
 
 			if (CsprojPath != null)
 				result.Append(CsprojPath)
@@ -93,6 +84,8 @@ namespace org.pescuma.dotnetdependencychecker.model
 
 			result.Append("Paths: ")
 				.Append(string.Join(", ", Paths));
+
+			result.Append("]");
 
 			return result.ToString();
 		}
@@ -123,9 +116,8 @@ namespace org.pescuma.dotnetdependencychecker.model
 					msg.Append(", Assembly name: ")
 						.Append(AssemblyName);
 
-				if (Guid != null)
-					msg.Append(", GUID: ")
-						.Append(Guid);
+				msg.Append(", GUID: ")
+					.Append(Guid);
 			}
 
 			return msg.ToString();

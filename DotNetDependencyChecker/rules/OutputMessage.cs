@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using org.pescuma.dotnetdependencychecker.model;
 
 namespace org.pescuma.dotnetdependencychecker.rules
@@ -7,6 +6,11 @@ namespace org.pescuma.dotnetdependencychecker.rules
 	public class OutputMessage
 	{
 		private List<Element> elements = new List<Element>();
+
+		public IEnumerable<Element> Elements
+		{
+			get { return elements; }
+		}
 
 		public OutputMessage Append(string text)
 		{
@@ -26,38 +30,17 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			return this;
 		}
 
-		public string ToConsole()
-		{
-			return string.Join("", elements.Select(e =>
-			{
-				if (e.Text != null)
-				{
-					return e.Text;
-				}
-				else if (e.Project is Project)
-				{
-					var proj = ((Project) e.Project);
-					if (e.Info == Info.NameAndPath)
-						return proj.GetNameAndPath();
-					else
-						return proj.GetCsprojOrFullID();
-				}
-				else
-					return e.Project.Names.First();
-			}));
-		}
-
 		public enum Info
 		{
-			NameAndPath,
-			CsprojOrFullID
+			Name,
+			Csproj
 		}
 
-		private class Element
+		public class Element
 		{
-			internal readonly string Text;
-			internal readonly Dependable Project;
-			internal readonly Info Info;
+			public readonly string Text;
+			public readonly Dependable Project;
+			public readonly Info Info;
 
 			public Element(string text)
 			{

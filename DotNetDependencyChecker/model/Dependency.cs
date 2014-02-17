@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using org.pescuma.dotnetdependencychecker.utils;
 using QuickGraph;
 
 namespace org.pescuma.dotnetdependencychecker.model
@@ -27,8 +28,16 @@ namespace org.pescuma.dotnetdependencychecker.model
 		public Dependency(Dependable source, Dependable target, Types type, Location location)
 			: base(source, target)
 		{
+			Argument.ThrowIfNull(source);
+			Argument.ThrowIfNull(location);
+
 			Type = type;
 			Location = location;
+		}
+
+		public Dependency WithTarget(Dependable otherTarget)
+		{
+			return new Dependency(Source, otherTarget, Type, Location);
 		}
 
 		protected bool Equals(Dependency other)
@@ -61,11 +70,6 @@ namespace org.pescuma.dotnetdependencychecker.model
 		public override string ToString()
 		{
 			return string.Format("{0} -> {1} ({2})", Source.Names.First(), Target.Names.First(), Type);
-		}
-
-		public Dependency WithTarget(Project otherTarget)
-		{
-			return new Dependency(Source, otherTarget, Type, Location);
 		}
 	}
 }

@@ -14,7 +14,7 @@ namespace org.pescuma.dotnetdependencychecker
 		private readonly Config config;
 		private readonly List<RuleMatch> warnings;
 		private Func<Dependable, bool> ignore;
-		private List<Dependable> projs;
+		private List<Assembly> projs;
 		private List<Dependency> dependencies;
 		private List<ProcessingProject> processing;
 
@@ -26,7 +26,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 		public DependencyGraph LoadGraph()
 		{
-			projs = new List<Dependable>();
+			projs = new List<Assembly>();
 			dependencies = new List<Dependency>();
 			ignore = p => config.Ignores.Any(i => i.Matches(p));
 
@@ -67,12 +67,12 @@ namespace org.pescuma.dotnetdependencychecker
 		{
 			processing.Where(i => !i.Ignored)
 				.Select(i => i.Project)
-				.ForEach(AddProject);
+				.ForEach(AddAssembly);
 		}
 
-		private void AddProject(Project newProj)
+		private void AddAssembly(Assembly newProj)
 		{
-			var sameProjs = projs.Where(p => p.Equals(newProj))
+			var sameProjs = projs.Where(p => AreTheSame(p, newProj))
 				.ToList();
 
 			if (sameProjs.Any())
@@ -92,6 +92,18 @@ namespace org.pescuma.dotnetdependencychecker
 			projs.Add(newProj);
 		}
 
+		private bool AreTheSame(Assembly a1, Assembly a2)
+		{
+			if (a1.Equals(a2))
+				return true;
+
+			// Handle Proj vs Assembly
+			if (!(a1 is Project) || !(a2 is Project))
+				return a1.AssemblyName.Equals(a2.AssemblyName);
+
+			return false;
+		}
+
 		private void CreateProjectReferences()
 		{
 			foreach (var item in processing.Where(i => !i.Ignored))
@@ -106,19 +118,19 @@ namespace org.pescuma.dotnetdependencychecker
 					// Dummy reference for logs in case of errors
 					var dep = new Dependency(proj, null, Dependency.Types.ProjectReference, new Location(csproj.Filename, reference.LineNumber));
 
-					var refs = FindProjects(proj, dep, p => p.CsprojPath == reference.Include, reference.Include);
+					var refs = FindAssembly(proj, dep, p => ((Project) p).CsprojPath == reference.Include, reference.Include);
 
 					if (refs == null)
 					{
 						var rp = TryReadCsproj(reference.Include);
 
 						if (rp != null && ignore(rp))
-							refs = new List<Project>();
+							refs = new List<Assembly>();
 
 						else if (rp != null)
 						{
-							AddProject(rp);
-							refs = rp.AsList();
+							AddAssembly(rp);
+							refs = rp.AsList<Assembly>();
 						}
 					}
 
@@ -133,7 +145,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 					if (refs == null)
 						refs = CreateFakeProject(proj, dep, reference)
-							.AsList();
+							.AsList<Assembly>();
 
 					if (refs == null || !refs.Any())
 						continue;
@@ -158,16 +170,16 @@ namespace org.pescuma.dotnetdependencychecker
 			}
 		}
 
-		private List<Project> SecondaryFindProjects(Project proj, Dependency dep, string filename, Func<Project, bool> matches, string refName)
+		private List<Assembly> SecondaryFindProjects(Project proj, Dependency dep, string filename, Func<Project, bool> matches, string refName)
 		{
-			var result = FindProjects(proj, dep, matches, refName);
+			var result = FindAssembly(proj, dep, p => matches((Project) p), refName);
 
 			if (result != null && result.Any())
 			{
 				var message = new OutputMessage();
 
 				message.Append("The project ")
-					.Append(proj, OutputMessage.Info.NameAndPath)
+					.Append(proj, OutputMessage.Info.Name)
 					.Append(" references the project ")
 					.Append(filename)
 					.Append(" but it could not be loaded. Using project")
@@ -177,7 +189,7 @@ namespace org.pescuma.dotnetdependencychecker
 					.Append(" instead:");
 
 				result.ForEach(p => message.Append("\n  - ")
-					.Append(p, OutputMessage.Info.CsprojOrFullID));
+					.Append(p, OutputMessage.Info.Csproj));
 
 				var allProjs = result.Concat(proj.AsList())
 					.ToList();
@@ -195,14 +207,14 @@ namespace org.pescuma.dotnetdependencychecker
 				return null;
 
 			var msg = new OutputMessage().Append("The project ")
-				.Append(proj, OutputMessage.Info.NameAndPath)
+				.Append(proj, OutputMessage.Info.Name)
 				.Append(" references the project ")
 				.Append(reference.Include)
 				.Append(" but it could not be loaded. Guessing assembly name to be the same as project name.");
 
 			warnings.Add(new RuleMatch(false, Severity.Warn, msg, null, dep.WithTarget(result)));
 
-			AddProject(result);
+			AddAssembly(result);
 
 			return result;
 		}
@@ -221,16 +233,16 @@ namespace org.pescuma.dotnetdependencychecker
 					// Dummy reference for logs in case of errors
 					var dep = new Dependency(proj, null, Dependency.Types.ProjectReference, new Location(csproj.Filename, reference.LineNumber));
 
-					var referenceProjs = FindProjects(proj, dep, p => name.Equals(p.AssemblyName, StringComparison.CurrentCultureIgnoreCase),
+					var referenceProjs = FindAssembly(proj, dep, p => name.Equals(p.AssemblyName, StringComparison.CurrentCultureIgnoreCase),
 						"with assembly name " + name);
 
 					if (referenceProjs == null)
 					{
-						var refProj = new Project(name, name, null, null);
+						var refProj = new Assembly(name);
 						if (ignore(refProj))
 							continue;
 
-						AddProject(refProj);
+						AddAssembly(refProj);
 
 						referenceProjs = refProj.AsList();
 					}
@@ -246,16 +258,16 @@ namespace org.pescuma.dotnetdependencychecker
 			}
 		}
 
-		private List<Project> FindProjects(Project proj, Dependency dep, Func<Project, bool> matches, string refName)
+		private List<Assembly> FindAssembly(Project proj, Dependency dep, Func<Assembly, bool> matches, string refName)
 		{
 			var candidates = processing.Where(p => !p.Ignored && matches(p.Project))
 				.Select(i => i.Project)
+				.Cast<Assembly>()
 				.ToList();
 
 			if (!candidates.Any())
 				// Search new projects too
-				candidates = projs.OfType<Project>()
-					.Where(matches)
+				candidates = projs.Where(matches)
 					.ToList();
 
 			if (candidates.Count == 1)
@@ -269,15 +281,15 @@ namespace org.pescuma.dotnetdependencychecker
 
 			if (processing.Any(p => p.Ignored && matches(p.Project)))
 				// The project exists but was ignored
-				return new List<Project>();
+				return new List<Assembly>();
 
 			return null;
 		}
 
-		private RuleMatch CreateMultipleReferencesWarning(Project proj, Dependency dep, string refName, List<Project> candidates)
+		private RuleMatch CreateMultipleReferencesWarning(Project proj, Dependency dep, string refName, List<Assembly> candidates)
 		{
 			var message = new OutputMessage().Append("The project ")
-				.Append(proj, OutputMessage.Info.NameAndPath)
+				.Append(proj, OutputMessage.Info.Name)
 				.Append(" references the project ")
 				.Append(refName)
 				.Append(", but there are ")
@@ -285,7 +297,7 @@ namespace org.pescuma.dotnetdependencychecker
 				.Append(" projects that match:");
 
 			candidates.ForEach(c => message.Append("\n  - ")
-				.Append(c, OutputMessage.Info.CsprojOrFullID));
+				.Append(c, OutputMessage.Info.Csproj));
 			message.Append("\nMultiple dependencies will be created.");
 
 			return new RuleMatch(false, Severity.Warn, message, null, proj.AsList()

@@ -29,10 +29,10 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			{
 				var message = new OutputMessage();
 				message.Append("The project ")
-					.Append(proj, OutputMessage.Info.NameAndPath)
+					.Append(proj, OutputMessage.Info.Name)
 					.Append(" has multiple dependencies on the same assembly:");
 				g.ForEach(d => message.Append("\n  - ")
-					.Append(d.Target, OutputMessage.Info.NameAndPath));
+					.Append(d.Target, OutputMessage.Info.Name));
 
 				result.Add(new RuleMatch(false, Severity, message, Location, proj.AsList(), g));
 			});

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker
@@ -33,7 +34,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 				if (warnings.Any())
 					warnings.ForEach(e => Console.WriteLine("\n[{0}] {1}", e.Severity.ToString()
-						.ToLower(), e.Messsage.ToConsole()));
+						.ToLower(), ToConsole(e.Messsage)));
 				else
 					Console.WriteLine("No errors found");
 
@@ -52,6 +53,28 @@ namespace org.pescuma.dotnetdependencychecker
 				Console.WriteLine();
 				return -1;
 			}
+		}
+
+		private static string ToConsole(OutputMessage messsage)
+		{
+			return string.Join("", messsage.Elements.Select(e =>
+			{
+				if (e.Text != null)
+				{
+					return e.Text;
+				}
+				else if (e.Project is Project)
+				{
+					var proj = ((Project) e.Project);
+
+					if (e.Info == OutputMessage.Info.Name)
+						return proj.GetNameAndPath();
+					else
+						return proj.GetCsprojOrFullID();
+				}
+				else
+					return e.Project.Names.First();
+			}));
 		}
 
 		private static void Dump(IEnumerable<string> projs, List<string> filenames)
