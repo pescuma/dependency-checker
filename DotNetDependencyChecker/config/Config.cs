@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker.config
@@ -16,9 +17,9 @@ namespace org.pescuma.dotnetdependencychecker.config
 		{
 			private readonly string line;
 			public readonly string Name;
-			public readonly Func<Project, bool> Matches;
+			public readonly Func<Dependable, bool> Matches;
 
-			public Group(string name, Func<Project, bool> matches, string line)
+			public Group(string name, Func<Dependable, bool> matches, string line)
 			{
 				Name = name;
 				Matches = matches;
@@ -33,10 +34,10 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		public class Ignore
 		{
-			public readonly Func<Project, bool> Matches;
+			public readonly Func<Dependable, bool> Matches;
 			private readonly ConfigLocation location;
 
-			public Ignore(Func<Project, bool> matches, ConfigLocation location)
+			public Ignore(Func<Dependable, bool> matches, ConfigLocation location)
 			{
 				Matches = matches;
 				this.location = location;

@@ -26,14 +26,14 @@ namespace org.pescuma.dotnetdependencychecker
 
 				var graph = new ProjectsLoader(config, warnings).LoadGraph();
 
-				Dump(graph.Vertices.Select(p => p.Name), config.Output.Projects);
+				Dump(graph.Vertices.Select(p => p.Names.First()), config.Output.Projects);
 
 				warnings.AddRange(RulesMatcher.Match(graph, config)
 					.Where(e => !e.Allowed));
 
 				if (warnings.Any())
 					warnings.ForEach(e => Console.WriteLine("\n[{0}] {1}", e.Severity.ToString()
-						.ToLower(), e.Messsage));
+						.ToLower(), e.Messsage.ToConsole()));
 				else
 					Console.WriteLine("No errors found");
 

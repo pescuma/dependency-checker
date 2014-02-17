@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace org.pescuma.dotnetdependencychecker
+namespace org.pescuma.dotnetdependencychecker.model
 {
-	public class Project
+	public class Project : Dependable
 	{
 		public static Comparison<Project> NaturalOrdering =
 			(p1, p2) => string.Compare(p1.Name, p2.Name, StringComparison.CurrentCultureIgnoreCase);
@@ -14,6 +14,23 @@ namespace org.pescuma.dotnetdependencychecker
 		public readonly Guid? Guid;
 		public readonly string CsprojPath;
 		public readonly HashSet<string> Paths = new HashSet<string>();
+
+		IEnumerable<string> Dependable.Names
+		{
+			get
+			{
+				var result = new HashSet<string>();
+				result.Add(Name);
+				if (AssemblyName != null)
+					result.Add(AssemblyName);
+				return result;
+			}
+		}
+
+		IEnumerable<string> Dependable.Paths
+		{
+			get { return Paths; }
+		}
 
 		public Project(string name, string assemblyName, Guid? guid, string csprojPath)
 		{

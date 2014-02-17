@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.model;
 
 namespace org.pescuma.dotnetdependencychecker.rules
 {
@@ -25,19 +25,20 @@ namespace org.pescuma.dotnetdependencychecker.rules
 		{
 			var result = new List<RuleMatch>();
 
-			var same = graph.Vertices.Where(allowProject)
+			var same = graph.Vertices.OfType<Project>()
+				.Where(allowProject)
 				.GroupBy(v => id(v))
 				.Where(g => g.Count() > 1);
 			same.ForEach(g =>
 			{
-				var msg = new StringBuilder();
-				msg.Append("Projects with same ")
+				var message = new OutputMessage();
+				message.Append("Projects with same ")
 					.Append(attributes)
 					.Append(" found:");
-				g.ForEach(e => msg.Append("\n  - ")
-					.Append(e.GetNameAndPath()));
+				g.ForEach(e => message.Append("\n  - ")
+					.Append(e, OutputMessage.Info.NameAndPath));
 
-				result.Add(new RuleMatch(false, Severity, msg.ToString(), Location, g, null));
+				result.Add(new RuleMatch(false, Severity, message, Location, g, null));
 			});
 
 			return result;

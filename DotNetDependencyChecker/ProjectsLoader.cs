@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker
@@ -12,8 +13,8 @@ namespace org.pescuma.dotnetdependencychecker
 	{
 		private readonly Config config;
 		private readonly List<RuleMatch> warnings;
-		private Func<Project, bool> ignore;
-		private List<Project> projs;
+		private Func<Dependable, bool> ignore;
+		private List<Dependable> projs;
 		private List<Dependency> dependencies;
 		private List<ProcessingProject> processing;
 
@@ -25,7 +26,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 		public DependencyGraph LoadGraph()
 		{
-			projs = new List<Project>();
+			projs = new List<Dependable>();
 			dependencies = new List<Dependency>();
 			ignore = p => config.Ignores.Any(i => i.Matches(p));
 
@@ -53,7 +54,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 			CreateDLLReferences();
 
-			projs.Sort(Project.NaturalOrdering);
+			projs.Sort(DependableUtils.NaturalOrdering);
 			dependencies.Sort(Dependency.NaturalOrdering);
 
 			var graph = new DependencyGraph();
@@ -83,7 +84,7 @@ namespace org.pescuma.dotnetdependencychecker
 					.Append(sameProjs.Count)
 					.Append(" projects that have the same:");
 				sameProjs.ForEach(p => msg.Append("\n  - ")
-					.Append(p.GetCsprojOrFullID()));
+					.Append(((Project) p).GetCsprojOrFullID()));
 
 				throw new ConfigException(msg.ToString());
 			}
@@ -163,16 +164,24 @@ namespace org.pescuma.dotnetdependencychecker
 
 			if (result != null && result.Any())
 			{
-				var msg = new StringBuilder();
+				var message = new OutputMessage();
 
-				msg.Append(string.Format("The project {0} references the project {1} but it could not be loaded. Using project{2} {3} instead:",
-					proj.GetNameAndPath(), filename, result.Count > 1 ? "s" : "", refName));
-				result.ForEach(p => msg.Append("\n  - ")
-					.Append(p.GetCsprojOrFullID()));
+				message.Append("The project ")
+					.Append(proj, OutputMessage.Info.NameAndPath)
+					.Append(" references the project ")
+					.Append(filename)
+					.Append(" but it could not be loaded. Using project")
+					.Append(result.Count > 1 ? "s" : "")
+					.Append(" ")
+					.Append(refName)
+					.Append(" instead:");
+
+				result.ForEach(p => message.Append("\n  - ")
+					.Append(p, OutputMessage.Info.CsprojOrFullID));
 
 				var allProjs = result.Concat(proj.AsList())
 					.ToList();
-				warnings.Add(new RuleMatch(false, Severity.Warn, msg.ToString(), null, allProjs, allProjs.Select(dep.WithTarget)));
+				warnings.Add(new RuleMatch(false, Severity.Warn, message, null, allProjs, allProjs.Select(dep.WithTarget)));
 			}
 
 			return result;
@@ -185,10 +194,12 @@ namespace org.pescuma.dotnetdependencychecker
 			if (ignore(result))
 				return null;
 
-			var msg =
-				string.Format(
-					"The project {0} references the project {1} but it could not be loaded. Guessing assembly name to be the same as project name.",
-					proj.GetNameAndPath(), reference.Include);
+			var msg = new OutputMessage().Append("The project ")
+				.Append(proj, OutputMessage.Info.NameAndPath)
+				.Append(" references the project ")
+				.Append(reference.Include)
+				.Append(" but it could not be loaded. Guessing assembly name to be the same as project name.");
+
 			warnings.Add(new RuleMatch(false, Severity.Warn, msg, null, dep.WithTarget(result)));
 
 			AddProject(result);
@@ -243,7 +254,8 @@ namespace org.pescuma.dotnetdependencychecker
 
 			if (!candidates.Any())
 				// Search new projects too
-				candidates = projs.Where(matches)
+				candidates = projs.OfType<Project>()
+					.Where(matches)
 					.ToList();
 
 			if (candidates.Count == 1)
@@ -264,15 +276,19 @@ namespace org.pescuma.dotnetdependencychecker
 
 		private RuleMatch CreateMultipleReferencesWarning(Project proj, Dependency dep, string refName, List<Project> candidates)
 		{
-			var msg = new StringBuilder();
+			var message = new OutputMessage().Append("The project ")
+				.Append(proj, OutputMessage.Info.NameAndPath)
+				.Append(" references the project ")
+				.Append(refName)
+				.Append(", but there are ")
+				.Append(candidates.Count)
+				.Append(" projects that match:");
 
-			msg.Append(string.Format("The project {0} references the project {1}, but there are {2} projects that match:", proj.GetNameAndPath(),
-				refName, candidates.Count));
-			candidates.ForEach(c => msg.Append("\n  - ")
-				.Append(c.GetCsprojOrFullID()));
-			msg.Append("\nMultiple dependencies will be created.");
+			candidates.ForEach(c => message.Append("\n  - ")
+				.Append(c, OutputMessage.Info.CsprojOrFullID));
+			message.Append("\nMultiple dependencies will be created.");
 
-			return new RuleMatch(false, Severity.Warn, msg.ToString(), null, proj.AsList()
+			return new RuleMatch(false, Severity.Warn, message, null, proj.AsList()
 				.Concat(candidates), dep.AsList());
 		}
 

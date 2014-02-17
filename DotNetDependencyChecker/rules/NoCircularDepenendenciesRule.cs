@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.model;
 using QuickGraph.Algorithms;
 
 namespace org.pescuma.dotnetdependencychecker.rules
@@ -17,7 +17,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 		{
 			var result = new List<RuleMatch>();
 
-			IDictionary<Project, int> components;
+			IDictionary<Dependable, int> components;
 			graph.StronglyConnectedComponents(out components);
 
 			var circularDependencies = components.Select(c => new { Proj = c.Key, Group = c.Value })
@@ -29,17 +29,17 @@ namespace org.pescuma.dotnetdependencychecker.rules
 				var projs = g.Select(i => i.Proj)
 					.ToList();
 
-				var projsSet = new HashSet<Project>(projs);
+				var projsSet = new HashSet<Dependable>(projs);
 				var deps = graph.Edges.Where(e => projsSet.Contains(e.Source) && projsSet.Contains(e.Target))
 					.ToList();
 
-				var err = new StringBuilder();
-				err.Append("Circular dependency found:");
-				projs.Sort(Project.NaturalOrdering);
-				projs.ForEach(p => err.Append("\n  - ")
-					.Append(p.GetNameAndPath()));
+				var message = new OutputMessage();
+				message.Append("Circular dependency found:");
+				projs.Sort(DependableUtils.NaturalOrdering);
+				projs.ForEach(p => message.Append("\n  - ")
+					.Append(p, OutputMessage.Info.NameAndPath));
 
-				result.Add(new RuleMatch(false, Severity, err.ToString(), Location, projs, deps));
+				result.Add(new RuleMatch(false, Severity, message, Location, projs, deps));
 			}
 
 			return result;

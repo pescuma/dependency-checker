@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker

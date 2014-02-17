@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.model;
 
 namespace org.pescuma.dotnetdependencychecker.rules
 {
@@ -18,7 +19,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			}
 
 			var projs = graph.Vertices.ToList();
-			projs.Sort(Project.NaturalOrdering);
+			projs.Sort(DependableUtils.NaturalOrdering);
 
 			foreach (var proj in projs)
 			{

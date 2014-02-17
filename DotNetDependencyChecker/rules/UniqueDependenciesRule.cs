@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.model;
 
 namespace org.pescuma.dotnetdependencychecker.rules
 {
@@ -12,24 +12,29 @@ namespace org.pescuma.dotnetdependencychecker.rules
 		{
 		}
 
-		public override List<RuleMatch> Process(DependencyGraph graph, Project proj)
+		public override List<RuleMatch> Process(DependencyGraph graph, Dependable element)
 		{
+			var proj = element as Project;
+			if (proj == null)
+				return null;
+
 			var result = new List<RuleMatch>();
 
 			var same = graph.OutEdges(proj)
-				.GroupBy(d => d.Target.AssemblyName)
+				.Where(d => d.Target is Project)
+				.GroupBy(d => ((Project) d.Target).AssemblyName)
 				.Where(g => g.Count() > 1);
 
 			same.ForEach(g =>
 			{
-				var msg = new StringBuilder();
-				msg.Append("The project ")
-					.Append(proj.GetNameAndPath())
+				var message = new OutputMessage();
+				message.Append("The project ")
+					.Append(proj, OutputMessage.Info.NameAndPath)
 					.Append(" has multiple dependencies on the same assembly:");
-				g.ForEach(d => msg.Append("\n  - ")
-					.Append(d.Target.GetNameAndPath()));
+				g.ForEach(d => message.Append("\n  - ")
+					.Append(d.Target, OutputMessage.Info.NameAndPath));
 
-				result.Add(new RuleMatch(false, Severity, msg.ToString(), Location, proj.AsList(), g));
+				result.Add(new RuleMatch(false, Severity, message, Location, proj.AsList(), g));
 			});
 
 			return result;

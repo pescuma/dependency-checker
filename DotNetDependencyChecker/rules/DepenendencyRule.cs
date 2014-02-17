@@ -1,17 +1,19 @@
 using System;
 using System.Collections.Generic;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.model;
 
 namespace org.pescuma.dotnetdependencychecker.rules
 {
 	public class DepenendencyRule : BaseRule
 	{
 		// HACK [pescuma] Fields are public for tests
-		public readonly Func<Project, bool> Source;
-		public readonly Func<Project, bool> Target;
+		public readonly Func<Dependable, bool> Source;
+		public readonly Func<Dependable, bool> Target;
 		public readonly bool Allow;
 
-		public DepenendencyRule(Severity severity, Func<Project, bool> source, Func<Project, bool> target, bool allow, ConfigLocation location)
+		public DepenendencyRule(Severity severity, Func<Dependable, bool> source, Func<Dependable, bool> target, bool allow,
+			ConfigLocation location)
 			: base(severity, location)
 		{
 			Source = source;
@@ -24,9 +26,14 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			if (!Source(dep.Source) || !Target(dep.Target))
 				return null;
 
-			var messsage = string.Format("Dependence between {0} and {1} {2}allowed", dep.Source.GetNameAndPath(), dep.Target.GetNameAndPath(),
-				Allow ? "" : "not ");
-			var projs = new List<Project> { dep.Source, dep.Target };
+			var messsage = new OutputMessage();
+			messsage.Append("Dependence between ")
+				.Append(dep.Source, OutputMessage.Info.NameAndPath)
+				.Append(" and ")
+				.Append(dep.Target, OutputMessage.Info.NameAndPath)
+				.Append(Allow ? "" : "not ")
+				.Append("allowed");
+			var projs = new List<Dependable> { dep.Source, dep.Target };
 			var dependencies = new List<Dependency> { dep };
 
 			return new RuleMatch(Allow, Severity, messsage, Location, projs, dependencies);

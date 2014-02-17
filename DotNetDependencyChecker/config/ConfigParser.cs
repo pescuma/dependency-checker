@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.rules;
 using org.pescuma.dotnetdependencychecker.utils;
 
@@ -98,9 +99,9 @@ namespace org.pescuma.dotnetdependencychecker.config
 			config.Groups.Add(new Config.Group(name, matcher, line));
 		}
 
-		private Func<Project, bool> ParseMatcher(string matchLine, ConfigLocation location)
+		private Func<Dependable, bool> ParseMatcher(string matchLine, ConfigLocation location)
 		{
-			Func<Project, bool> result = null;
+			Func<Dependable, bool> result = null;
 
 			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
@@ -114,14 +115,14 @@ namespace org.pescuma.dotnetdependencychecker.config
 			return result;
 		}
 
-		private Func<Project, bool> ParseRE(string line)
+		private Func<Dependable, bool> ParseRE(string line)
 		{
 			var re = new Regex("^" + line + "$", RegexOptions.IgnoreCase);
 
-			return proj => re.IsMatch(proj.Name);
+			return proj => proj.Names.Any(re.IsMatch);
 		}
 
-		private Func<Project, bool> ParsePath(string line)
+		private Func<Dependable, bool> ParsePath(string line)
 		{
 			var path = PathUtils.ToAbsolute(basePath, line);
 
@@ -134,9 +135,9 @@ namespace org.pescuma.dotnetdependencychecker.config
 			       || fullPath.StartsWith(beginPath + "\\", StringComparison.CurrentCultureIgnoreCase);
 		}
 
-		private Func<Project, bool> ParseSimpleMatch(string line)
+		private Func<Dependable, bool> ParseSimpleMatch(string line)
 		{
-			return proj => line.Equals(proj.Name, StringComparison.CurrentCultureIgnoreCase);
+			return proj => proj.Names.Any(n => line.Equals(n, StringComparison.CurrentCultureIgnoreCase));
 		}
 
 		private void ParseOutputProjects(string line, ConfigLocation configLocation)
@@ -234,7 +235,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 				throw new ConfigParserException(location, "The line has more text than it should");
 
 			config.Ignores.Add(new Config.Ignore(
-				proj => proj.CsprojPath == null || !config.Inputs.Any(input => PathMatches(proj.CsprojPath, input)), location));
+				el => !(el is Project) || !config.Inputs.Any(input => PathMatches(((Project) el).CsprojPath, input)), location));
 		}
 	}
 }

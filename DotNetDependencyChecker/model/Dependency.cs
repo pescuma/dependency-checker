@@ -1,17 +1,18 @@
 ﻿using System;
+using System.Linq;
 using QuickGraph;
 
-namespace org.pescuma.dotnetdependencychecker
+namespace org.pescuma.dotnetdependencychecker.model
 {
-	public class Dependency : Edge<Project>
+	public class Dependency : Edge<Dependable>
 	{
 		public static Comparison<Dependency> NaturalOrdering = (d1, d2) =>
 		{
-			var comp = string.Compare(d1.Source.Name, d2.Source.Name, StringComparison.CurrentCultureIgnoreCase);
+			var comp = string.Compare(d1.Source.Names.First(), d2.Source.Names.First(), StringComparison.CurrentCultureIgnoreCase);
 			if (comp != 0)
 				return comp;
 
-			return string.Compare(d1.Target.Name, d2.Target.Name, StringComparison.CurrentCultureIgnoreCase);
+			return string.Compare(d1.Target.Names.First(), d2.Target.Names.First(), StringComparison.CurrentCultureIgnoreCase);
 		};
 
 		public readonly Types Type;
@@ -23,7 +24,7 @@ namespace org.pescuma.dotnetdependencychecker
 			DllReference
 		}
 
-		public Dependency(Project source, Project target, Types type, Location location)
+		public Dependency(Dependable source, Dependable target, Types type, Location location)
 			: base(source, target)
 		{
 			Type = type;
@@ -59,7 +60,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 		public override string ToString()
 		{
-			return string.Format("{0} => {1} ({2})", Source.Name, Target.Name, Type);
+			return string.Format("{0} -> {1} ({2})", Source.Names.First(), Target.Names.First(), Type);
 		}
 
 		public Dependency WithTarget(Project otherTarget)

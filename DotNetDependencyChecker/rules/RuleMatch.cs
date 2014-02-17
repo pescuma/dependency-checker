@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.model;
 
 namespace org.pescuma.dotnetdependencychecker.rules
 {
@@ -8,12 +9,12 @@ namespace org.pescuma.dotnetdependencychecker.rules
 	{
 		public readonly bool Allowed;
 		public readonly Severity Severity;
-		public readonly string Messsage;
+		public readonly OutputMessage Messsage;
 		public readonly ConfigLocation Location;
-		public readonly List<Project> Projects;
+		public readonly List<Dependable> Projects;
 		public readonly List<Dependency> Dependencies;
 
-		public RuleMatch(bool allowed, Severity severity, string messsage, ConfigLocation location, params Dependency[] dependencies)
+		public RuleMatch(bool allowed, Severity severity, OutputMessage messsage, ConfigLocation location, params Dependency[] dependencies)
 			: this(allowed, severity, messsage, location, //
 				dependencies.Select(d => d.Source)
 					.Concat(dependencies.Select(d => d.Target))
@@ -23,17 +24,17 @@ namespace org.pescuma.dotnetdependencychecker.rules
 		{
 		}
 
-		public RuleMatch(bool allowed, Severity severity, string messsage, ConfigLocation location, IEnumerable<Project> projects,
+		public RuleMatch(bool allowed, Severity severity, OutputMessage messsage, ConfigLocation location, IEnumerable<Dependable> projects,
 			IEnumerable<Dependency> dependencies)
 		{
 			Allowed = allowed;
 			Severity = severity;
 			Messsage = messsage;
 			Location = location;
-			Projects = new List<Project>(projects ?? Enumerable.Empty<Project>());
+			Projects = new List<Dependable>(projects ?? Enumerable.Empty<Dependable>());
 			Dependencies = new List<Dependency>(dependencies ?? Enumerable.Empty<Dependency>());
 
-			Projects.Sort(Project.NaturalOrdering);
+			Projects.Sort(DependableUtils.NaturalOrdering);
 			Dependencies.Sort(Dependency.NaturalOrdering);
 		}
 	}

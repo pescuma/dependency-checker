@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.model;
 
 namespace org.pescuma.dotnetdependencychecker.rules
 {
@@ -20,7 +21,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			return null;
 		}
 
-		public virtual List<RuleMatch> Process(DependencyGraph graph, Project proj)
+		public virtual List<RuleMatch> Process(DependencyGraph graph, Dependable proj)
 		{
 			return null;
 		}
