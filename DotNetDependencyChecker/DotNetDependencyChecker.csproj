@@ -61,6 +61,7 @@
     <Compile Include="config\ConfigParser.cs" />
     <Compile Include="config\ConfigParserException.cs" />
     <Compile Include="CsprojReader.cs" />
+    <Compile Include="GroupsLoader.cs" />
     <Compile Include="model\Assembly.cs" />
     <Compile Include="model\Dependable.cs" />
     <Compile Include="model\Dependency.cs" />

@@ -29,6 +29,8 @@ namespace org.pescuma.dotnetdependencychecker
 
 				Dump(graph.Vertices.Select(p => p.Names.First()), config.Output.Projects);
 
+				new GroupsLoader(config, graph).FillGroups();
+
 				warnings.AddRange(RulesMatcher.Match(graph, config)
 					.Where(e => !e.Allowed));
 

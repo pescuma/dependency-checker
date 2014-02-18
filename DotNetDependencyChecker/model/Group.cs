@@ -21,5 +21,10 @@ namespace org.pescuma.dotnetdependencychecker.model
 		{
 			get { return Enumerable.Empty<string>(); }
 		}
+
+		public override string ToString()
+		{
+			return Name;
+		}
 	}
 }
