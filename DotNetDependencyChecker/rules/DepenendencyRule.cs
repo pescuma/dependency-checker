@@ -21,18 +21,18 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			Allow = allow;
 		}
 
-		public override RuleMatch Process(DependencyGraph graph, Dependency dep)
+		public override RuleMatch Process(Dependency dep)
 		{
 			if (!Source(dep.Source) || !Target(dep.Target))
 				return null;
 
 			var messsage = new OutputMessage();
 			messsage.Append("Dependence between ")
-				.Append(dep.Source, OutputMessage.ProjInfo.Name)
+				.Append(dep.Source, OutputMessage.ProjInfo.NameAndGroup)
 				.Append(" and ")
-				.Append(dep.Target, OutputMessage.ProjInfo.Name)
-				.Append(Allow ? "" : "not ")
-				.Append("allowed");
+				.Append(dep.Target, OutputMessage.ProjInfo.NameAndGroup)
+				.Append(Allow ? "" : " not")
+				.Append(" allowed");
 			var projs = new List<Dependable> { dep.Source, dep.Target };
 			var dependencies = new List<Dependency> { dep };
 

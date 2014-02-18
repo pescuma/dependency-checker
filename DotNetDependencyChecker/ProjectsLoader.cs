@@ -180,7 +180,7 @@ namespace org.pescuma.dotnetdependencychecker
 				var message = new OutputMessage();
 
 				message.Append("The project ")
-					.Append(proj, OutputMessage.ProjInfo.Name)
+					.Append(proj, OutputMessage.ProjInfo.NameAndCsproj)
 					.Append(" references the project ")
 					.Append(filename)
 					.Append(" but it could not be loaded. Using project")
@@ -190,7 +190,7 @@ namespace org.pescuma.dotnetdependencychecker
 					.Append(" instead:");
 
 				result.ForEach(p => message.Append("\n  - ")
-					.Append(p, OutputMessage.ProjInfo.Path));
+					.Append(p, OutputMessage.ProjInfo.Csproj));
 
 				var allProjs = result.Concat(proj.AsList())
 					.ToList();
@@ -208,7 +208,7 @@ namespace org.pescuma.dotnetdependencychecker
 				return null;
 
 			var msg = new OutputMessage().Append("The project ")
-				.Append(proj, OutputMessage.ProjInfo.Name)
+				.Append(proj, OutputMessage.ProjInfo.NameAndCsproj)
 				.Append(" references the project ")
 				.Append(reference.Include)
 				.Append(" but it could not be loaded. Guessing assembly name to be the same as project name.");
@@ -290,7 +290,7 @@ namespace org.pescuma.dotnetdependencychecker
 		private RuleMatch CreateMultipleReferencesWarning(Project proj, Dependency dep, string refName, List<Assembly> candidates)
 		{
 			var message = new OutputMessage().Append("The project ")
-				.Append(proj, OutputMessage.ProjInfo.Name)
+				.Append(proj, OutputMessage.ProjInfo.NameAndCsproj)
 				.Append(" references the project ")
 				.Append(refName)
 				.Append(", but there are ")
@@ -298,7 +298,7 @@ namespace org.pescuma.dotnetdependencychecker
 				.Append(" projects that match:");
 
 			candidates.ForEach(c => message.Append("\n  - ")
-				.Append(c, OutputMessage.ProjInfo.Path));
+				.Append(c, OutputMessage.ProjInfo.Csproj));
 			message.Append("\nMultiple dependencies will be created.");
 
 			return new RuleMatch(false, Severity.Warn, message, null, proj.AsList()

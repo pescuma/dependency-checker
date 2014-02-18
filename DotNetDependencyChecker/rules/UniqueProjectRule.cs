@@ -36,7 +36,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 					.Append(attributes)
 					.Append(" found:");
 				g.ForEach(e => message.Append("\n  - ")
-					.Append(e, OutputMessage.ProjInfo.Name));
+					.Append(e, OutputMessage.ProjInfo.NameAndCsproj));
 
 				result.Add(new RuleMatch(false, Severity, message, Location, g, null));
 			});

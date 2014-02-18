@@ -84,17 +84,39 @@ namespace org.pescuma.dotnetdependencychecker
 			{
 				case OutputMessage.ProjInfo.Name:
 				{
-					if (proj.Paths.Any())
-						return string.Format("{0} ({1})", string.Join(" or ", proj.Names), string.Join(", ", proj.Paths));
-					else
-						return string.Join(", ", proj.Names);
+					return string.Join(" or ", proj.Names);
+				}
+				case OutputMessage.ProjInfo.NameAndGroup:
+				{
+					if (proj is Group)
+						return InfoForConsole(((Group) proj).Representing, info);
+
+					var result = InfoForConsole(proj, OutputMessage.ProjInfo.Name);
+
+					var group = (proj is Assembly ? ((Assembly) proj).Group : null);
+					if (group != null)
+						result = string.Format("{0} (in group {1})", result, group.Name);
+
+					return result;
+				}
+				case OutputMessage.ProjInfo.NameAndCsproj:
+				{
+					return string.Format("{0} ({1})", InfoForConsole(proj, OutputMessage.ProjInfo.Name),
+						InfoForConsole(proj, OutputMessage.ProjInfo.Csproj));
 				}
 				case OutputMessage.ProjInfo.Path:
 				{
 					if (proj.Paths.Any())
-						return string.Join(" or ", proj.Names);
-					else
 						return string.Join(" or ", proj.Paths);
+					else
+						return InfoForConsole(proj, OutputMessage.ProjInfo.Name);
+				}
+				case OutputMessage.ProjInfo.Csproj:
+				{
+					if (proj is Project)
+						return ((Project) proj).CsprojPath;
+					else
+						throw new InvalidDataException();
 				}
 				default:
 					throw new InvalidDataException();

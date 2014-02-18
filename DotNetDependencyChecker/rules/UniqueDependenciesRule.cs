@@ -32,12 +32,12 @@ namespace org.pescuma.dotnetdependencychecker.rules
 
 				var message = new OutputMessage();
 				message.Append("The project ")
-					.Append(proj, OutputMessage.ProjInfo.Name)
+					.Append(proj, OutputMessage.ProjInfo.NameAndCsproj)
 					.Append(" has multiple dependencies on the same assembly:");
 				g.ForEach(d => message.Append("\n  - ")
 					.Append(d, OutputMessage.DepInfo.Type)
 					.Append(" with ")
-					.Append(d.Target, OutputMessage.ProjInfo.Name)
+					.Append(d.Target, OutputMessage.ProjInfo.NameAndCsproj)
 					.Append(" in ")
 					.Append(d, OutputMessage.DepInfo.Line));
 

@@ -10,6 +10,6 @@ namespace org.pescuma.dotnetdependencychecker.rules
 		List<RuleMatch> Process(DependencyGraph graph, Dependable proj);
 
 		/// <returns>null if didn't match</returns>
-		RuleMatch Process(DependencyGraph graph, Dependency dep);
+		RuleMatch Process(Dependency dep);
 	}
 }

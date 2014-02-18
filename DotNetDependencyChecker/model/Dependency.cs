@@ -40,6 +40,11 @@ namespace org.pescuma.dotnetdependencychecker.model
 			return new Dependency(Source, otherTarget, Type, Location);
 		}
 
+		public Dependency WithSource(Group otherSource)
+		{
+			return new Dependency(otherSource, Target, Type, Location);
+		}
+
 		protected bool Equals(Dependency other)
 		{
 			return Equals(Source, other.Source) && Equals(Target, other.Target) && Type == other.Type;

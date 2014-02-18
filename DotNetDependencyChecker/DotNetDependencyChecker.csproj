@@ -81,7 +81,7 @@
     <Compile Include="rules\UniqueProjectRule.cs" />
     <Compile Include="rules\Rule.cs" />
     <Compile Include="rules\RuleMatch.cs" />
-    <Compile Include="rules\RulesMatcher.cs" />
+    <Compile Include="RulesMatcher.cs" />
     <Compile Include="rules\Severity.cs" />
     <Compile Include="utils\Argument.cs" />
     <Compile Include="utils\PathUtils.cs" />

@@ -39,7 +39,10 @@ namespace org.pescuma.dotnetdependencychecker.rules
 		public enum ProjInfo
 		{
 			Name,
-			Path
+			NameAndCsproj,
+			NameAndGroup,
+			Path,
+			Csproj
 		}
 
 		public enum DepInfo

@@ -26,7 +26,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			return null;
 		}
 
-		public virtual RuleMatch Process(DependencyGraph graph, Dependency dep)
+		public virtual RuleMatch Process(Dependency dep)
 		{
 			return null;
 		}
