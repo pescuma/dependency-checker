@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
 using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.rules;
@@ -27,9 +28,11 @@ namespace org.pescuma.dotnetdependencychecker
 
 				var graph = new ProjectsLoader(config, warnings).LoadGraph();
 
-				Dump(graph.Vertices.Select(p => p.Names.First()), config.Output.Projects);
+				DumpProjects(graph.Vertices, config.Output.Projects);
 
 				new GroupsLoader(config, graph).FillGroups();
+
+				DumpGroups(graph.Vertices, config.Output.Groups);
 
 				warnings.AddRange(RulesMatcher.Match(graph, config)
 					.Where(e => !e.Allowed));
@@ -62,72 +65,124 @@ namespace org.pescuma.dotnetdependencychecker
 			return string.Join("", messsage.Elements.Select(e =>
 			{
 				if (e.Text != null)
-				{
 					return e.Text;
-				}
+
 				else if (e.Project != null)
-				{
-					var proj = e.Project;
-					switch (e.ProjInfo)
-					{
-						case OutputMessage.ProjInfo.Name:
-						{
-							if (proj.Paths.Any())
-								return string.Format("{0} ({1})", proj.Names.First(), proj.Paths.First());
-							else
-								return proj.Names.First();
-						}
-						case OutputMessage.ProjInfo.Path:
-						{
-							if (proj.Paths.Any())
-								return proj.Paths.First();
-							else
-								return proj.Names.First();
-						}
-						default:
-							throw new InvalidDataException();
-					}
-				}
+					return InfoForConsole(e.Project, e.ProjInfo);
+
 				else if (e.Dependendcy != null)
-				{
-					var dep = e.Dependendcy;
-					switch (e.DepInfo)
-					{
-						case OutputMessage.DepInfo.Type:
-						{
-							switch (dep.Type)
-							{
-								case Dependency.Types.DllReference:
-									return "DLL reference";
-								case Dependency.Types.ProjectReference:
-									return "project reference";
-								default:
-									throw new InvalidDataException();
-							}
-						}
-						case OutputMessage.DepInfo.Line:
-						{
-							return "line " + dep.Location.Line;
-						}
-						default:
-							throw new InvalidDataException();
-					}
-				}
+					return InfoForConsole(e.Dependendcy, e.DepInfo);
+
 				else
 					throw new InvalidDataException();
 			}));
 		}
 
-		private static void Dump(IEnumerable<string> projs, List<string> filenames)
+		private static string InfoForConsole(Dependable proj, OutputMessage.ProjInfo info)
+		{
+			switch (info)
+			{
+				case OutputMessage.ProjInfo.Name:
+				{
+					if (proj.Paths.Any())
+						return string.Format("{0} ({1})", string.Join(" or ", proj.Names), string.Join(", ", proj.Paths));
+					else
+						return string.Join(", ", proj.Names);
+				}
+				case OutputMessage.ProjInfo.Path:
+				{
+					if (proj.Paths.Any())
+						return string.Join(" or ", proj.Names);
+					else
+						return string.Join(" or ", proj.Paths);
+				}
+				default:
+					throw new InvalidDataException();
+			}
+		}
+
+		private static string InfoForConsole(Dependency dep, OutputMessage.DepInfo info)
+		{
+			switch (info)
+			{
+				case OutputMessage.DepInfo.Type:
+				{
+					switch (dep.Type)
+					{
+						case Dependency.Types.DllReference:
+							return "DLL reference";
+						case Dependency.Types.ProjectReference:
+							return "project reference";
+						default:
+							throw new InvalidDataException();
+					}
+				}
+				case OutputMessage.DepInfo.Line:
+				{
+					return "line " + dep.Location.Line;
+				}
+				default:
+					throw new InvalidDataException();
+			}
+		}
+
+		private static void DumpProjects(IEnumerable<Dependable> projects, List<string> filenames)
 		{
 			if (!filenames.Any())
 				return;
 
-			var names = projs.ToList();
+			var projs = projects.ToList();
+			projs.Sort(DependableUtils.NaturalOrdering);
 
-			names.Sort();
+			var names = projs.Select(p => InfoForConsole(p, OutputMessage.ProjInfo.Name))
+				.ToList();
 
 			filenames.ForEach(f => File.WriteAllLines(f, names));
+		}
+
+		private static void DumpGroups(IEnumerable<Dependable> projects, List<string> filenames)
+		{
+			if (!filenames.Any())
+				return;
+
+			var groups = projects.OfType<Assembly>()
+				.GroupBy(p => p.Group)
+				.ToList();
+
+			groups.Sort((e1, e2) =>
+			{
+				var g1 = e1.Key;
+				var g2 = e2.Key;
+
+				if (Equals(g1, g2))
+					return 0;
+
+				if (g1 == null)
+					return 1;
+
+				if (g2 == null)
+					return -1;
+
+				return string.Compare(g1.Name, g2.Name, StringComparison.CurrentCultureIgnoreCase);
+			});
+
+			var result = new StringBuilder();
+			groups.ForEach(g =>
+			{
+				result.Append(g.Key != null ? g.Key.Name : "Without a group")
+					.Append(":\n");
+
+				var projs = g.ToList();
+				projs.Sort(DependableUtils.NaturalOrdering);
+				projs.ForEach(p => result.Append("  - ")
+					.Append(InfoForConsole(p, OutputMessage.ProjInfo.Name))
+					.Append("\n"));
+
+				result.Append("\n");
+			});
+			var text = result.ToString();
+
+			filenames.ForEach(f => File.WriteAllText(f, text));
 		}
 	}
 }

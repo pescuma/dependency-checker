@@ -142,17 +142,17 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		private void ParseOutputProjects(string line, ConfigLocation configLocation)
 		{
-			config.Output.Projects.Add(Path.GetFullPath(line));
+			config.Output.Projects.Add(PathUtils.ToAbsolute(basePath, line));
 		}
 
 		private void ParseOutputGroups(string line, ConfigLocation configLocation)
 		{
-			config.Output.Groups.Add(Path.GetFullPath(line));
+			config.Output.Groups.Add(PathUtils.ToAbsolute(basePath, line));
 		}
 
 		private void ParseOutputDependencies(string line, ConfigLocation configLocation)
 		{
-			config.Output.Dependencies.Add(Path.GetFullPath(line));
+			config.Output.Dependencies.Add(PathUtils.ToAbsolute(basePath, line));
 		}
 
 		private static readonly Dictionary<string, Severity> SEVERITIES = new Dictionary<string, Severity>
