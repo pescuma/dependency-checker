@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using org.pescuma.dotnetdependencychecker.utils;
 
@@ -9,7 +10,11 @@ namespace org.pescuma.dotnetdependencychecker.model
 	{
 		public readonly string Name;
 		public readonly Guid Guid;
-		public readonly string CsprojPath;
+
+		public string CsprojPath
+		{
+			get { return Paths.First(); }
+		}
 
 		IEnumerable<string> Dependable.Names
 		{
@@ -31,14 +36,13 @@ namespace org.pescuma.dotnetdependencychecker.model
 
 			Name = name;
 			Guid = guid;
-			CsprojPath = csprojPath;
 
 			Paths.Add(csprojPath);
 		}
 
 		protected bool Equals(Project other)
 		{
-			return base.Equals(other) && string.Equals(Name, other.Name) && Guid.Equals(other.Guid) && string.Equals(CsprojPath, other.CsprojPath);
+			return base.Equals(other) && string.Equals(Name, other.Name) && string.Equals(CsprojPath, other.CsprojPath);
 		}
 
 		public override bool Equals(object obj)
@@ -58,7 +62,6 @@ namespace org.pescuma.dotnetdependencychecker.model
 			{
 				var hashCode = base.GetHashCode();
 				hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
-				hashCode = (hashCode * 397) ^ Guid.GetHashCode();
 				hashCode = (hashCode * 397) ^ (CsprojPath != null ? CsprojPath.GetHashCode() : 0);
 				return hashCode;
 			}
@@ -88,39 +91,6 @@ namespace org.pescuma.dotnetdependencychecker.model
 			result.Append("]");
 
 			return result.ToString();
-		}
-
-		// Helpers for messages
-
-		public string GetNameAndPath()
-		{
-			if (CsprojPath != null)
-				return string.Format("{0} ({1})", Name, CsprojPath);
-			else
-				return Name;
-		}
-
-		public string GetCsprojOrFullID()
-		{
-			var msg = new StringBuilder();
-
-			if (CsprojPath != null)
-			{
-				msg.Append(CsprojPath);
-			}
-			else
-			{
-				msg.Append(Name);
-
-				if (AssemblyName != Name)
-					msg.Append(", Assembly name: ")
-						.Append(AssemblyName);
-
-				msg.Append(", GUID: ")
-					.Append(Guid);
-			}
-
-			return msg.ToString();
 		}
 	}
 }

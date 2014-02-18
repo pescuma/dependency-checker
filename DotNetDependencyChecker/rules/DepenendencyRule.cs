@@ -28,9 +28,9 @@ namespace org.pescuma.dotnetdependencychecker.rules
 
 			var messsage = new OutputMessage();
 			messsage.Append("Dependence between ")
-				.Append(dep.Source, OutputMessage.Info.Name)
+				.Append(dep.Source, OutputMessage.ProjInfo.Name)
 				.Append(" and ")
-				.Append(dep.Target, OutputMessage.Info.Name)
+				.Append(dep.Target, OutputMessage.ProjInfo.Name)
 				.Append(Allow ? "" : "not ")
 				.Append("allowed");
 			var projs = new List<Dependable> { dep.Source, dep.Target };

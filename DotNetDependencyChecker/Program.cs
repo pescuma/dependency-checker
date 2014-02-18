@@ -63,17 +63,56 @@ namespace org.pescuma.dotnetdependencychecker
 				{
 					return e.Text;
 				}
-				else if (e.Project is Project)
+				else if (e.Project != null)
 				{
-					var proj = ((Project) e.Project);
-
-					if (e.Info == OutputMessage.Info.Name)
-						return proj.GetNameAndPath();
-					else
-						return proj.GetCsprojOrFullID();
+					var proj = e.Project;
+					switch (e.ProjInfo)
+					{
+						case OutputMessage.ProjInfo.Name:
+						{
+							if (proj.Paths.Any())
+								return string.Format("{0} ({1})", proj.Names.First(), proj.Paths.First());
+							else
+								return proj.Names.First();
+						}
+						case OutputMessage.ProjInfo.Path:
+						{
+							if (proj.Paths.Any())
+								return proj.Paths.First();
+							else
+								return proj.Names.First();
+						}
+						default:
+							throw new InvalidDataException();
+					}
+				}
+				else if (e.Dependendcy != null)
+				{
+					var dep = e.Dependendcy;
+					switch (e.DepInfo)
+					{
+						case OutputMessage.DepInfo.Type:
+						{
+							switch (dep.Type)
+							{
+								case Dependency.Types.DllReference:
+									return "DLL reference";
+								case Dependency.Types.ProjectReference:
+									return "project reference";
+								default:
+									throw new InvalidDataException();
+							}
+						}
+						case OutputMessage.DepInfo.Line:
+						{
+							return "line " + dep.Location.Line;
+						}
+						default:
+							throw new InvalidDataException();
+					}
 				}
 				else
-					return e.Project.Names.First();
+					throw new InvalidDataException();
 			}));
 		}
 

@@ -8,6 +8,7 @@ namespace org.pescuma.dotnetdependencychecker.model
 	{
 		public readonly string AssemblyName;
 		public readonly HashSet<string> Paths = new HashSet<string>();
+		public Group Group;
 
 		public Assembly(string assemblyName)
 		{

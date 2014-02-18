@@ -14,7 +14,7 @@ namespace org.pescuma.dotnetdependencychecker
 		private readonly Config config;
 		private readonly List<RuleMatch> warnings;
 		private Func<Dependable, bool> ignore;
-		private List<Assembly> projs;
+		private List<Assembly> assemblies;
 		private List<Dependency> dependencies;
 		private List<ProcessingProject> processing;
 
@@ -26,7 +26,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 		public DependencyGraph LoadGraph()
 		{
-			projs = new List<Assembly>();
+			assemblies = new List<Assembly>();
 			dependencies = new List<Dependency>();
 			ignore = p => config.Ignores.Any(i => i.Matches(p));
 
@@ -54,11 +54,11 @@ namespace org.pescuma.dotnetdependencychecker
 
 			CreateDLLReferences();
 
-			projs.Sort(DependableUtils.NaturalOrdering);
+			assemblies.Sort(DependableUtils.NaturalOrdering);
 			dependencies.Sort(Dependency.NaturalOrdering);
 
 			var graph = new DependencyGraph();
-			projs.ForEach(p => graph.AddVertex(p));
+			assemblies.ForEach(p => graph.AddVertex(p));
 			dependencies.ForEach(d => graph.AddEdge(d));
 			return graph;
 		}
@@ -70,26 +70,26 @@ namespace org.pescuma.dotnetdependencychecker
 				.ForEach(AddAssembly);
 		}
 
-		private void AddAssembly(Assembly newProj)
+		private void AddAssembly(Assembly newAssembly)
 		{
-			var sameProjs = projs.Where(p => AreTheSame(p, newProj))
+			var sameAssemblies = assemblies.Where(p => AreTheSame(p, newAssembly))
 				.ToList();
 
-			if (sameProjs.Any())
+			if (sameAssemblies.Any())
 			{
-				sameProjs.Add(newProj);
+				sameAssemblies.Add(newAssembly);
 
 				var msg = new StringBuilder();
 				msg.Append("There are ")
-					.Append(sameProjs.Count)
-					.Append(" projects that have the same:");
-				sameProjs.ForEach(p => msg.Append("\n  - ")
-					.Append(((Project) p).GetCsprojOrFullID()));
+					.Append(sameAssemblies.Count)
+					.Append(" projects that are the same:");
+				sameAssemblies.ForEach(p => msg.Append("\n  - ")
+					.Append(((Project) p).CsprojPath));
 
 				throw new ConfigException(msg.ToString());
 			}
 
-			projs.Add(newProj);
+			assemblies.Add(newAssembly);
 		}
 
 		private bool AreTheSame(Assembly a1, Assembly a2)
@@ -118,7 +118,8 @@ namespace org.pescuma.dotnetdependencychecker
 					// Dummy reference for logs in case of errors
 					var dep = new Dependency(proj, null, Dependency.Types.ProjectReference, new Location(csproj.Filename, reference.LineNumber));
 
-					var refs = FindAssembly(proj, dep, p => ((Project) p).CsprojPath == reference.Include, reference.Include);
+					var refs = FindAssembly(proj, dep,
+						p => string.Equals(((Project) p).CsprojPath, reference.Include, StringComparison.CurrentCultureIgnoreCase), reference.Include);
 
 					if (refs == null)
 					{
@@ -179,7 +180,7 @@ namespace org.pescuma.dotnetdependencychecker
 				var message = new OutputMessage();
 
 				message.Append("The project ")
-					.Append(proj, OutputMessage.Info.Name)
+					.Append(proj, OutputMessage.ProjInfo.Name)
 					.Append(" references the project ")
 					.Append(filename)
 					.Append(" but it could not be loaded. Using project")
@@ -189,7 +190,7 @@ namespace org.pescuma.dotnetdependencychecker
 					.Append(" instead:");
 
 				result.ForEach(p => message.Append("\n  - ")
-					.Append(p, OutputMessage.Info.Csproj));
+					.Append(p, OutputMessage.ProjInfo.Path));
 
 				var allProjs = result.Concat(proj.AsList())
 					.ToList();
@@ -207,7 +208,7 @@ namespace org.pescuma.dotnetdependencychecker
 				return null;
 
 			var msg = new OutputMessage().Append("The project ")
-				.Append(proj, OutputMessage.Info.Name)
+				.Append(proj, OutputMessage.ProjInfo.Name)
 				.Append(" references the project ")
 				.Append(reference.Include)
 				.Append(" but it could not be loaded. Guessing assembly name to be the same as project name.");
@@ -267,7 +268,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 			if (!candidates.Any())
 				// Search new projects too
-				candidates = projs.Where(matches)
+				candidates = assemblies.Where(matches)
 					.ToList();
 
 			if (candidates.Count == 1)
@@ -289,7 +290,7 @@ namespace org.pescuma.dotnetdependencychecker
 		private RuleMatch CreateMultipleReferencesWarning(Project proj, Dependency dep, string refName, List<Assembly> candidates)
 		{
 			var message = new OutputMessage().Append("The project ")
-				.Append(proj, OutputMessage.Info.Name)
+				.Append(proj, OutputMessage.ProjInfo.Name)
 				.Append(" references the project ")
 				.Append(refName)
 				.Append(", but there are ")
@@ -297,7 +298,7 @@ namespace org.pescuma.dotnetdependencychecker
 				.Append(" projects that match:");
 
 			candidates.ForEach(c => message.Append("\n  - ")
-				.Append(c, OutputMessage.Info.Csproj));
+				.Append(c, OutputMessage.ProjInfo.Path));
 			message.Append("\nMultiple dependencies will be created.");
 
 			return new RuleMatch(false, Severity.Warn, message, null, proj.AsList()

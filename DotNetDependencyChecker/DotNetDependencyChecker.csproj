@@ -65,6 +65,7 @@
     <Compile Include="model\Dependable.cs" />
     <Compile Include="model\Dependency.cs" />
     <Compile Include="model\DependencyGraph.cs" />
+    <Compile Include="model\Group.cs" />
     <Compile Include="rules\OutputMessage.cs" />
     <Compile Include="rules\BaseRule.cs" />
     <Compile Include="rules\DepenendencyRule.cs" />
