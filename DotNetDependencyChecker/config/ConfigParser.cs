@@ -12,6 +12,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 	public class ConfigParser
 	{
 		private const string COMMENT = "#";
+		private const string GROUP_ELEMENT = "+=";
 		private const string DEPENDS = "->";
 		private const string NOT_DEPENDS = "-X->";
 
@@ -84,9 +85,9 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		private void ParseGroup(string line, ConfigLocation location)
 		{
-			var pos = line.IndexOf(DEPENDS, StringComparison.Ordinal);
+			var pos = line.IndexOf(GROUP_ELEMENT, StringComparison.CurrentCultureIgnoreCase);
 			if (pos < 0)
-				throw new ConfigParserException(location, "Invalid group (should contain Name " + DEPENDS + " Contents)");
+				throw new ConfigParserException(location, "Invalid group (should contain Name " + GROUP_ELEMENT + " Contents)");
 
 			var name = line.Substring(0, pos)
 				.Trim();

@@ -87,7 +87,7 @@ input: c:\b");
 		[Test]
 		public void TestGroupName()
 		{
-			var config = Parse(@"group: My name -> A");
+			var config = Parse(@"group: My name += A");
 
 			Assert.AreEqual(1, config.Groups.Count);
 
@@ -98,7 +98,7 @@ input: c:\b");
 		[Test]
 		public void TestGroupWithSimpleMatch()
 		{
-			var config = Parse(@"group: My name -> A.Project.Name");
+			var config = Parse(@"group: My name += A.Project.Name");
 
 			var group = config.Groups[0];
 			Assert.AreEqual(true, group.Matches(ProjWithName("A.Project.Name")));
@@ -108,7 +108,7 @@ input: c:\b");
 		[Test]
 		public void TestGroupWithSimpleMatchIsCaseInsensitive()
 		{
-			var config = Parse(@"group: My name -> A.Project.Name");
+			var config = Parse(@"group: My name += A.Project.Name");
 
 			var group = config.Groups[0];
 			Assert.AreEqual(true, group.Matches(ProjWithName("a.pRoJect.Name")));
@@ -117,7 +117,7 @@ input: c:\b");
 		[Test]
 		public void TestGroupWithREMatch()
 		{
-			var config = Parse(@"group: My name -> re: Ab+");
+			var config = Parse(@"group: My name += re: Ab+");
 
 			var group = config.Groups[0];
 			Assert.AreEqual(true, group.Matches(ProjWithName("Abbb")));
@@ -127,7 +127,7 @@ input: c:\b");
 		[Test]
 		public void TestGroupWithREMatchIsCaseInsensitive()
 		{
-			var config = Parse(@"group: My name -> re: Ab+");
+			var config = Parse(@"group: My name += re: Ab+");
 
 			var group = config.Groups[0];
 			Assert.AreEqual(true, group.Matches(ProjWithName("abbb")));
@@ -136,7 +136,7 @@ input: c:\b");
 		[Test]
 		public void TestGroupWithExactPathMatch()
 		{
-			var config = Parse(@"group: My name -> path: C:\a");
+			var config = Parse(@"group: My name += path: C:\a");
 
 			var group = config.Groups[0];
 			Assert.AreEqual(true, group.Matches(ProjWithPath(@"C:\a")));
@@ -146,7 +146,7 @@ input: c:\b");
 		[Test]
 		public void TestGroupWithExactPathMatchIsCaseInsensitive()
 		{
-			var config = Parse(@"group: My name -> path: C:\a");
+			var config = Parse(@"group: My name += path: C:\a");
 
 			var group = config.Groups[0];
 			Assert.AreEqual(true, group.Matches(ProjWithPath(@"c:\A")));
@@ -155,7 +155,7 @@ input: c:\b");
 		[Test]
 		public void TestGroupWithPathPrefixMatch()
 		{
-			var config = Parse(@"group: My name -> path: C:\a");
+			var config = Parse(@"group: My name += path: C:\a");
 
 			var group = config.Groups[0];
 			Assert.AreEqual(true, group.Matches(ProjWithPath(@"C:\a\X")));
@@ -165,7 +165,7 @@ input: c:\b");
 		[Test]
 		public void TestGroupWithPathPrefixMatchIsCaseInsensitive()
 		{
-			var config = Parse(@"group: My name -> path: C:\a");
+			var config = Parse(@"group: My name += path: C:\a");
 
 			var group = config.Groups[0];
 			Assert.AreEqual(true, group.Matches(ProjWithPath(@"c:\A\X")));
@@ -174,8 +174,8 @@ input: c:\b");
 		[Test]
 		public void TestGroupsKeepFileOrder()
 		{
-			var config = Parse(@"group: My name -> A
-group: My name -> B");
+			var config = Parse(@"group: My name += A
+group: My name += B");
 
 			Assert.AreEqual(true, config.Groups[0].Matches(ProjWithName("A")));
 			Assert.AreEqual(true, config.Groups[1].Matches(ProjWithName("B")));
