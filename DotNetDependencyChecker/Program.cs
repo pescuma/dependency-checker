@@ -6,7 +6,6 @@ using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
 using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.output;
-using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker
 {
@@ -40,12 +39,14 @@ namespace org.pescuma.dotnetdependencychecker
 				warnings = warnings.Where(e => !(e is DependencyRuleMatch) || !((DependencyRuleMatch) e).Allowed)
 					.ToList();
 
+				config.Output.Results.ForEach(o => o.Output(warnings));
+
 				if (warnings.Any())
-					warnings.ForEach(e => Console.WriteLine("\n" + ToConsole(e)));
+					Console.WriteLine(warnings.Count + " errors(s) found");
 				else
 					Console.WriteLine("No errors found");
-
 				Console.WriteLine();
+
 				return 0;
 			}
 			catch (ConfigParserException e)
@@ -62,133 +63,6 @@ namespace org.pescuma.dotnetdependencychecker
 			}
 		}
 
-		private static string ToConsole(OutputEntry entry)
-		{
-			var result = new StringBuilder();
-
-			result.Append("[")
-				.Append(entry.Severity.ToString()
-					.ToUpper())
-				.Append("] ");
-			result.Append(ToConsole(entry.Messsage));
-
-			if (entry.Projects.Any())
-			{
-				result.Append("\nProjects affected:");
-				entry.Projects.ForEach(p => result.Append("\n  - ")
-					.Append(ToConsole(p, OutputMessage.ProjInfo.NameAndPath)));
-			}
-
-			if (entry.Dependencies.Any())
-			{
-				result.Append("\nDependencies affected:");
-				entry.Dependencies.ForEach(d => result.Append("\n  - ")
-					.Append(ToConsole(d, OutputMessage.DepInfo.FullDescription)));
-			}
-
-			return result.ToString();
-		}
-
-		private static string ToConsole(OutputMessage messsage)
-		{
-			return string.Join("", messsage.Elements.Select(e =>
-			{
-				if (e.Text != null)
-					return e.Text;
-
-				else if (e.Project != null)
-					return ToConsole(e.Project, e.ProjInfo);
-
-				else if (e.Dependendcy != null)
-					return ToConsole(e.Dependendcy, e.DepInfo);
-
-				else
-					throw new InvalidDataException();
-			}));
-		}
-
-		private static string ToConsole(Dependable proj, OutputMessage.ProjInfo info)
-		{
-			if (proj is Group)
-				return ToConsole(((Group) proj).Representing, info);
-
-			switch (info)
-			{
-				case OutputMessage.ProjInfo.Name:
-				{
-					return string.Join(" or ", proj.Names);
-				}
-				case OutputMessage.ProjInfo.NameAndGroup:
-				{
-					var result = ToConsole(proj, OutputMessage.ProjInfo.Name);
-
-					var group = (proj is Assembly ? ((Assembly) proj).Group : null);
-					if (group != null)
-						result = string.Format("{0} (in group {1})", result, group.Name);
-
-					return result;
-				}
-				case OutputMessage.ProjInfo.NameAndCsproj:
-				{
-					return string.Format("{0} ({1})", ToConsole(proj, OutputMessage.ProjInfo.Name), ToConsole(proj, OutputMessage.ProjInfo.Csproj));
-				}
-				case OutputMessage.ProjInfo.NameAndPath:
-				{
-					if (proj.Paths.Any())
-						return string.Format("{0} ({1})", ToConsole(proj, OutputMessage.ProjInfo.Name), ToConsole(proj, OutputMessage.ProjInfo.Path));
-					else
-						return ToConsole(proj, OutputMessage.ProjInfo.Name);
-				}
-				case OutputMessage.ProjInfo.Path:
-				{
-					if (proj.Paths.Any())
-						return string.Join(" or ", proj.Paths);
-					else
-						return ToConsole(proj, OutputMessage.ProjInfo.Name);
-				}
-				case OutputMessage.ProjInfo.Csproj:
-				{
-					if (proj is Project)
-						return ((Project) proj).CsprojPath;
-					else
-						throw new InvalidDataException();
-				}
-				default:
-					throw new InvalidDataException();
-			}
-		}
-
-		private static string ToConsole(Dependency dep, OutputMessage.DepInfo info)
-		{
-			switch (info)
-			{
-				case OutputMessage.DepInfo.Type:
-				{
-					switch (dep.Type)
-					{
-						case Dependency.Types.DllReference:
-							return "DLL reference";
-						case Dependency.Types.ProjectReference:
-							return "project reference";
-						default:
-							throw new InvalidDataException();
-					}
-				}
-				case OutputMessage.DepInfo.Line:
-				{
-					return "line " + dep.Location.Line;
-				}
-				case OutputMessage.DepInfo.FullDescription:
-				{
-					return string.Format("{0} in {1} of {2} pointing to {3}", ToConsole(dep, OutputMessage.DepInfo.Type),
-						ToConsole(dep, OutputMessage.DepInfo.Line), ToConsole(dep.Source, OutputMessage.ProjInfo.NameAndCsproj),
-						ToConsole(dep.Target, OutputMessage.ProjInfo.NameAndPath));
-				}
-				default:
-					throw new InvalidDataException();
-			}
-		}
-
 		private static void DumpProjects(IEnumerable<Dependable> projects, List<string> filenames)
 		{
 			if (!filenames.Any())
@@ -197,7 +71,7 @@ namespace org.pescuma.dotnetdependencychecker
 			var projs = projects.ToList();
 			projs.Sort(DependableUtils.NaturalOrdering);
 
-			var names = projs.Select(p => ToConsole(p, OutputMessage.ProjInfo.Name))
+			var names = projs.Select(p => string.Join(" or ", p.Names))
 				.ToList();
 
 			filenames.ForEach(f => File.WriteAllLines(f, names));
@@ -237,9 +111,10 @@ namespace org.pescuma.dotnetdependencychecker
 
 				var projs = g.ToList();
 				projs.Sort(DependableUtils.NaturalOrdering);
-				projs.ForEach(p => result.Append("  - ")
-					.Append(ToConsole(p, OutputMessage.ProjInfo.Name))
-					.Append("\n"));
+				projs.Cast<Dependable>()
+					.ForEach(p => result.Append("  - ")
+						.Append(string.Join(" or ", p.Names))
+						.Append("\n"));
 
 				result.Append("\n");
 			});

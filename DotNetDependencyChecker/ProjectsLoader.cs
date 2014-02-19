@@ -31,8 +31,6 @@ namespace org.pescuma.dotnetdependencychecker
 			dependencies = new List<Dependency>();
 			ignore = p => config.Ignores.Any(i => i.Matches(p));
 
-			Console.WriteLine("Reading cs projs...");
-
 			var csprojFiles = config.Inputs.SelectMany(folder => Directory.GetFiles(folder, "*.csproj", SearchOption.AllDirectories))
 				.Select(Path.GetFullPath)
 				.Distinct();
@@ -46,8 +44,6 @@ namespace org.pescuma.dotnetdependencychecker
 				return new ProcessingProject(csproj, project, ignored);
 			})
 				.ToList();
-
-			Console.WriteLine("Creating dependency graph...");
 
 			CreateInitialProjects();
 

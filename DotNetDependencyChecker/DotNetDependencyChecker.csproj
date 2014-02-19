@@ -63,6 +63,7 @@
     <Compile Include="CsprojReader.cs" />
     <Compile Include="GroupsLoader.cs" />
     <Compile Include="output\BaseOutputEntry.cs" />
+    <Compile Include="output\ConsoleOutputer.cs" />
     <Compile Include="output\LoadingOutputWarning.cs" />
     <Compile Include="model\Assembly.cs" />
     <Compile Include="model\Dependable.cs" />
@@ -70,7 +71,10 @@
     <Compile Include="model\DependencyGraph.cs" />
     <Compile Include="model\Group.cs" />
     <Compile Include="output\OutputEntry.cs" />
+    <Compile Include="output\Outputer.cs" />
+    <Compile Include="output\TextOutputer.cs" />
     <Compile Include="output\UniqueProjectOutput.cs" />
+    <Compile Include="output\XMLOutputer.cs" />
     <Compile Include="rules\OutputMessage.cs" />
     <Compile Include="rules\BaseRule.cs" />
     <Compile Include="rules\DepenendencyRule.cs" />

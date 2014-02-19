@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using org.pescuma.dotnetdependencychecker.model;
+using org.pescuma.dotnetdependencychecker.output;
 using org.pescuma.dotnetdependencychecker.rules;
 using org.pescuma.dotnetdependencychecker.utils;
 
@@ -43,6 +44,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 				{ "output projects:", ParseOutputProjects },
 				{ "output groups:", ParseOutputGroups },
 				{ "output dependencies:", ParseOutputDependencies },
+				{ "output results:", ParseOutputResults },
 				{ "rule:", ParseRule },
 				{ "ignore:", ParseIgnore },
 				{ "ignore all references not in includes", ParseIgnoreAllNonLocalProjects },
@@ -141,19 +143,40 @@ namespace org.pescuma.dotnetdependencychecker.config
 			return proj => proj.Names.Any(n => line.Equals(n, StringComparison.CurrentCultureIgnoreCase));
 		}
 
-		private void ParseOutputProjects(string line, ConfigLocation configLocation)
+		private void ParseOutputProjects(string line, ConfigLocation location)
 		{
 			config.Output.Projects.Add(PathUtils.ToAbsolute(basePath, line));
 		}
 
-		private void ParseOutputGroups(string line, ConfigLocation configLocation)
+		private void ParseOutputGroups(string line, ConfigLocation location)
 		{
 			config.Output.Groups.Add(PathUtils.ToAbsolute(basePath, line));
 		}
 
-		private void ParseOutputDependencies(string line, ConfigLocation configLocation)
+		private void ParseOutputDependencies(string line, ConfigLocation location)
 		{
 			config.Output.Dependencies.Add(PathUtils.ToAbsolute(basePath, line));
+		}
+
+		private void ParseOutputResults(string line, ConfigLocation location)
+		{
+			if (line.Equals("console", StringComparison.CurrentCultureIgnoreCase))
+				config.Output.Results.Add(new ConsoleOutputer(false));
+
+			else if (line.Equals("console verbose", StringComparison.CurrentCultureIgnoreCase))
+				config.Output.Results.Add(new ConsoleOutputer(true));
+
+			else
+			{
+				var file = PathUtils.ToAbsolute(basePath, line);
+				var extension = Path.GetExtension(file) ?? "";
+
+				if (extension.Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
+					config.Output.Results.Add(new XMLOutputer(file));
+
+				else
+					config.Output.Results.Add(new TextOutputer(file));
+			}
 		}
 
 		private static readonly Dictionary<string, Severity> SEVERITIES = new Dictionary<string, Severity>
