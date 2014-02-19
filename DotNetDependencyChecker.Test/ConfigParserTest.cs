@@ -117,7 +117,7 @@ input: c:\b");
 		[Test]
 		public void TestGroupWithREMatch()
 		{
-			var config = Parse(@"group: My name += re: Ab+");
+			var config = Parse(@"group: My name += regex: Ab+");
 
 			var group = config.Groups[0];
 			Assert.AreEqual(true, group.Matches(ProjWithName("Abbb")));
@@ -127,7 +127,7 @@ input: c:\b");
 		[Test]
 		public void TestGroupWithREMatchIsCaseInsensitive()
 		{
-			var config = Parse(@"group: My name += re: Ab+");
+			var config = Parse(@"group: My name += regex: Ab+");
 
 			var group = config.Groups[0];
 			Assert.AreEqual(true, group.Matches(ProjWithName("abbb")));
@@ -258,7 +258,7 @@ output projects: c:\b.out");
 		[Test]
 		public void TestAllowRuleWithBothREs()
 		{
-			var config = Parse(@"rule: re: Ab+ -> re: Ba+");
+			var config = Parse(@"rule: regex: Ab+ -> regex: Ba+");
 
 			Assert.AreEqual(1, config.Rules.Count);
 

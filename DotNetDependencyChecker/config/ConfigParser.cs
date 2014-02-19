@@ -108,7 +108,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
-				{ "re:", (line, loc) => result = ParseRE(line) },
+				{ "regex:", (line, loc) => result = ParseRE(line) },
 				{ "path:", (line, loc) => result = ParsePath(line) },
 				{ "", (line, loc) => result = ParseSimpleMatch(line) },
 			};
