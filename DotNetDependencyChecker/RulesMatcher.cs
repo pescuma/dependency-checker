@@ -2,15 +2,16 @@ using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dotnetdependencychecker.config;
 using org.pescuma.dotnetdependencychecker.model;
+using org.pescuma.dotnetdependencychecker.output;
 using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker
 {
 	public class RulesMatcher
 	{
-		public static List<RuleMatch> Match(DependencyGraph graph, Config config)
+		public static List<OutputEntry> Match(DependencyGraph graph, Config config)
 		{
-			var result = new List<RuleMatch>();
+			var result = new List<OutputEntry>();
 
 			foreach (var rule in config.Rules)
 			{
@@ -48,7 +49,7 @@ namespace org.pescuma.dotnetdependencychecker
 			return result;
 		}
 
-		private static RuleMatch FindMatch(List<Rule> rules, List<Dependency> deps)
+		private static OutputEntry FindMatch(List<Rule> rules, List<Dependency> deps)
 		{
 			foreach (var rule in rules)
 			{

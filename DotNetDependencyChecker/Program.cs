@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
 using org.pescuma.dotnetdependencychecker.model;
+using org.pescuma.dotnetdependencychecker.output;
 using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker
@@ -22,7 +23,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 			try
 			{
-				var warnings = new List<RuleMatch>();
+				var warnings = new List<OutputEntry>();
 
 				var config = new ConfigParser().Parse(args[0]);
 
@@ -34,8 +35,10 @@ namespace org.pescuma.dotnetdependencychecker
 
 				DumpGroups(graph.Vertices, config.Output.Groups);
 
-				warnings.AddRange(RulesMatcher.Match(graph, config)
-					.Where(e => !e.Allowed));
+				warnings.AddRange(RulesMatcher.Match(graph, config));
+
+				warnings = warnings.Where(e => !(e is DependencyRuleMatch) || !((DependencyRuleMatch) e).Allowed)
+					.ToList();
 
 				if (warnings.Any())
 					warnings.ForEach(e => Console.WriteLine("\n[{0}] {1}", e.Severity.ToString()

@@ -62,11 +62,15 @@
     <Compile Include="config\ConfigParserException.cs" />
     <Compile Include="CsprojReader.cs" />
     <Compile Include="GroupsLoader.cs" />
+    <Compile Include="output\BaseOutputEntry.cs" />
+    <Compile Include="output\LoadingOutputWarning.cs" />
     <Compile Include="model\Assembly.cs" />
     <Compile Include="model\Dependable.cs" />
     <Compile Include="model\Dependency.cs" />
     <Compile Include="model\DependencyGraph.cs" />
     <Compile Include="model\Group.cs" />
+    <Compile Include="output\OutputEntry.cs" />
+    <Compile Include="output\UniqueProjectOutput.cs" />
     <Compile Include="rules\OutputMessage.cs" />
     <Compile Include="rules\BaseRule.cs" />
     <Compile Include="rules\DepenendencyRule.cs" />
@@ -80,7 +84,7 @@
     <Compile Include="rules\UniqueDependenciesRule.cs" />
     <Compile Include="rules\UniqueProjectRule.cs" />
     <Compile Include="rules\Rule.cs" />
-    <Compile Include="rules\RuleMatch.cs" />
+    <Compile Include="output\DependencyRuleMatch.cs" />
     <Compile Include="RulesMatcher.cs" />
     <Compile Include="rules\Severity.cs" />
     <Compile Include="utils\Argument.cs" />

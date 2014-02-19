@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dotnetdependencychecker.config;
 using org.pescuma.dotnetdependencychecker.model;
+using org.pescuma.dotnetdependencychecker.output;
 using QuickGraph.Algorithms;
 
 namespace org.pescuma.dotnetdependencychecker.rules
@@ -13,9 +14,9 @@ namespace org.pescuma.dotnetdependencychecker.rules
 		{
 		}
 
-		public override List<RuleMatch> Process(DependencyGraph graph)
+		public override List<OutputEntry> Process(DependencyGraph graph)
 		{
-			var result = new List<RuleMatch>();
+			var result = new List<OutputEntry>();
 
 			IDictionary<Dependable, int> components;
 			graph.StronglyConnectedComponents(out components);
@@ -39,7 +40,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 				projs.ForEach(p => message.Append("\n  - ")
 					.Append(p, OutputMessage.ProjInfo.Name));
 
-				result.Add(new RuleMatch(false, Severity, message, Location, projs, deps));
+				result.Add(new DependencyRuleMatch(false, Severity, message, this, projs, deps));
 			}
 
 			return result;

@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using org.pescuma.dotnetdependencychecker.config;
 using org.pescuma.dotnetdependencychecker.model;
+using org.pescuma.dotnetdependencychecker.output;
 
 namespace org.pescuma.dotnetdependencychecker.rules
 {
@@ -21,7 +21,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			Allow = allow;
 		}
 
-		public override RuleMatch Process(Dependency dep)
+		public override OutputEntry Process(Dependency dep)
 		{
 			if (!Source(dep.Source) || !Target(dep.Target))
 				return null;
@@ -33,10 +33,8 @@ namespace org.pescuma.dotnetdependencychecker.rules
 				.Append(dep.Target, OutputMessage.ProjInfo.NameAndGroup)
 				.Append(Allow ? "" : " not")
 				.Append(" allowed");
-			var projs = new List<Dependable> { dep.Source, dep.Target };
-			var dependencies = new List<Dependency> { dep };
 
-			return new RuleMatch(Allow, Severity, messsage, Location, projs, dependencies);
+			return new DependencyRuleMatch(Allow, Severity, messsage, this, dep);
 		}
 	}
 }

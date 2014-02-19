@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
 using org.pescuma.dotnetdependencychecker.model;
+using org.pescuma.dotnetdependencychecker.output;
 using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker
@@ -12,13 +13,13 @@ namespace org.pescuma.dotnetdependencychecker
 	public class ProjectsLoader
 	{
 		private readonly Config config;
-		private readonly List<RuleMatch> warnings;
+		private readonly List<OutputEntry> warnings;
 		private Func<Dependable, bool> ignore;
 		private List<Assembly> assemblies;
 		private List<Dependency> dependencies;
 		private List<ProcessingProject> processing;
 
-		public ProjectsLoader(Config config, List<RuleMatch> warnings)
+		public ProjectsLoader(Config config, List<OutputEntry> warnings)
 		{
 			this.config = config;
 			this.warnings = warnings;
@@ -177,9 +178,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 			if (result != null && result.Any())
 			{
-				var message = new OutputMessage();
-
-				message.Append("The project ")
+				var message = new OutputMessage().Append("The project ")
 					.Append(proj, OutputMessage.ProjInfo.NameAndCsproj)
 					.Append(" references the project ")
 					.Append(filename)
@@ -192,9 +191,8 @@ namespace org.pescuma.dotnetdependencychecker
 				result.ForEach(p => message.Append("\n  - ")
 					.Append(p, OutputMessage.ProjInfo.Csproj));
 
-				var allProjs = result.Concat(proj.AsList())
-					.ToList();
-				warnings.Add(new RuleMatch(false, Severity.Warn, message, null, allProjs, allProjs.Select(dep.WithTarget)));
+				warnings.Add(new LoadingOutputWarning(message, result.Select(dep.WithTarget)
+					.ToArray()));
 			}
 
 			return result;
@@ -213,7 +211,7 @@ namespace org.pescuma.dotnetdependencychecker
 				.Append(reference.Include)
 				.Append(" but it could not be loaded. Guessing assembly name to be the same as project name.");
 
-			warnings.Add(new RuleMatch(false, Severity.Warn, msg, null, dep.WithTarget(result)));
+			warnings.Add(new LoadingOutputWarning(msg, dep.WithTarget(result)));
 
 			AddAssembly(result);
 
@@ -287,7 +285,7 @@ namespace org.pescuma.dotnetdependencychecker
 			return null;
 		}
 
-		private RuleMatch CreateMultipleReferencesWarning(Project proj, Dependency dep, string refName, List<Assembly> candidates)
+		private OutputEntry CreateMultipleReferencesWarning(Project proj, Dependency dep, string refName, List<Assembly> candidates)
 		{
 			var message = new OutputMessage().Append("The project ")
 				.Append(proj, OutputMessage.ProjInfo.NameAndCsproj)
@@ -301,8 +299,8 @@ namespace org.pescuma.dotnetdependencychecker
 				.Append(c, OutputMessage.ProjInfo.Csproj));
 			message.Append("\nMultiple dependencies will be created.");
 
-			return new RuleMatch(false, Severity.Warn, message, null, proj.AsList()
-				.Concat(candidates), dep.AsList());
+			return new LoadingOutputWarning(message, candidates.Select(dep.WithTarget)
+				.ToArray());
 		}
 
 		private class ProcessingProject

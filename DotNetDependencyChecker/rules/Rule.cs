@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
 using org.pescuma.dotnetdependencychecker.model;
+using org.pescuma.dotnetdependencychecker.output;
 
 namespace org.pescuma.dotnetdependencychecker.rules
 {
 	public interface Rule
 	{
-		List<RuleMatch> Process(DependencyGraph graph);
+		List<OutputEntry> Process(DependencyGraph graph);
 
-		List<RuleMatch> Process(DependencyGraph graph, Dependable proj);
+		List<OutputEntry> Process(DependencyGraph graph, Dependable proj);
 
 		/// <returns>null if didn't match</returns>
-		RuleMatch Process(Dependency dep);
+		OutputEntry Process(Dependency dep);
 	}
 }

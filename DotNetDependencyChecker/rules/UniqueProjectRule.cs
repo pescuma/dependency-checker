@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dotnetdependencychecker.config;
 using org.pescuma.dotnetdependencychecker.model;
+using org.pescuma.dotnetdependencychecker.output;
 
 namespace org.pescuma.dotnetdependencychecker.rules
 {
@@ -21,9 +22,9 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			this.attributes = attributes;
 		}
 
-		public override List<RuleMatch> Process(DependencyGraph graph)
+		public override List<OutputEntry> Process(DependencyGraph graph)
 		{
-			var result = new List<RuleMatch>();
+			var result = new List<OutputEntry>();
 
 			var same = graph.Vertices.OfType<Project>()
 				.Where(allowProject)
@@ -38,7 +39,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 				g.ForEach(e => message.Append("\n  - ")
 					.Append(e, OutputMessage.ProjInfo.NameAndCsproj));
 
-				result.Add(new RuleMatch(false, Severity, message, Location, g, null));
+				result.Add(new UniqueProjectOutput(Severity, message, Location));
 			});
 
 			return result;

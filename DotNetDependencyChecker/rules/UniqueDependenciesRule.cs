@@ -2,6 +2,7 @@
 using System.Linq;
 using org.pescuma.dotnetdependencychecker.config;
 using org.pescuma.dotnetdependencychecker.model;
+using org.pescuma.dotnetdependencychecker.output;
 
 namespace org.pescuma.dotnetdependencychecker.rules
 {
@@ -12,13 +13,13 @@ namespace org.pescuma.dotnetdependencychecker.rules
 		{
 		}
 
-		public override List<RuleMatch> Process(DependencyGraph graph, Dependable element)
+		public override List<OutputEntry> Process(DependencyGraph graph, Dependable element)
 		{
 			var proj = element as Project;
 			if (proj == null)
 				return null;
 
-			var result = new List<RuleMatch>();
+			var result = new List<OutputEntry>();
 
 			var same = graph.OutEdges(proj)
 				.Where(d => d.Target is Project)
@@ -41,7 +42,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 					.Append(" in ")
 					.Append(d, OutputMessage.DepInfo.Line));
 
-				result.Add(new RuleMatch(false, Severity, message, Location, proj.AsList(), g));
+				result.Add(new DependencyRuleMatch(false, Severity, message, this, proj.AsList(), g));
 			});
 
 			return result;
