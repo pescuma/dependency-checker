@@ -353,7 +353,7 @@ output projects: c:\b.out");
 			var config = Parse("rule: a -> B [warning]");
 
 			var rule = (DepenendencyRule) config.Rules[0];
-			Assert.AreEqual(Severity.Warn, rule.Severity);
+			Assert.AreEqual(Severity.Warning, rule.Severity);
 			Assert.AreEqual(true, rule.Source(ProjWithName("a")));
 			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
 		}

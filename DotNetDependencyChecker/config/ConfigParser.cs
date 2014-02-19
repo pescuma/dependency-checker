@@ -182,7 +182,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 		private static readonly Dictionary<string, Severity> SEVERITIES = new Dictionary<string, Severity>
 		{
 			{ "info", Severity.Info },
-			{ "warning", Severity.Warn },
+			{ "warning", Severity.Warning },
 			{ "error", Severity.Error },
 		};
 

@@ -42,7 +42,15 @@ namespace org.pescuma.dotnetdependencychecker
 				config.Output.Results.ForEach(o => o.Output(warnings));
 
 				if (warnings.Any())
-					Console.WriteLine(warnings.Count + " errors(s) found");
+				{
+					var gs = warnings.GroupBy(w => w.Severity)
+						.Select(e => new { Severity = e.Key, Count = e.Count() })
+						.ToList();
+					gs.Sort((s1, s2) => (int) s2.Severity - (int) s1.Severity);
+
+					Console.WriteLine("Found " + string.Join(", ", gs.Select(e => e.Count + " " + e.Severity.ToString()
+						.ToLower() + "(s)")));
+				}
 				else
 					Console.WriteLine("No errors found");
 				Console.WriteLine();
