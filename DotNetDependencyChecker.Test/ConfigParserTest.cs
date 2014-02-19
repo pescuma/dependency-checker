@@ -298,7 +298,7 @@ output projects: c:\b.out");
 		public void TestIgnoreAllNonLocalProjects()
 		{
 			var config = Parse("input: c:\\a\n" + //
-			                   "ignore all references not in includes");
+							   "ignore all references not in inputs");
 
 			Assert.AreEqual(1, config.Ignores.Count);
 			var ignore = config.Ignores[0];
@@ -310,7 +310,7 @@ output projects: c:\b.out");
 		public void TestIgnoreAllNonLocalProjectsCaseInsensitive()
 		{
 			var config = Parse("input: C:\\A\n" + //
-			                   "ignore all references not in includes");
+							   "ignore all references not in inputs");
 
 			Assert.AreEqual(1, config.Ignores.Count);
 			var ignore = config.Ignores[0];

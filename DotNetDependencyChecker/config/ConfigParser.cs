@@ -47,7 +47,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 				{ "output results:", ParseOutputResults },
 				{ "rule:", ParseRule },
 				{ "ignore:", ParseIgnore },
-				{ "ignore all references not in includes", ParseIgnoreAllNonLocalProjects },
+				{ "ignore all references not in inputs", ParseIgnoreAllNonLocalProjects },
 			};
 
 			foreach (var item in lines.Indexed())
