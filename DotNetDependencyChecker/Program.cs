@@ -6,6 +6,7 @@ using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
 using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.output;
+using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker
 {
@@ -48,14 +49,18 @@ namespace org.pescuma.dotnetdependencychecker
 						.ToList();
 					gs.Sort((s1, s2) => (int) s2.Severity - (int) s1.Severity);
 
-					Console.WriteLine("Found " + string.Join(", ", gs.Select(e => e.Count + " " + e.Severity.ToString()
+					Console.WriteLine("Found {0}\n", string.Join(", ", gs.Select(e => e.Count + " " + e.Severity.ToString()
 						.ToLower() + "(s)")));
+
+					return gs.Where(g => g.Severity == Severity.Error)
+						.Select(g => g.Count)
+						.FirstOrDefault();
 				}
 				else
-					Console.WriteLine("No errors found");
-				Console.WriteLine();
-
-				return 0;
+				{
+					Console.WriteLine("No errors found\n");
+					return 0;
+				}
 			}
 			catch (ConfigParserException e)
 			{
