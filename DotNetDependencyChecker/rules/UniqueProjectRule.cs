@@ -10,13 +10,13 @@ namespace org.pescuma.dotnetdependencychecker.rules
 	public class UniqueProjectRule : BaseRule
 	{
 		private readonly Func<Project, string> id;
-		private readonly string attributes;
+		private readonly Func<Project, string> description;
 
-		public UniqueProjectRule(Func<Project, string> id, string attributes, Severity severity, ConfigLocation location)
+		public UniqueProjectRule(Func<Project, string> id, Func<Project, string> description, Severity severity, ConfigLocation location)
 			: base(severity, location)
 		{
 			this.id = id;
-			this.attributes = attributes;
+			this.description = description;
 		}
 
 		public override List<OutputEntry> Process(DependencyGraph graph)
@@ -28,14 +28,15 @@ namespace org.pescuma.dotnetdependencychecker.rules
 				.Where(g => g.Count() > 1);
 			same.ForEach(g =>
 			{
-				var message = new OutputMessage();
-				message.Append("Projects with same ")
-					.Append(attributes)
-					.Append(" found:");
-				g.ForEach(e => message.Append("\n  - ")
-					.Append(e, OutputMessage.ProjInfo.NameAndCsproj));
+				var projs = g.ToList();
 
-				result.Add(new UniqueProjectOutput(Severity, message, Location));
+				var message = new OutputMessage();
+				message.Append(projs.Count())
+					.Append(" projects ")
+					.Append(description(projs.First()))
+					.Append(" found");
+
+				result.Add(new UniqueProjectOutput(Severity, message, Location, projs));
 			});
 
 			return result;

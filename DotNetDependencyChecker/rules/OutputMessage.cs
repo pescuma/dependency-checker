@@ -39,16 +39,18 @@ namespace org.pescuma.dotnetdependencychecker.rules
 		public enum ProjInfo
 		{
 			Name,
+			NameAndPath,
 			NameAndCsproj,
 			NameAndGroup,
 			Path,
-			Csproj
+			Csproj,
 		}
 
 		public enum DepInfo
 		{
 			Type,
-			Line
+			Line,
+			FullDescription
 		}
 
 		public class Element

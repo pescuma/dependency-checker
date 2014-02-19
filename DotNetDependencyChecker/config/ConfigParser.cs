@@ -167,9 +167,12 @@ namespace org.pescuma.dotnetdependencychecker.config
 			new Dictionary<string, Func<Severity, ConfigLocation, Rule>>
 			{
 				{ "don't allow circular dependencies", (s, l) => new NoCircularDepenendenciesRule(s, l) },
-				{ "no two projects with same name", (s, l) => new UniqueProjectRule(p => p.Name, "name", s, l) },
-				{ "no two projects with same guid", (s, l) => new UniqueProjectRule(p => p.Guid.ToString(), "GUID", s, l) },
-				{ "no two projects with same name and guid", (s, l) => new UniqueProjectRule(p => p.Name + "\n" + p.Guid, "name and GUID", s, l) },
+				{ "no two projects with same name", (s, l) => new UniqueProjectRule(p => p.Name, p => "named " + p.Name, s, l) },
+				{ "no two projects with same guid", (s, l) => new UniqueProjectRule(p => p.Guid.ToString(), p => "with GUID " + p.Guid, s, l) },
+				{
+					"no two projects with same name and guid",
+					(s, l) => new UniqueProjectRule(p => p.Name + "\n" + p.Guid, p => "named " + p.Name + " and with GUID " + p.Guid, s, l)
+				},
 				{ "avoid same dependency twice", (s, l) => new UniqueDependenciesRule(s, l) },
 			};
 

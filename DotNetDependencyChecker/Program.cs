@@ -41,8 +41,7 @@ namespace org.pescuma.dotnetdependencychecker
 					.ToList();
 
 				if (warnings.Any())
-					warnings.ForEach(e => Console.WriteLine("\n[{0}] {1}", e.Severity.ToString()
-						.ToLower(), ToConsole(e.Messsage)));
+					warnings.ForEach(e => Console.WriteLine("\n" + ToConsole(e)));
 				else
 					Console.WriteLine("No errors found");
 
@@ -63,6 +62,33 @@ namespace org.pescuma.dotnetdependencychecker
 			}
 		}
 
+		private static string ToConsole(OutputEntry entry)
+		{
+			var result = new StringBuilder();
+
+			result.Append("[")
+				.Append(entry.Severity.ToString()
+					.ToUpper())
+				.Append("] ");
+			result.Append(ToConsole(entry.Messsage));
+
+			if (entry.Projects.Any())
+			{
+				result.Append("\nProjects affected:");
+				entry.Projects.ForEach(p => result.Append("\n  - ")
+					.Append(ToConsole(p, OutputMessage.ProjInfo.NameAndPath)));
+			}
+
+			if (entry.Dependencies.Any())
+			{
+				result.Append("\nDependencies affected:");
+				entry.Dependencies.ForEach(d => result.Append("\n  - ")
+					.Append(ToConsole(d, OutputMessage.DepInfo.FullDescription)));
+			}
+
+			return result.ToString();
+		}
+
 		private static string ToConsole(OutputMessage messsage)
 		{
 			return string.Join("", messsage.Elements.Select(e =>
@@ -71,18 +97,21 @@ namespace org.pescuma.dotnetdependencychecker
 					return e.Text;
 
 				else if (e.Project != null)
-					return InfoForConsole(e.Project, e.ProjInfo);
+					return ToConsole(e.Project, e.ProjInfo);
 
 				else if (e.Dependendcy != null)
-					return InfoForConsole(e.Dependendcy, e.DepInfo);
+					return ToConsole(e.Dependendcy, e.DepInfo);
 
 				else
 					throw new InvalidDataException();
 			}));
 		}
 
-		private static string InfoForConsole(Dependable proj, OutputMessage.ProjInfo info)
+		private static string ToConsole(Dependable proj, OutputMessage.ProjInfo info)
 		{
+			if (proj is Group)
+				return ToConsole(((Group) proj).Representing, info);
+
 			switch (info)
 			{
 				case OutputMessage.ProjInfo.Name:
@@ -91,10 +120,7 @@ namespace org.pescuma.dotnetdependencychecker
 				}
 				case OutputMessage.ProjInfo.NameAndGroup:
 				{
-					if (proj is Group)
-						return InfoForConsole(((Group) proj).Representing, info);
-
-					var result = InfoForConsole(proj, OutputMessage.ProjInfo.Name);
+					var result = ToConsole(proj, OutputMessage.ProjInfo.Name);
 
 					var group = (proj is Assembly ? ((Assembly) proj).Group : null);
 					if (group != null)
@@ -104,15 +130,21 @@ namespace org.pescuma.dotnetdependencychecker
 				}
 				case OutputMessage.ProjInfo.NameAndCsproj:
 				{
-					return string.Format("{0} ({1})", InfoForConsole(proj, OutputMessage.ProjInfo.Name),
-						InfoForConsole(proj, OutputMessage.ProjInfo.Csproj));
+					return string.Format("{0} ({1})", ToConsole(proj, OutputMessage.ProjInfo.Name), ToConsole(proj, OutputMessage.ProjInfo.Csproj));
+				}
+				case OutputMessage.ProjInfo.NameAndPath:
+				{
+					if (proj.Paths.Any())
+						return string.Format("{0} ({1})", ToConsole(proj, OutputMessage.ProjInfo.Name), ToConsole(proj, OutputMessage.ProjInfo.Path));
+					else
+						return ToConsole(proj, OutputMessage.ProjInfo.Name);
 				}
 				case OutputMessage.ProjInfo.Path:
 				{
 					if (proj.Paths.Any())
 						return string.Join(" or ", proj.Paths);
 					else
-						return InfoForConsole(proj, OutputMessage.ProjInfo.Name);
+						return ToConsole(proj, OutputMessage.ProjInfo.Name);
 				}
 				case OutputMessage.ProjInfo.Csproj:
 				{
@@ -126,7 +158,7 @@ namespace org.pescuma.dotnetdependencychecker
 			}
 		}
 
-		private static string InfoForConsole(Dependency dep, OutputMessage.DepInfo info)
+		private static string ToConsole(Dependency dep, OutputMessage.DepInfo info)
 		{
 			switch (info)
 			{
@@ -146,6 +178,12 @@ namespace org.pescuma.dotnetdependencychecker
 				{
 					return "line " + dep.Location.Line;
 				}
+				case OutputMessage.DepInfo.FullDescription:
+				{
+					return string.Format("{0} in {1} of {2} pointing to {3}", ToConsole(dep, OutputMessage.DepInfo.Type),
+						ToConsole(dep, OutputMessage.DepInfo.Line), ToConsole(dep.Source, OutputMessage.ProjInfo.NameAndCsproj),
+						ToConsole(dep.Target, OutputMessage.ProjInfo.NameAndPath));
+				}
 				default:
 					throw new InvalidDataException();
 			}
@@ -159,7 +197,7 @@ namespace org.pescuma.dotnetdependencychecker
 			var projs = projects.ToList();
 			projs.Sort(DependableUtils.NaturalOrdering);
 
-			var names = projs.Select(p => InfoForConsole(p, OutputMessage.ProjInfo.Name))
+			var names = projs.Select(p => ToConsole(p, OutputMessage.ProjInfo.Name))
 				.ToList();
 
 			filenames.ForEach(f => File.WriteAllLines(f, names));
@@ -200,7 +238,7 @@ namespace org.pescuma.dotnetdependencychecker
 				var projs = g.ToList();
 				projs.Sort(DependableUtils.NaturalOrdering);
 				projs.ForEach(p => result.Append("  - ")
-					.Append(InfoForConsole(p, OutputMessage.ProjInfo.Name))
+					.Append(ToConsole(p, OutputMessage.ProjInfo.Name))
 					.Append("\n"));
 
 				result.Append("\n");

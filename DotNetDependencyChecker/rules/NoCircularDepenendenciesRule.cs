@@ -31,16 +31,25 @@ namespace org.pescuma.dotnetdependencychecker.rules
 					.ToList();
 
 				var projsSet = new HashSet<Dependable>(projs);
-				var deps = graph.Edges.Where(e => projsSet.Contains(e.Source) && projsSet.Contains(e.Target))
-					.ToList();
+				projs.Sort(DependableUtils.NaturalOrdering);
+
+				var deps = graph.Edges.Where(e => projsSet.Contains(e.Source) && projsSet.Contains(e.Target));
 
 				var message = new OutputMessage();
-				message.Append("Circular dependency found:");
-				projs.Sort(DependableUtils.NaturalOrdering);
-				projs.ForEach(p => message.Append("\n  - ")
-					.Append(p, OutputMessage.ProjInfo.Name));
+				message.Append("Circular dependency found between projects ");
 
-				result.Add(new DependencyRuleMatch(false, Severity, message, this, projs, deps));
+				var first = true;
+				foreach (var proj in projs)
+				{
+					if (first)
+						first = false;
+					else
+						message.Append(", ");
+
+					message.Append(proj, OutputMessage.ProjInfo.Name);
+				}
+
+				result.Add(new DependencyRuleMatch(false, Severity, message, this, deps));
 			}
 
 			return result;

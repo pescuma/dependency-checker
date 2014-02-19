@@ -1,4 +1,6 @@
-﻿using org.pescuma.dotnetdependencychecker.config;
+﻿using System.Collections.Generic;
+using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker.output
@@ -7,8 +9,8 @@ namespace org.pescuma.dotnetdependencychecker.output
 	{
 		public readonly ConfigLocation Location;
 
-		public UniqueProjectOutput(Severity severity, OutputMessage messsage, ConfigLocation location)
-			: base(severity, messsage)
+		public UniqueProjectOutput(Severity severity, OutputMessage messsage, ConfigLocation location, IEnumerable<Dependable> projs)
+			: base(severity, messsage, projs, null)
 		{
 			Location = location;
 		}

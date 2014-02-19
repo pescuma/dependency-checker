@@ -179,7 +179,7 @@ namespace org.pescuma.dotnetdependencychecker
 			if (result != null && result.Any())
 			{
 				var message = new OutputMessage().Append("The project ")
-					.Append(proj, OutputMessage.ProjInfo.NameAndCsproj)
+					.Append(proj, OutputMessage.ProjInfo.Name)
 					.Append(" references the project ")
 					.Append(filename)
 					.Append(" but it could not be loaded. Using project")
@@ -206,7 +206,7 @@ namespace org.pescuma.dotnetdependencychecker
 				return null;
 
 			var msg = new OutputMessage().Append("The project ")
-				.Append(proj, OutputMessage.ProjInfo.NameAndCsproj)
+				.Append(proj, OutputMessage.ProjInfo.Name)
 				.Append(" references the project ")
 				.Append(reference.Include)
 				.Append(" but it could not be loaded. Guessing assembly name to be the same as project name.");

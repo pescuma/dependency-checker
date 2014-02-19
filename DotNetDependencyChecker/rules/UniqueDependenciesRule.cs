@@ -22,27 +22,18 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			var result = new List<OutputEntry>();
 
 			var same = graph.OutEdges(proj)
-				.Where(d => d.Target is Project)
-				.GroupBy(d => ((Project) d.Target).AssemblyName)
+				.GroupBy(d => d.Target)
 				.Where(g => g.Count() > 1);
 
 			same.ForEach(g =>
 			{
-				var deps = g.ToList();
-				deps.Sort(Dependency.NaturalOrdering);
-
 				var message = new OutputMessage();
 				message.Append("The project ")
-					.Append(proj, OutputMessage.ProjInfo.NameAndCsproj)
-					.Append(" has multiple dependencies on the same assembly:");
-				g.ForEach(d => message.Append("\n  - ")
-					.Append(d, OutputMessage.DepInfo.Type)
-					.Append(" with ")
-					.Append(d.Target, OutputMessage.ProjInfo.NameAndCsproj)
-					.Append(" in ")
-					.Append(d, OutputMessage.DepInfo.Line));
+					.Append(proj, OutputMessage.ProjInfo.Name)
+					.Append(" has multiple dependencies with ")
+					.Append(g.Key, OutputMessage.ProjInfo.Name);
 
-				result.Add(new DependencyRuleMatch(false, Severity, message, this, proj.AsList(), g));
+				result.Add(new DependencyRuleMatch(false, Severity, message, this, g));
 			});
 
 			return result;

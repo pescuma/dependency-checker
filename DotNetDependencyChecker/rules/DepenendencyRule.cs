@@ -34,7 +34,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 				.Append(Allow ? "" : " not")
 				.Append(" allowed");
 
-			return new DependencyRuleMatch(Allow, Severity, messsage, this, dep);
+			return new DependencyRuleMatch(Allow, Severity, messsage, this, dep.AsList());
 		}
 	}
 }

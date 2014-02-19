@@ -17,38 +17,34 @@ namespace org.pescuma.dotnetdependencychecker.output
 		{
 			Severity = severity;
 			Messsage = messsage;
-			Projects = new List<Dependable>(projects ?? Enumerable.Empty<Dependable>());
-			Dependencies = new List<Dependency>(dependencies ?? Enumerable.Empty<Dependency>());
 
-			Projects.Sort(DependableUtils.NaturalOrdering);
+			if (dependencies == null)
+				dependencies = messsage.Elements.Select(e => e.Dependendcy)
+					.Where(d => d != null)
+					.Distinct();
+
+			Dependencies = dependencies.ToList();
 			Dependencies.Sort(Dependency.NaturalOrdering);
+
+			if (projects == null)
+				projects = messsage.Elements.Select(e => e.Project)
+					.Concat(Dependencies.Select(d => d.Source))
+					.Concat(Dependencies.Select(d => d.Target))
+					.Where(p => p != null)
+					.Distinct();
+
+			Projects = projects.ToList();
+			Projects.Sort(DependableUtils.NaturalOrdering);
 		}
 
-		protected BaseOutputEntry(Severity severity, OutputMessage messsage, Dependency[] dependencies)
-			: this(severity, messsage, GetProjects(dependencies), //
-				dependencies)
+		protected BaseOutputEntry(Severity severity, OutputMessage messsage, IEnumerable<Dependency> dependencies)
+			: this(severity, messsage, null, dependencies)
 		{
 		}
 
 		protected BaseOutputEntry(Severity severity, OutputMessage messsage)
-			: this(severity, messsage, //
-				messsage.Elements.Select(e => e.Project)
-					.Where(p => p != null)
-					.Concat(GetProjects(messsage.Elements.Select(e => e.Dependendcy)))
-					.Distinct(), //
-				messsage.Elements.Select(e => e.Dependendcy)
-					.Where(d => d != null)
-					.Distinct())
+			: this(severity, messsage, null, null)
 		{
-		}
-
-		private static IEnumerable<Dependable> GetProjects(IEnumerable<Dependency> dependencies)
-		{
-			var ds = dependencies as IList<Dependency> ?? dependencies.ToList();
-			return ds.Select(d => d.Source)
-				.Concat(ds.Select(d => d.Target))
-				.Where(p => p != null)
-				.Distinct();
 		}
 	}
 }
