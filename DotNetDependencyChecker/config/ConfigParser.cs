@@ -4,7 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using org.pescuma.dotnetdependencychecker.model;
-using org.pescuma.dotnetdependencychecker.output;
+using org.pescuma.dotnetdependencychecker.output.build;
+using org.pescuma.dotnetdependencychecker.output.errors;
 using org.pescuma.dotnetdependencychecker.rules;
 using org.pescuma.dotnetdependencychecker.utils;
 
@@ -45,6 +46,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 				{ "output groups:", ParseOutputGroups },
 				{ "output dependencies:", ParseOutputDependencies },
 				{ "output results:", ParseOutputResults },
+				{ "output build order:", ParseOutputBuildOrder },
 				{ "rule:", ParseRule },
 				{ "ignore:", ParseIgnore },
 				{ "ignore all references not in inputs", ParseIgnoreAllNonLocalProjects },
@@ -161,10 +163,10 @@ namespace org.pescuma.dotnetdependencychecker.config
 		private void ParseOutputResults(string line, ConfigLocation location)
 		{
 			if (line.Equals("console", StringComparison.CurrentCultureIgnoreCase))
-				config.Output.Results.Add(new ConsoleOutputer(false));
+				config.Output.Results.Add(new ConsoleEntryOutputer(false));
 
 			else if (line.Equals("console verbose", StringComparison.CurrentCultureIgnoreCase))
-				config.Output.Results.Add(new ConsoleOutputer(true));
+				config.Output.Results.Add(new ConsoleEntryOutputer(true));
 
 			else
 			{
@@ -172,11 +174,21 @@ namespace org.pescuma.dotnetdependencychecker.config
 				var extension = Path.GetExtension(file) ?? "";
 
 				if (extension.Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
-					config.Output.Results.Add(new XMLOutputer(file));
-
+					config.Output.Results.Add(new XMLEntryOutputer(file));
 				else
-					config.Output.Results.Add(new TextOutputer(file));
+					config.Output.Results.Add(new TextEntryOutputer(file));
 			}
+		}
+
+		private void ParseOutputBuildOrder(string line, ConfigLocation location)
+		{
+			var file = PathUtils.ToAbsolute(basePath, line);
+			var extension = Path.GetExtension(file) ?? "";
+
+			if (extension.Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
+				config.Output.BuildOrder.Add(new BuildOrderXMLEntryOutputer(file));
+			else
+				config.Output.BuildOrder.Add(new BuildOrderTextEntryOutputer(file));
 		}
 
 		private static readonly Dictionary<string, Severity> SEVERITIES = new Dictionary<string, Severity>

@@ -56,6 +56,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfigException.cs" />
+    <Compile Include="BuildOrderProcessor.cs" />
+    <Compile Include="output\build\BuildOrderOutputer.cs" />
+    <Compile Include="output\build\BuildOrderXMLEntryOutputer.cs" />
     <Compile Include="config\ConfigLocation.cs" />
     <Compile Include="config\Config.cs" />
     <Compile Include="config\ConfigParser.cs" />
@@ -64,8 +67,9 @@
     <Compile Include="GroupsLoader.cs" />
     <Compile Include="model\Group.cs" />
     <Compile Include="output\BaseOutputEntry.cs" />
+    <Compile Include="output\build\BuildOrderTextEntryOutputer.cs" />
     <Compile Include="output\CircularDependencyRuleMatch.cs" />
-    <Compile Include="output\ConsoleOutputer.cs" />
+    <Compile Include="output\errors\ConsoleEntryOutputer.cs" />
     <Compile Include="output\LoadingOutputWarning.cs" />
     <Compile Include="model\Assembly.cs" />
     <Compile Include="model\Dependable.cs" />
@@ -73,10 +77,10 @@
     <Compile Include="model\DependencyGraph.cs" />
     <Compile Include="model\GroupElement.cs" />
     <Compile Include="output\OutputEntry.cs" />
-    <Compile Include="output\Outputer.cs" />
-    <Compile Include="output\TextOutputer.cs" />
+    <Compile Include="output\errors\EntryOutputer.cs" />
+    <Compile Include="output\errors\TextEntryOutputer.cs" />
     <Compile Include="output\UniqueProjectOutput.cs" />
-    <Compile Include="output\XMLOutputer.cs" />
+    <Compile Include="output\errors\XMLEntryOutputer.cs" />
     <Compile Include="rules\OutputMessage.cs" />
     <Compile Include="rules\BaseRule.cs" />
     <Compile Include="rules\DepenendencyRule.cs" />
@@ -94,6 +98,7 @@
     <Compile Include="RulesMatcher.cs" />
     <Compile Include="rules\Severity.cs" />
     <Compile Include="utils\Argument.cs" />
+    <Compile Include="utils\ExtensionMethods.cs" />
     <Compile Include="utils\PathUtils.cs" />
   </ItemGroup>
   <ItemGroup>

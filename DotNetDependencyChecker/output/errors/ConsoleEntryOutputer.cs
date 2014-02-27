@@ -6,13 +6,13 @@ using System.Text;
 using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.rules;
 
-namespace org.pescuma.dotnetdependencychecker.output
+namespace org.pescuma.dotnetdependencychecker.output.errors
 {
-	public class ConsoleOutputer : Outputer
+	public class ConsoleEntryOutputer : EntryOutputer
 	{
 		private readonly bool verbose;
 
-		public ConsoleOutputer(bool verbose)
+		public ConsoleEntryOutputer(bool verbose)
 		{
 			this.verbose = verbose;
 		}

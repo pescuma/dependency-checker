@@ -1,7 +1,5 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using org.pescuma.dotnetdependencychecker.config;
-using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker
@@ -12,16 +10,6 @@ namespace org.pescuma.dotnetdependencychecker
 		private Config Parse(string configFileContents)
 		{
 			return new ConfigParser().ParseLines(@"c:\config.txt", configFileContents.Split('\n'));
-		}
-
-		private Project ProjWithName(string name)
-		{
-			return new Project(name, "NO ASSEMBLY NAME", new Guid(), "CSPROJ");
-		}
-
-		private Project ProjWithPath(string path)
-		{
-			return new Project("NO NAME", "NO ASSEMBLY NAME", new Guid(), path);
 		}
 
 		[Test]
@@ -101,8 +89,8 @@ input: c:\b");
 			var config = Parse(@"group: My name += A.Project.Name");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(ProjWithName("A.Project.Name")));
-			Assert.AreEqual(false, group.Matches(ProjWithName("X")));
+			Assert.AreEqual(true, group.Matches(TestUtils.ProjWithName("A.Project.Name")));
+			Assert.AreEqual(false, group.Matches(TestUtils.ProjWithName("X")));
 		}
 
 		[Test]
@@ -111,7 +99,7 @@ input: c:\b");
 			var config = Parse(@"group: My name += A.Project.Name");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(ProjWithName("a.pRoJect.Name")));
+			Assert.AreEqual(true, group.Matches(TestUtils.ProjWithName("a.pRoJect.Name")));
 		}
 
 		[Test]
@@ -120,8 +108,8 @@ input: c:\b");
 			var config = Parse(@"group: My name += regex: Ab+");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(ProjWithName("Abbb")));
-			Assert.AreEqual(false, group.Matches(ProjWithName("A")));
+			Assert.AreEqual(true, group.Matches(TestUtils.ProjWithName("Abbb")));
+			Assert.AreEqual(false, group.Matches(TestUtils.ProjWithName("A")));
 		}
 
 		[Test]
@@ -130,7 +118,7 @@ input: c:\b");
 			var config = Parse(@"group: My name += regex: Ab+");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(ProjWithName("abbb")));
+			Assert.AreEqual(true, group.Matches(TestUtils.ProjWithName("abbb")));
 		}
 
 		[Test]
@@ -139,8 +127,8 @@ input: c:\b");
 			var config = Parse(@"group: My name += path: C:\a");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(ProjWithPath(@"C:\a")));
-			Assert.AreEqual(false, group.Matches(ProjWithPath(@"C:\b")));
+			Assert.AreEqual(true, group.Matches(TestUtils.ProjWithPath(@"C:\a")));
+			Assert.AreEqual(false, group.Matches(TestUtils.ProjWithPath(@"C:\b")));
 		}
 
 		[Test]
@@ -149,7 +137,7 @@ input: c:\b");
 			var config = Parse(@"group: My name += path: C:\a");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(ProjWithPath(@"c:\A")));
+			Assert.AreEqual(true, group.Matches(TestUtils.ProjWithPath(@"c:\A")));
 		}
 
 		[Test]
@@ -158,8 +146,8 @@ input: c:\b");
 			var config = Parse(@"group: My name += path: C:\a");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(ProjWithPath(@"C:\a\X")));
-			Assert.AreEqual(false, group.Matches(ProjWithPath(@"C:\b\X")));
+			Assert.AreEqual(true, group.Matches(TestUtils.ProjWithPath(@"C:\a\X")));
+			Assert.AreEqual(false, group.Matches(TestUtils.ProjWithPath(@"C:\b\X")));
 		}
 
 		[Test]
@@ -168,7 +156,7 @@ input: c:\b");
 			var config = Parse(@"group: My name += path: C:\a");
 
 			var group = config.Groups[0];
-			Assert.AreEqual(true, group.Matches(ProjWithPath(@"c:\A\X")));
+			Assert.AreEqual(true, group.Matches(TestUtils.ProjWithPath(@"c:\A\X")));
 		}
 
 		[Test]
@@ -177,8 +165,8 @@ input: c:\b");
 			var config = Parse(@"group: My name += A
 group: My name += B");
 
-			Assert.AreEqual(true, config.Groups[0].Matches(ProjWithName("A")));
-			Assert.AreEqual(true, config.Groups[1].Matches(ProjWithName("B")));
+			Assert.AreEqual(true, config.Groups[0].Matches(TestUtils.ProjWithName("A")));
+			Assert.AreEqual(true, config.Groups[1].Matches(TestUtils.ProjWithName("B")));
 		}
 
 		[Test]
@@ -231,11 +219,11 @@ output projects: c:\b.out");
 			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(true, rule.Allow);
 
-			Assert.AreEqual(true, rule.Source(ProjWithName("A")));
-			Assert.AreEqual(false, rule.Source(ProjWithName("B")));
+			Assert.AreEqual(true, rule.Source(TestUtils.ProjWithName("A")));
+			Assert.AreEqual(false, rule.Source(TestUtils.ProjWithName("B")));
 
-			Assert.AreEqual(false, rule.Target(ProjWithName("A")));
-			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+			Assert.AreEqual(false, rule.Target(TestUtils.ProjWithName("A")));
+			Assert.AreEqual(true, rule.Target(TestUtils.ProjWithName("B")));
 		}
 
 		[Test]
@@ -248,11 +236,11 @@ output projects: c:\b.out");
 			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(false, rule.Allow);
 
-			Assert.AreEqual(true, rule.Source(ProjWithName("A")));
-			Assert.AreEqual(false, rule.Source(ProjWithName("B")));
+			Assert.AreEqual(true, rule.Source(TestUtils.ProjWithName("A")));
+			Assert.AreEqual(false, rule.Source(TestUtils.ProjWithName("B")));
 
-			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
-			Assert.AreEqual(false, rule.Target(ProjWithName("A")));
+			Assert.AreEqual(true, rule.Target(TestUtils.ProjWithName("B")));
+			Assert.AreEqual(false, rule.Target(TestUtils.ProjWithName("A")));
 		}
 
 		[Test]
@@ -265,11 +253,11 @@ output projects: c:\b.out");
 			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(true, rule.Allow);
 
-			Assert.AreEqual(true, rule.Source(ProjWithName("Abb")));
-			Assert.AreEqual(false, rule.Source(ProjWithName("A")));
+			Assert.AreEqual(true, rule.Source(TestUtils.ProjWithName("Abb")));
+			Assert.AreEqual(false, rule.Source(TestUtils.ProjWithName("A")));
 
-			Assert.AreEqual(true, rule.Target(ProjWithName("Baa")));
-			Assert.AreEqual(false, rule.Target(ProjWithName("B")));
+			Assert.AreEqual(true, rule.Target(TestUtils.ProjWithName("Baa")));
+			Assert.AreEqual(false, rule.Target(TestUtils.ProjWithName("B")));
 		}
 
 		[Test]
@@ -290,32 +278,32 @@ output projects: c:\b.out");
 
 			Assert.AreEqual(1, config.Ignores.Count);
 			var ignore = config.Ignores[0];
-			Assert.AreEqual(true, ignore.Matches(ProjWithName("A")));
-			Assert.AreEqual(false, ignore.Matches(ProjWithName("B")));
+			Assert.AreEqual(true, ignore.Matches(TestUtils.ProjWithName("A")));
+			Assert.AreEqual(false, ignore.Matches(TestUtils.ProjWithName("B")));
 		}
 
 		[Test]
 		public void TestIgnoreAllNonLocalProjects()
 		{
 			var config = Parse("input: c:\\a\n" + //
-							   "ignore all references not in inputs");
+			                   "ignore all references not in inputs");
 
 			Assert.AreEqual(1, config.Ignores.Count);
 			var ignore = config.Ignores[0];
-			Assert.AreEqual(false, ignore.Matches(ProjWithPath(@"c:\a\p.csproj")));
-			Assert.AreEqual(true, ignore.Matches(ProjWithPath(@"c:\b\p.csproj")));
+			Assert.AreEqual(false, ignore.Matches(TestUtils.ProjWithPath(@"c:\a\p.csproj")));
+			Assert.AreEqual(true, ignore.Matches(TestUtils.ProjWithPath(@"c:\b\p.csproj")));
 		}
 
 		[Test]
 		public void TestIgnoreAllNonLocalProjectsCaseInsensitive()
 		{
 			var config = Parse("input: C:\\A\n" + //
-							   "ignore all references not in inputs");
+			                   "ignore all references not in inputs");
 
 			Assert.AreEqual(1, config.Ignores.Count);
 			var ignore = config.Ignores[0];
-			Assert.AreEqual(false, ignore.Matches(ProjWithPath(@"c:\a\p.csproj")));
-			Assert.AreEqual(true, ignore.Matches(ProjWithPath(@"c:\b\p.csproj")));
+			Assert.AreEqual(false, ignore.Matches(TestUtils.ProjWithPath(@"c:\a\p.csproj")));
+			Assert.AreEqual(true, ignore.Matches(TestUtils.ProjWithPath(@"c:\b\p.csproj")));
 		}
 
 		[Test]
@@ -354,8 +342,8 @@ output projects: c:\b.out");
 
 			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(Severity.Warning, rule.Severity);
-			Assert.AreEqual(true, rule.Source(ProjWithName("a")));
-			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+			Assert.AreEqual(true, rule.Source(TestUtils.ProjWithName("a")));
+			Assert.AreEqual(true, rule.Target(TestUtils.ProjWithName("B")));
 		}
 
 		[Test]
@@ -365,8 +353,8 @@ output projects: c:\b.out");
 
 			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(Severity.Error, rule.Severity);
-			Assert.AreEqual(true, rule.Source(ProjWithName("a")));
-			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+			Assert.AreEqual(true, rule.Source(TestUtils.ProjWithName("a")));
+			Assert.AreEqual(true, rule.Target(TestUtils.ProjWithName("B")));
 		}
 
 		[Test]
@@ -376,8 +364,8 @@ output projects: c:\b.out");
 
 			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(Severity.Info, rule.Severity);
-			Assert.AreEqual(true, rule.Source(ProjWithName("a")));
-			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+			Assert.AreEqual(true, rule.Source(TestUtils.ProjWithName("a")));
+			Assert.AreEqual(true, rule.Target(TestUtils.ProjWithName("B")));
 		}
 
 		[Test]
@@ -387,8 +375,8 @@ output projects: c:\b.out");
 
 			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(Severity.Info, rule.Severity);
-			Assert.AreEqual(true, rule.Source(ProjWithName("a")));
-			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+			Assert.AreEqual(true, rule.Source(TestUtils.ProjWithName("a")));
+			Assert.AreEqual(true, rule.Target(TestUtils.ProjWithName("B")));
 		}
 
 		[Test]
@@ -398,8 +386,8 @@ output projects: c:\b.out");
 
 			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(Severity.Info, rule.Severity);
-			Assert.AreEqual(true, rule.Source(ProjWithName("a")));
-			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+			Assert.AreEqual(true, rule.Source(TestUtils.ProjWithName("a")));
+			Assert.AreEqual(true, rule.Target(TestUtils.ProjWithName("B")));
 		}
 
 		[Test]
@@ -409,8 +397,8 @@ output projects: c:\b.out");
 
 			var rule = (DepenendencyRule) config.Rules[0];
 			Assert.AreEqual(Severity.Info, rule.Severity);
-			Assert.AreEqual(true, rule.Source(ProjWithName("a")));
-			Assert.AreEqual(true, rule.Target(ProjWithName("B")));
+			Assert.AreEqual(true, rule.Source(TestUtils.ProjWithName("a")));
+			Assert.AreEqual(true, rule.Target(TestUtils.ProjWithName("B")));
 		}
 
 		[Test]

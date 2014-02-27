@@ -113,7 +113,7 @@ namespace org.pescuma.dotnetdependencychecker
 					var reference = csref;
 
 					// Dummy reference for logs in case of errors
-					var dep = new Dependency(proj, null, Dependency.Types.ProjectReference, new Location(csproj.Filename, reference.LineNumber));
+					var dep = Dependency.WithProject(proj, null, new Location(csproj.Filename, reference.LineNumber));
 
 					var refs = FindAssembly(proj, dep,
 						p => string.Equals(((Project) p).CsprojPath, reference.Include, StringComparison.CurrentCultureIgnoreCase), reference.Include);
@@ -229,7 +229,7 @@ namespace org.pescuma.dotnetdependencychecker
 					var name = reference.Include.Name;
 
 					// Dummy reference for logs in case of errors
-					var dep = new Dependency(proj, null, Dependency.Types.DllReference, new Location(csproj.Filename, reference.LineNumber));
+					var dep = Dependency.WithAssembly(proj, null, new Location(csproj.Filename, reference.LineNumber), reference.HintPath);
 
 					var referenceProjs = FindAssembly(proj, dep, p => name.Equals(p.AssemblyName, StringComparison.CurrentCultureIgnoreCase),
 						"with assembly name " + name);

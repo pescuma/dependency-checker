@@ -4,13 +4,13 @@ using System.Linq;
 using System.Xml.Linq;
 using org.pescuma.dotnetdependencychecker.model;
 
-namespace org.pescuma.dotnetdependencychecker.output
+namespace org.pescuma.dotnetdependencychecker.output.errors
 {
-	public class XMLOutputer : Outputer
+	public class XMLEntryOutputer : EntryOutputer
 	{
 		private readonly string file;
 
-		public XMLOutputer(string file)
+		public XMLEntryOutputer(string file)
 		{
 			this.file = file;
 		}
@@ -39,7 +39,7 @@ namespace org.pescuma.dotnetdependencychecker.output
 
 				xentry.Add(new XAttribute("Type", entry.Type));
 				xentry.Add(new XAttribute("Severity", entry.Severity.ToString()));
-				xentry.Add(new XElement("Message", ConsoleOutputer.ToConsole(entry.Messsage)));
+				xentry.Add(new XElement("Message", ConsoleEntryOutputer.ToConsole(entry.Messsage)));
 
 				if (entry is DependencyRuleMatch)
 				{
@@ -121,6 +121,8 @@ namespace org.pescuma.dotnetdependencychecker.output
 			result.Add(new XElement("Location", //
 				new XAttribute("File", dep.Location.File), //
 				new XAttribute("Line", dep.Location.Line)));
+			if (dep.DLLHintPath != null)
+				result.Add(new XElement("DLLHintPath", dep.DLLHintPath));
 
 			return result;
 		}

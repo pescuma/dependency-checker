@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace org.pescuma.dotnetdependencychecker.output
+namespace org.pescuma.dotnetdependencychecker.output.errors
 {
-	public interface Outputer
+	public interface EntryOutputer
 	{
 		void Output(List<OutputEntry> entries);
 	}

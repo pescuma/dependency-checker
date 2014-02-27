@@ -18,6 +18,7 @@ namespace org.pescuma.dotnetdependencychecker.model
 
 		public readonly Types Type;
 		public readonly Location Location;
+		public readonly string DLLHintPath;
 
 		public enum Types
 		{
@@ -25,7 +26,17 @@ namespace org.pescuma.dotnetdependencychecker.model
 			DllReference
 		}
 
-		public Dependency(Dependable source, Dependable target, Types type, Location location)
+		public static Dependency WithProject(Dependable source, Dependable target, Location location)
+		{
+			return new Dependency(source, target, Types.ProjectReference, location, null);
+		}
+
+		public static Dependency WithAssembly(Dependable source, Dependable target, Location location, string dllPath)
+		{
+			return new Dependency(source, target, Types.DllReference, location, dllPath);
+		}
+
+		private Dependency(Dependable source, Dependable target, Types type, Location location, string dllHintPath)
 			: base(source, target)
 		{
 			Argument.ThrowIfNull(source);
@@ -33,16 +44,23 @@ namespace org.pescuma.dotnetdependencychecker.model
 
 			Type = type;
 			Location = location;
+			DLLHintPath = dllHintPath;
 		}
 
 		public Dependency WithTarget(Dependable otherTarget)
 		{
-			return new Dependency(Source, otherTarget, Type, Location);
+			if (otherTarget == Target)
+				return this;
+
+			return new Dependency(Source, otherTarget, Type, Location, DLLHintPath);
 		}
 
-		public Dependency WithSource(GroupElement otherSource)
+		public Dependency WithSource(Dependable otherSource)
 		{
-			return new Dependency(otherSource, Target, Type, Location);
+			if (otherSource == Source)
+				return this;
+
+			return new Dependency(otherSource, Target, Type, Location, DLLHintPath);
 		}
 
 		protected bool Equals(Dependency other)
