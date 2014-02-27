@@ -86,17 +86,17 @@ namespace org.pescuma.dotnetdependencychecker
 			return result;
 		}
 
-		private static Group GetGroupActingAs(Dependable proj)
+		private static GroupElement GetGroupActingAs(Dependable proj)
 		{
 			var source = proj as Assembly;
 			if (source == null)
 				return null;
 
-			var result = source.Group;
+			var result = source.GroupElement;
 			if (result == null)
 				return null;
 
-			return result.ActingAs(proj);
+			return result;
 		}
 	}
 }

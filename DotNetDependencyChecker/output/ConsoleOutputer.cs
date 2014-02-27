@@ -76,8 +76,8 @@ namespace org.pescuma.dotnetdependencychecker.output
 
 		private static string ToConsole(Dependable proj, OutputMessage.ProjInfo info)
 		{
-			if (proj is Group)
-				return ToConsole(((Group) proj).Representing, info);
+			if (proj is GroupElement)
+				return ToConsole(((GroupElement) proj).Representing, info);
 
 			switch (info)
 			{
@@ -89,7 +89,7 @@ namespace org.pescuma.dotnetdependencychecker.output
 				{
 					var result = ToConsole(proj, OutputMessage.ProjInfo.Name);
 
-					var group = (proj is Assembly ? ((Assembly) proj).Group : null);
+					var group = (proj is Assembly ? ((Assembly) proj).GroupElement : null);
 					if (group != null)
 						result = string.Format("{0} (in group {1})", result, group.Name);
 

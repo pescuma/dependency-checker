@@ -62,6 +62,7 @@
     <Compile Include="config\ConfigParserException.cs" />
     <Compile Include="CsprojReader.cs" />
     <Compile Include="GroupsLoader.cs" />
+    <Compile Include="model\Group.cs" />
     <Compile Include="output\BaseOutputEntry.cs" />
     <Compile Include="output\CircularDependencyRuleMatch.cs" />
     <Compile Include="output\ConsoleOutputer.cs" />
@@ -70,7 +71,7 @@
     <Compile Include="model\Dependable.cs" />
     <Compile Include="model\Dependency.cs" />
     <Compile Include="model\DependencyGraph.cs" />
-    <Compile Include="model\Group.cs" />
+    <Compile Include="model\GroupElement.cs" />
     <Compile Include="output\OutputEntry.cs" />
     <Compile Include="output\Outputer.cs" />
     <Compile Include="output\TextOutputer.cs" />

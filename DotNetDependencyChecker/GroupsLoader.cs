@@ -20,10 +20,10 @@ namespace org.pescuma.dotnetdependencychecker
 		public void FillGroups()
 		{
 			graph.Vertices.Cast<Assembly>()
-				.ForEach(proj => proj.Group = FindGroup(proj));
+				.ForEach(proj => proj.GroupElement = FindGroupElement(proj));
 		}
 
-		private Group FindGroup(Assembly proj)
+		private GroupElement FindGroupElement(Assembly proj)
 		{
 			var configGroup = config.Groups.FirstOrDefault(g => g.Matches(proj));
 			if (configGroup == null)
@@ -36,7 +36,7 @@ namespace org.pescuma.dotnetdependencychecker
 				groups.Add(configGroup.Name, group);
 			}
 
-			return group;
+			return new GroupElement(group, configGroup.Location, proj);
 		}
 	}
 }

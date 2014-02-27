@@ -16,20 +16,20 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		public class Group
 		{
-			private readonly string line;
 			public readonly string Name;
+			public readonly ConfigLocation Location;
 			public readonly Func<Dependable, bool> Matches;
 
-			public Group(string name, Func<Dependable, bool> matches, string line)
+			public Group(string name, Func<Dependable, bool> matches, ConfigLocation location)
 			{
 				Name = name;
 				Matches = matches;
-				this.line = line;
+				this.Location = location;
 			}
 
 			public override string ToString()
 			{
-				return line;
+				return Location.LineText;
 			}
 		}
 

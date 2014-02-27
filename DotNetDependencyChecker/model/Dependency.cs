@@ -40,7 +40,7 @@ namespace org.pescuma.dotnetdependencychecker.model
 			return new Dependency(Source, otherTarget, Type, Location);
 		}
 
-		public Dependency WithSource(Group otherSource)
+		public Dependency WithSource(GroupElement otherSource)
 		{
 			return new Dependency(otherSource, Target, Type, Location);
 		}

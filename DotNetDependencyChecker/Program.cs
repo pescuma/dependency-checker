@@ -96,7 +96,7 @@ namespace org.pescuma.dotnetdependencychecker
 				return;
 
 			var groups = projects.OfType<Assembly>()
-				.GroupBy(p => p.Group)
+				.GroupBy(p => p.GroupElement)
 				.ToList();
 
 			groups.Sort((e1, e2) =>

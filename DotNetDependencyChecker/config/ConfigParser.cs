@@ -99,7 +99,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 			var matcher = ParseMatcher(matchLine, location);
 
-			config.Groups.Add(new Config.Group(name, matcher, line));
+			config.Groups.Add(new Config.Group(name, matcher, location));
 		}
 
 		private Func<Dependable, bool> ParseMatcher(string matchLine, ConfigLocation location)
