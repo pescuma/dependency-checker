@@ -10,11 +10,35 @@ namespace org.pescuma.dotnetdependencychecker
 	{
 		public static BuildScript CreateBuildScript(DependencyGraph graph)
 		{
-			var circularDependencies = ComputeCircularDependencies(graph);
+			var circularDependencies = ComputeCircularDependencies(graph)
+				.ToList();
 
 			var nonCircularGraph = ReplaceCircularDependenciesWithGroup(graph, circularDependencies);
 
-			return null;
+			var disjointSet = nonCircularGraph.ToUndirectedGraph()
+				.ComputeDisjointSet();
+
+			var result = new BuildScript();
+
+			foreach (var vertices in nonCircularGraph.Vertices.GroupBy(disjointSet.FindSet)
+				.Select(s => new HashSet<Dependable>(s)))
+			{
+				var thread = new BuildThread();
+				foreach (var proj in nonCircularGraph.CreateSubGraph(vertices)
+					.TopologicalSort())
+				{
+					Add(thread, proj, circularDependencies);
+				}
+
+				result.ParallelThreads.Add(thread);
+			}
+
+			return result;
+		}
+
+		private static void Add(BuildThread thread, Dependable proj, IEnumerable<CircularDependencyGroup> circularDependencies)
+		{
+			throw new System.NotImplementedException();
 		}
 
 		public static IEnumerable<CircularDependencyGroup> ComputeCircularDependencies(DependencyGraph graph)
@@ -29,13 +53,13 @@ namespace org.pescuma.dotnetdependencychecker
 		}
 
 		public static DependencyGraph ReplaceCircularDependenciesWithGroup(DependencyGraph graph,
-			IEnumerable<CircularDependencyGroup> circularDependencies)
+			List<CircularDependencyGroup> circularDependencies)
 		{
+			if (!circularDependencies.Any())
+				return graph;
+
 			var projToGroup = new Dictionary<Dependable, CircularDependencyGroup>();
 			circularDependencies.ForEach(d => d.Projs.ForEach(p => projToGroup.Add(p, d)));
-
-			if (!projToGroup.Any())
-				return graph;
 
 			var vertices = graph.Vertices.Select(v => projToGroup.Get(v) ?? v)
 				.Distinct();
@@ -47,8 +71,15 @@ namespace org.pescuma.dotnetdependencychecker
 
 			var result = new DependencyGraph();
 			result.AddVertexRange(vertices);
-			result.AddEdgeRange(edges);
+			result.AddEdgeRange(edges.Select(SwapSourceAndTarget));
 			return result;
+		}
+
+		private static Dependency SwapSourceAndTarget(Dependency dep)
+		{
+			var source = dep.Source;
+			return dep.WithSource(dep.Target)
+				.WithTarget(source);
 		}
 	}
 
@@ -75,9 +106,5 @@ namespace org.pescuma.dotnetdependencychecker
 		{
 			return "CircularDependencyGroup[" + string.Join(",", Projs.Select(p => p.Names.First())) + "]";
 		}
-	}
-
-	public class BuildScript
-	{
 	}
 }

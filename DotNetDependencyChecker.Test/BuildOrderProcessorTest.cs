@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 
 namespace org.pescuma.dotnetdependencychecker
@@ -14,7 +15,7 @@ namespace org.pescuma.dotnetdependencychecker
 			var dep = TestUtils.Dependency(p1, p2);
 			var graph = TestUtils.Graph(p1, p2, dep);
 
-			var result = BuildOrderProcessor.ReplaceCircularDependenciesWithGroup(graph, Enumerable.Empty<CircularDependencyGroup>());
+			var result = BuildOrderProcessor.ReplaceCircularDependenciesWithGroup(graph, new List<CircularDependencyGroup>());
 
 			Assert.AreEqual(2, result.Vertices.Count());
 			Assert.AreEqual(1, result.Edges.Count());

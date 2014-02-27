@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuildScript.cs" />
     <Compile Include="ConfigException.cs" />
     <Compile Include="BuildOrderProcessor.cs" />
     <Compile Include="output\build\BuildOrderOutputer.cs" />
