@@ -8,12 +8,11 @@ namespace org.pescuma.dotnetdependencychecker
 	public class BuildOrderProcessorTest
 	{
 		[Test]
-		public void TestNoCircularDeps()
+		public void CurcularDepsDetection_None()
 		{
-			var p1 = TestUtils.ProjWithName("P1");
-			var p2 = TestUtils.ProjWithName("P2");
-			var dep = TestUtils.Dependency(p1, p2);
-			var graph = TestUtils.Graph(p1, p2, dep);
+			var ps = TestUtils.ProjsWithName("P0", "P1");
+			var dep = TestUtils.Dependency(ps[0], ps[1]);
+			var graph = TestUtils.Graph(ps, dep);
 
 			var result = BuildOrderProcessor.ReplaceCircularDependenciesWithGroup(graph, new List<CircularDependencyGroup>());
 
@@ -22,7 +21,7 @@ namespace org.pescuma.dotnetdependencychecker
 		}
 
 		[Test]
-		public void TestOneSimpleCircularDep()
+		public void CurcularDepsDetection_OneSimple()
 		{
 			var ps = TestUtils.ProjsWithName("P0", "P1", "P2", "P3");
 			var deps = new[]
@@ -44,6 +43,23 @@ namespace org.pescuma.dotnetdependencychecker
 
 			Assert.AreEqual(3, result.Vertices.Count());
 			Assert.AreEqual(2, result.Edges.Count());
+		}
+
+		[Test]
+		public void TwoProjsNoCurcularDeps()
+		{
+			var ps = TestUtils.ProjsWithName("P0", "P1");
+			var dep = TestUtils.Dependency(ps[0], ps[1]);
+			var graph = TestUtils.Graph(ps, dep);
+
+			var result = BuildOrderProcessor.CreateBuildScript(graph);
+
+			Assert.AreEqual(1, result.ParallelThreads.Count);
+
+			var thread = result.ParallelThreads[0];
+			Assert.AreEqual(2, thread.Steps.Count);
+			Assert.AreEqual(new BuildProject(ps[0]), thread.Steps[0]);
+			Assert.AreEqual(new BuildProject(ps[1]), thread.Steps[1]);
 		}
 	}
 }

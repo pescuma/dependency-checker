@@ -24,11 +24,9 @@ namespace org.pescuma.dotnetdependencychecker
 				.Select(s => new HashSet<Dependable>(s)))
 			{
 				var thread = new BuildThread();
-				foreach (var proj in nonCircularGraph.CreateSubGraph(vertices)
-					.TopologicalSort())
-				{
-					Add(thread, proj, circularDependencies);
-				}
+				nonCircularGraph.CreateSubGraph(vertices)
+					.TopologicalSort()
+					.ForEach(p => Add(thread.Steps, graph, p));
 
 				result.ParallelThreads.Add(thread);
 			}
@@ -36,7 +34,29 @@ namespace org.pescuma.dotnetdependencychecker
 			return result;
 		}
 
-		private static void Add(BuildThread thread, Dependable proj, IEnumerable<CircularDependencyGroup> circularDependencies)
+		private static void Add(List<BuildStep> steps, DependencyGraph graph, Dependable project)
+		{
+			if (project is Project)
+				AddProject(steps, graph, (Project) project);
+			else if (project is CircularDependencyGroup)
+				AddCircularDependencyGroup(steps, graph, (CircularDependencyGroup) project);
+		}
+
+		private static void AddProject(List<BuildStep> steps, DependencyGraph graph, Project project)
+		{
+			foreach (var dep in graph.OutEdges(project)
+				.Where(e => e.Type == Dependency.Types.DllReference && e.DLLHintPath != null))
+			{
+				if (dep.Target is Project)
+					steps.Add(new CopyProjectOutput((Project) dep.Target, dep.DLLHintPath));
+				else
+					steps.Add(new MaterializeDll((Assembly) dep.Target, dep.DLLHintPath));
+			}
+
+			steps.Add(new BuildProject(project));
+		}
+
+		private static void AddCircularDependencyGroup(List<BuildStep> steps, DependencyGraph graph, CircularDependencyGroup project)
 		{
 			throw new System.NotImplementedException();
 		}
