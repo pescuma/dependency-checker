@@ -56,7 +56,7 @@ namespace org.pescuma.dotnetdependencychecker.output
 			return result.ToString();
 		}
 
-		private static string ToConsole(OutputMessage messsage)
+		public static string ToConsole(OutputMessage messsage)
 		{
 			return string.Join("", messsage.Elements.Select(e =>
 			{

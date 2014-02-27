@@ -33,7 +33,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 					.Append(" has multiple dependencies with ")
 					.Append(g.Key, OutputMessage.ProjInfo.Name);
 
-				result.Add(new DependencyRuleMatch(false, Severity, message, this, g));
+				result.Add(new DependencyRuleMatch(false, "Non unique dependency", Severity, message, this, g));
 			});
 
 			return result;

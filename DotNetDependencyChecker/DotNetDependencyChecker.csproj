@@ -63,6 +63,7 @@
     <Compile Include="CsprojReader.cs" />
     <Compile Include="GroupsLoader.cs" />
     <Compile Include="output\BaseOutputEntry.cs" />
+    <Compile Include="output\CircularDependencyRuleMatch.cs" />
     <Compile Include="output\ConsoleOutputer.cs" />
     <Compile Include="output\LoadingOutputWarning.cs" />
     <Compile Include="model\Assembly.cs" />

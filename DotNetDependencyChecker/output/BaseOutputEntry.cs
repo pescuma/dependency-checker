@@ -7,14 +7,16 @@ namespace org.pescuma.dotnetdependencychecker.output
 {
 	public abstract class BaseOutputEntry : OutputEntry
 	{
+		public string Type { get; private set; }
 		public Severity Severity { get; private set; }
 		public OutputMessage Messsage { get; private set; }
 		public List<Dependable> Projects { get; private set; }
 		public List<Dependency> Dependencies { get; private set; }
 
-		protected BaseOutputEntry(Severity severity, OutputMessage messsage, IEnumerable<Dependable> projects,
+		protected BaseOutputEntry(string type, Severity severity, OutputMessage messsage, IEnumerable<Dependable> projects,
 			IEnumerable<Dependency> dependencies)
 		{
+			Type = type;
 			Severity = severity;
 			Messsage = messsage;
 
@@ -37,13 +39,13 @@ namespace org.pescuma.dotnetdependencychecker.output
 			Projects.Sort(DependableUtils.NaturalOrdering);
 		}
 
-		protected BaseOutputEntry(Severity severity, OutputMessage messsage, IEnumerable<Dependency> dependencies)
-			: this(severity, messsage, null, dependencies)
+		protected BaseOutputEntry(string type, Severity severity, OutputMessage messsage, IEnumerable<Dependency> dependencies)
+			: this(type, severity, messsage, null, dependencies)
 		{
 		}
 
-		protected BaseOutputEntry(Severity severity, OutputMessage messsage)
-			: this(severity, messsage, null, null)
+		protected BaseOutputEntry(string type, Severity severity, OutputMessage messsage)
+			: this(type, severity, messsage, null, null)
 		{
 		}
 	}

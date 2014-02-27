@@ -184,10 +184,13 @@ namespace org.pescuma.dotnetdependencychecker
 					.Append(refName)
 					.Append(" instead:");
 
-				result.ForEach(p => message.Append("\n  - ")
-					.Append(p, OutputMessage.ProjInfo.Csproj));
+				if (result.Count == 1)
+					result.ForEach(p => message.Append(result.First(), OutputMessage.ProjInfo.Csproj));
+				else
+					result.ForEach(p => message.Append("\n  - ")
+						.Append(p, OutputMessage.ProjInfo.Csproj));
 
-				warnings.Add(new LoadingOutputWarning(message, result.Select(dep.WithTarget)
+				warnings.Add(new LoadingOutputWarning("Only similar project found", message, result.Select(dep.WithTarget)
 					.ToArray()));
 			}
 
@@ -207,7 +210,7 @@ namespace org.pescuma.dotnetdependencychecker
 				.Append(reference.Include)
 				.Append(" but it could not be loaded. Guessing assembly name to be the same as project name.");
 
-			warnings.Add(new LoadingOutputWarning(msg, dep.WithTarget(result)));
+			warnings.Add(new LoadingOutputWarning("Project not found", msg, dep.WithTarget(result)));
 
 			AddAssembly(result);
 
@@ -295,7 +298,7 @@ namespace org.pescuma.dotnetdependencychecker
 				.Append(c, OutputMessage.ProjInfo.Csproj));
 			message.Append("\nMultiple dependencies will be created.");
 
-			return new LoadingOutputWarning(message, candidates.Select(dep.WithTarget)
+			return new LoadingOutputWarning("Multiple projects found", message, candidates.Select(dep.WithTarget)
 				.ToArray());
 		}
 

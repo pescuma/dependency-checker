@@ -5,8 +5,8 @@ namespace org.pescuma.dotnetdependencychecker.output
 {
 	public class LoadingOutputWarning : BaseOutputEntry
 	{
-		public LoadingOutputWarning(OutputMessage messsage, params Dependency[] dependencies)
-			: base(Severity.Info, messsage, dependencies)
+		public LoadingOutputWarning(string type, OutputMessage messsage, params Dependency[] dependencies)
+			: base("Loading/" + type, Severity.Info, messsage, dependencies)
 		{
 		}
 	}

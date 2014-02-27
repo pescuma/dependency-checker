@@ -7,9 +7,8 @@ namespace org.pescuma.dotnetdependencychecker.rules
 {
 	public abstract class BaseRule : Rule
 	{
-		// HACK [pescuma] Fields are public for tests
-		public readonly Severity Severity;
-		public readonly ConfigLocation Location;
+		public Severity Severity { get; private set; }
+		public ConfigLocation Location { get; private set; }
 
 		protected BaseRule(Severity severity, ConfigLocation location)
 		{

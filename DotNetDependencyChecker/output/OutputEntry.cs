@@ -6,6 +6,7 @@ namespace org.pescuma.dotnetdependencychecker.output
 {
 	public interface OutputEntry
 	{
+		string Type { get; }
 		Severity Severity { get; }
 		OutputMessage Messsage { get; }
 		List<Dependable> Projects { get; }

@@ -49,7 +49,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 					message.Append(proj, OutputMessage.ProjInfo.Name);
 				}
 
-				result.Add(new DependencyRuleMatch(false, Severity, message, this, deps));
+				result.Add(new CircularDependencyRuleMatch(Severity, message, this, deps));
 			}
 
 			return result;
