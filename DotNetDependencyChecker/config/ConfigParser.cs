@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using org.pescuma.dotnetdependencychecker.model;
+using org.pescuma.dotnetdependencychecker.output.dependencies;
 using org.pescuma.dotnetdependencychecker.output.results;
 using org.pescuma.dotnetdependencychecker.rules;
 using org.pescuma.dotnetdependencychecker.utils;
@@ -155,7 +156,13 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		private void ParseOutputDependencies(string line, ConfigLocation location)
 		{
-			config.Output.Dependencies.Add(PathUtils.ToAbsolute(basePath, line));
+			var file = PathUtils.ToAbsolute(basePath, line);
+			var extension = Path.GetExtension(file) ?? "";
+
+			if (extension.Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
+				config.Output.Dependencies.Add(new XMLDependenciesOutputer(file));
+			else
+				config.Output.Dependencies.Add(new TextDependenciesOutputer(file));
 		}
 
 		private void ParseOutputResults(string line, ConfigLocation location)

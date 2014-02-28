@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using org.pescuma.dotnetdependencychecker.model;
+using org.pescuma.dotnetdependencychecker.output.dependencies;
 using org.pescuma.dotnetdependencychecker.output.results;
 using org.pescuma.dotnetdependencychecker.rules;
 
@@ -54,7 +55,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 		{
 			public readonly List<string> Projects = new List<string>();
 			public readonly List<string> Groups = new List<string>();
-			public readonly List<string> Dependencies = new List<string>();
+			public readonly List<DependenciesOutputer> Dependencies = new List<DependenciesOutputer>();
 			public readonly List<EntryOutputer> Results = new List<EntryOutputer>();
 		}
 	}

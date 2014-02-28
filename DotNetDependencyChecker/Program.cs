@@ -35,6 +35,8 @@ namespace org.pescuma.dotnetdependencychecker
 
 				DumpGroups(graph.Vertices, config.Output.Groups);
 
+				config.Output.Dependencies.ForEach(o => o.Output(graph));
+
 				warnings.AddRange(RulesMatcher.Match(graph, config));
 
 				warnings = warnings.Where(e => !(e is DependencyRuleMatch) || !((DependencyRuleMatch) e).Allowed)
@@ -42,25 +44,9 @@ namespace org.pescuma.dotnetdependencychecker
 
 				config.Output.Results.ForEach(o => o.Output(warnings));
 
-				if (warnings.Any())
-				{
-					var gs = warnings.GroupBy(w => w.Severity)
-						.Select(e => new { Severity = e.Key, Count = e.Count() })
-						.ToList();
-					gs.Sort((s1, s2) => (int) s2.Severity - (int) s1.Severity);
-
-					Console.WriteLine("Found {0}\n", string.Join(", ", gs.Select(e => e.Count + " " + e.Severity.ToString()
-						.ToLower() + "(s)")));
-
-					return gs.Where(g => g.Severity == Severity.Error)
-						.Select(g => g.Count)
-						.FirstOrDefault();
-				}
-				else
-				{
-					Console.WriteLine("No errors found\n");
-					return 0;
-				}
+				DumpNumberOfErrorsFound(warnings);
+				Console.WriteLine();
+				return warnings.Count(w => w.Severity == Severity.Error);
 			}
 			catch (ConfigParserException e)
 			{
@@ -74,6 +60,23 @@ namespace org.pescuma.dotnetdependencychecker
 				Console.WriteLine();
 				return -1;
 			}
+		}
+
+		private static void DumpNumberOfErrorsFound(List<OutputEntry> warnings)
+		{
+			if (!warnings.Any())
+			{
+				Console.WriteLine("No errors found");
+				return;
+			}
+
+			var gs = warnings.GroupBy(w => w.Severity)
+				.Select(e => new { Severity = e.Key, Count = e.Count() })
+				.ToList();
+			gs.Sort((s1, s2) => (int) s2.Severity - (int) s1.Severity);
+
+			Console.WriteLine("Found " + string.Join(", ", gs.Select(e => e.Count + " " + e.Severity.ToString()
+				.ToLower() + "(s)")));
 		}
 
 		private static void DumpProjects(IEnumerable<Dependable> projects, List<string> filenames)

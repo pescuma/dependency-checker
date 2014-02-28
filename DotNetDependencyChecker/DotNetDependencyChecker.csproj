@@ -65,6 +65,9 @@
     <Compile Include="model\Group.cs" />
     <Compile Include="output\BaseOutputEntry.cs" />
     <Compile Include="output\CircularDependencyRuleMatch.cs" />
+    <Compile Include="output\dependencies\DependenciesOutputer.cs" />
+    <Compile Include="output\dependencies\TextDependenciesOutputer.cs" />
+    <Compile Include="output\dependencies\XMLDependenciesOutputer.cs" />
     <Compile Include="output\results\ConsoleEntryOutputer.cs" />
     <Compile Include="output\LoadingOutputWarning.cs" />
     <Compile Include="model\Assembly.cs" />
@@ -101,9 +104,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="output\dependencies\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

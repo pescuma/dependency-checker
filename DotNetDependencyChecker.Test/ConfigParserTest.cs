@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.output.dependencies;
 using org.pescuma.dotnetdependencychecker.rules;
 
 namespace org.pescuma.dotnetdependencychecker
@@ -206,7 +207,7 @@ output projects: c:\b.out");
 			var config = Parse(@"output dependencies: c:\lp.txt");
 
 			Assert.AreEqual(1, config.Output.Dependencies.Count);
-			Assert.AreEqual(@"c:\lp.txt", config.Output.Dependencies[0]);
+			Assert.IsTrue(config.Output.Dependencies[0] is TextDependenciesOutputer);
 		}
 
 		[Test]
