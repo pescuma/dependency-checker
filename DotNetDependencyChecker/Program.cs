@@ -42,12 +42,6 @@ namespace org.pescuma.dotnetdependencychecker
 
 				config.Output.Results.ForEach(o => o.Output(warnings));
 
-				if (config.Output.BuildOrder.Any())
-				{
-					var script = BuildOrderProcessor.CreateBuildScript(graph);
-					config.Output.BuildOrder.ForEach(o => o.Output(script));
-				}
-
 				if (warnings.Any())
 				{
 					var gs = warnings.GroupBy(w => w.Severity)

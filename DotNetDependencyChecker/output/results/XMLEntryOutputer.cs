@@ -4,7 +4,7 @@ using System.Linq;
 using System.Xml.Linq;
 using org.pescuma.dotnetdependencychecker.model;
 
-namespace org.pescuma.dotnetdependencychecker.output.errors
+namespace org.pescuma.dotnetdependencychecker.output.results
 {
 	public class XMLEntryOutputer : EntryOutputer
 	{

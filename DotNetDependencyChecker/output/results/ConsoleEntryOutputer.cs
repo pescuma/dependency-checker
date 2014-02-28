@@ -6,7 +6,7 @@ using System.Text;
 using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.rules;
 
-namespace org.pescuma.dotnetdependencychecker.output.errors
+namespace org.pescuma.dotnetdependencychecker.output.results
 {
 	public class ConsoleEntryOutputer : EntryOutputer
 	{
