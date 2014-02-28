@@ -19,6 +19,13 @@ namespace org.pescuma.dotnetdependencychecker
 				cb(i);
 		}
 
+		public static void ForEach<T>(this IEnumerable<T> list, Action<T, int> cb)
+		{
+			var index = 0;
+			foreach (var i in list)
+				cb(i, index++);
+		}
+
 		public static IEnumerable<IndexedElement<T>> Indexed<T>(this IEnumerable<T> list)
 		{
 			int index = -1;

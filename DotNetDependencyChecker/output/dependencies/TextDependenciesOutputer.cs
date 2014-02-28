@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using org.pescuma.dotnetdependencychecker.model;
@@ -14,7 +15,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 			this.file = file;
 		}
 
-		public void Output(DependencyGraph graph)
+		public void Output(DependencyGraph graph, List<OutputEntry> warnings)
 		{
 			var result = new StringBuilder();
 			AppendProjects(result, graph);

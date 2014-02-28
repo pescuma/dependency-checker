@@ -161,6 +161,8 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 			if (extension.Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
 				config.Output.Dependencies.Add(new XMLDependenciesOutputer(file));
+			else if (extension.Equals(".dot", StringComparison.CurrentCultureIgnoreCase))
+				config.Output.Dependencies.Add(new DotDependenciesOutputer(file));
 			else
 				config.Output.Dependencies.Add(new TextDependenciesOutputer(file));
 		}

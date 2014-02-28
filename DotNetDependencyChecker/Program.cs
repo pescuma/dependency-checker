@@ -35,7 +35,6 @@ namespace org.pescuma.dotnetdependencychecker
 
 				DumpGroups(graph.Vertices, config.Output.Groups);
 
-				config.Output.Dependencies.ForEach(o => o.Output(graph));
 
 				warnings.AddRange(RulesMatcher.Match(graph, config));
 
@@ -43,6 +42,8 @@ namespace org.pescuma.dotnetdependencychecker
 					.ToList();
 
 				config.Output.Results.ForEach(o => o.Output(warnings));
+
+				config.Output.Dependencies.ForEach(o => o.Output(graph, warnings));
 
 				DumpNumberOfErrorsFound(warnings);
 				Console.WriteLine();

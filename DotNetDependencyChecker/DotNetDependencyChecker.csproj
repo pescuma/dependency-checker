@@ -66,6 +66,7 @@
     <Compile Include="output\BaseOutputEntry.cs" />
     <Compile Include="output\CircularDependencyRuleMatch.cs" />
     <Compile Include="output\dependencies\DependenciesOutputer.cs" />
+    <Compile Include="output\dependencies\DotDependenciesOutputer.cs" />
     <Compile Include="output\dependencies\TextDependenciesOutputer.cs" />
     <Compile Include="output\dependencies\XMLDependenciesOutputer.cs" />
     <Compile Include="output\results\ConsoleEntryOutputer.cs" />
