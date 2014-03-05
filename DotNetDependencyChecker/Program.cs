@@ -35,10 +35,10 @@ namespace org.pescuma.dotnetdependencychecker
 
 				DumpGroups(graph.Vertices, config.Output.Groups);
 
-
 				warnings.AddRange(RulesMatcher.Match(graph, config));
 
 				warnings = warnings.Where(e => !(e is DependencyRuleMatch) || !((DependencyRuleMatch) e).Allowed)
+					.Where(w => !config.InOutput.Ignore.Any(f => f(w)))
 					.ToList();
 
 				config.Output.Results.ForEach(o => o.Output(warnings));

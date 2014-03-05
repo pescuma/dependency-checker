@@ -49,6 +49,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 				{ "rule:", ParseRule },
 				{ "ignore:", ParseIgnore },
 				{ "ignore all references not in inputs", ParseIgnoreAllNonLocalProjects },
+				{ "in output:", ParseInOutput },
 			};
 
 			foreach (var item in lines.Indexed())
@@ -268,6 +269,15 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 			config.Ignores.Add(new Config.Ignore(
 				el => !(el is Project) || !config.Inputs.Any(input => PathMatches(((Project) el).CsprojPath, input)), location));
+		}
+
+		private void ParseInOutput(string line, ConfigLocation location)
+		{
+			if (line == "ignore loading errors")
+				config.InOutput.Ignore.Add(w => w.Type.StartsWith("Loading/"));
+
+			else
+				throw new ConfigParserException(location, "Invalid line");
 		}
 	}
 }

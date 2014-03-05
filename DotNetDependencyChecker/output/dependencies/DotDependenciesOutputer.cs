@@ -25,7 +25,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 
 		public void Output(DependencyGraph aGraph, List<OutputEntry> aWarnings)
 		{
-			//graph = Sample(aGraph, aWarnings);
+			//graph = Sample(aGraph, aWarnings, 0);
 			graph = aGraph;
 			warnings = aWarnings;
 
@@ -36,16 +36,17 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 			File.WriteAllText(file, result);
 		}
 
-		private static DependencyGraph Sample(DependencyGraph aGraph, List<OutputEntry> aWarnings)
+		private DependencyGraph Sample(DependencyGraph aGraph, List<OutputEntry> aWarnings, int percent)
 		{
 			var rand = new Random();
-			var selected = new HashSet<Dependable>(aGraph.Vertices.Where(v => rand.Next(10) < 1 || aWarnings.Any(w => w.Projects.Contains(v))));
 
-			var graph = new DependencyGraph();
-			graph.AddVertexRange(selected);
-			graph.AddEdgeRange(aGraph.Edges.Where(e => selected.Contains(e.Source) && selected.Contains(e.Target)));
+			var selected = new HashSet<Dependable>(aWarnings.SelectMany(w => w.Projects)
+				.Concat(aGraph.Vertices.Where(v => rand.Next(100) < percent)));
 
-			return graph;
+			var result = new DependencyGraph();
+			result.AddVertexRange(selected);
+			result.AddEdgeRange(aGraph.Edges.Where(e => selected.Contains(e.Source) && selected.Contains(e.Target)));
+			return result;
 		}
 
 		private string GenerateDot()

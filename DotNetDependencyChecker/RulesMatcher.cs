@@ -38,9 +38,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 			foreach (var dep in deps)
 			{
-				var possibleDeps = GenerateAllPossibleDeps(dep);
-
-				var match = FindMatch(config.Rules, possibleDeps);
+				var match = FindMatch(config.Rules, dep);
 
 				if (match != null)
 					result.Add(match);
@@ -49,54 +47,16 @@ namespace org.pescuma.dotnetdependencychecker
 			return result;
 		}
 
-		private static OutputEntry FindMatch(List<Rule> rules, List<Dependency> deps)
+		private static OutputEntry FindMatch(List<Rule> rules, Dependency dep)
 		{
 			foreach (var rule in rules)
 			{
-				foreach (var dep in deps)
-				{
-					var match = rule.Process(dep);
-					if (match != null)
-						return match;
-				}
+				var match = rule.Process(dep);
+				if (match != null)
+					return match;
 			}
 
 			return null;
-		}
-
-		private static List<Dependency> GenerateAllPossibleDeps(Dependency dep)
-		{
-			var result = new List<Dependency>();
-
-			result.Add(dep);
-
-			var sourceGroup = GetGroupActingAs(dep.Source);
-			var targetGroup = GetGroupActingAs(dep.Target);
-
-			if (sourceGroup != null)
-				result.Add(dep.WithSource(sourceGroup));
-
-			if (targetGroup != null)
-				result.Add(dep.WithTarget(targetGroup));
-
-			if (sourceGroup != null && targetGroup != null)
-				result.Add(dep.WithSource(sourceGroup)
-					.WithTarget(targetGroup));
-
-			return result;
-		}
-
-		private static GroupElement GetGroupActingAs(Dependable proj)
-		{
-			var source = proj as Assembly;
-			if (source == null)
-				return null;
-
-			var result = source.GroupElement;
-			if (result == null)
-				return null;
-
-			return result;
 		}
 	}
 }

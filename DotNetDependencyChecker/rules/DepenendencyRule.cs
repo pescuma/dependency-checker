@@ -23,7 +23,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 
 		public override OutputEntry Process(Dependency dep)
 		{
-			if (!Source(dep.Source) || !Target(dep.Target))
+			if (!Matches(Source, dep.Source) || !Matches(Target, dep.Target))
 				return null;
 
 			var messsage = new OutputMessage();
@@ -35,6 +35,18 @@ namespace org.pescuma.dotnetdependencychecker.rules
 				.Append(" allowed");
 
 			return new DependencyRuleMatch(Allow, "Dependency", Severity, messsage, this, dep.AsList());
+		}
+
+		private bool Matches(Func<Dependable, bool> test, Dependable el)
+		{
+			if (test(el))
+				return true;
+
+			var proj = (Assembly) el;
+			if (proj.GroupElement != null && test(proj.GroupElement))
+				return true;
+
+			return false;
 		}
 	}
 }

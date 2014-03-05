@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using org.pescuma.dotnetdependencychecker.model;
+using org.pescuma.dotnetdependencychecker.output;
 using org.pescuma.dotnetdependencychecker.output.dependencies;
 using org.pescuma.dotnetdependencychecker.output.results;
 using org.pescuma.dotnetdependencychecker.rules;
@@ -14,6 +15,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 		public readonly List<Ignore> Ignores = new List<Ignore>();
 		public readonly List<Rule> Rules = new List<Rule>();
 		public readonly OutputConfig Output = new OutputConfig();
+		public readonly InOutputConfig InOutput = new InOutputConfig();
 
 		public class Group
 		{
@@ -57,6 +59,11 @@ namespace org.pescuma.dotnetdependencychecker.config
 			public readonly List<string> Groups = new List<string>();
 			public readonly List<DependenciesOutputer> Dependencies = new List<DependenciesOutputer>();
 			public readonly List<EntryOutputer> Results = new List<EntryOutputer>();
+		}
+
+		public class InOutputConfig
+		{
+			public readonly List<Func<OutputEntry, bool>> Ignore = new List<Func<OutputEntry, bool>>();
 		}
 	}
 }
