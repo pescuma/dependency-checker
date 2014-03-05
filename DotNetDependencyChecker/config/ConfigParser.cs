@@ -44,7 +44,8 @@ namespace org.pescuma.dotnetdependencychecker.config
 				{ "group:", ParseGroup },
 				{ "output projects:", ParseOutputProjects },
 				{ "output groups:", ParseOutputGroups },
-				{ "output dependencies:", ParseOutputDependencies },
+				{ "output dependencies:", (line, loc) => ParseOutputDependencies(line, loc, false) },
+				{ "output dependencies with errors:", (line, loc) => ParseOutputDependencies(line, loc, true) },
 				{ "output results:", ParseOutputResults },
 				{ "rule:", ParseRule },
 				{ "ignore:", ParseIgnore },
@@ -155,17 +156,25 @@ namespace org.pescuma.dotnetdependencychecker.config
 			config.Output.Groups.Add(PathUtils.ToAbsolute(basePath, line));
 		}
 
-		private void ParseOutputDependencies(string line, ConfigLocation location)
+		private void ParseOutputDependencies(string line, ConfigLocation location, bool onlyWithMessages)
 		{
 			var file = PathUtils.ToAbsolute(basePath, line);
 			var extension = Path.GetExtension(file) ?? "";
 
 			if (extension.Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
-				config.Output.Dependencies.Add(new XMLDependenciesOutputer(file));
+				config.Output.Dependencies.Add(filterIfNeeded(onlyWithMessages, new XMLDependenciesOutputer(file)));
 			else if (extension.Equals(".dot", StringComparison.CurrentCultureIgnoreCase))
-				config.Output.Dependencies.Add(new DotDependenciesOutputer(file));
+				config.Output.Dependencies.Add(new DotDependenciesOutputer(config, file, onlyWithMessages));
 			else
-				config.Output.Dependencies.Add(new TextDependenciesOutputer(file));
+				config.Output.Dependencies.Add(filterIfNeeded(onlyWithMessages, new TextDependenciesOutputer(file)));
+		}
+
+		private DependenciesOutputer filterIfNeeded(bool onlyWithMessages, DependenciesOutputer next)
+		{
+			if (onlyWithMessages)
+				return new OnlyWithMessagesDependenciesOutputer(next);
+			else
+				return next;
 		}
 
 		private void ParseOutputResults(string line, ConfigLocation location)

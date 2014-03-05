@@ -47,7 +47,7 @@ namespace org.pescuma.dotnetdependencychecker
 			return result;
 		}
 
-		private static OutputEntry FindMatch(List<Rule> rules, Dependency dep)
+		public static OutputEntry FindMatch(List<Rule> rules, Dependency dep)
 		{
 			foreach (var rule in rules)
 			{
