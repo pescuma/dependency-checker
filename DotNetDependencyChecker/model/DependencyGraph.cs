@@ -4,9 +4,9 @@ using QuickGraph;
 
 namespace org.pescuma.dotnetdependencychecker.model
 {
-	public class DependencyGraph : BidirectionalGraph<Dependable, Dependency>
+	public class DependencyGraph : BidirectionalGraph<Assembly, Dependency>
 	{
-		public DependencyGraph CreateSubGraph(HashSet<Dependable> vertices)
+		public DependencyGraph CreateSubGraph(HashSet<Assembly> vertices)
 		{
 			var result = new DependencyGraph();
 			result.AddVertexRange(vertices);

@@ -1,35 +1,19 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using org.pescuma.dotnetdependencychecker.config;
+﻿using org.pescuma.dotnetdependencychecker.config;
 
 namespace org.pescuma.dotnetdependencychecker.model
 {
-	public class GroupElement : Dependable
+	public class GroupElement : Assembly
 	{
 		public readonly Group Group;
 		public readonly ConfigLocation Location;
-		public readonly Dependable Representing;
+		public readonly Assembly Representing;
 
-		public string Name
-		{
-			get { return Group.Name; }
-		}
-
-		public GroupElement(Group group, ConfigLocation location, Dependable representing)
+		public GroupElement(Group group, ConfigLocation location, Assembly representing)
+			: base(group.Name)
 		{
 			Group = group;
 			Location = location;
 			Representing = representing;
-		}
-
-		IEnumerable<string> Dependable.Names
-		{
-			get { return Group.Name.AsList(); }
-		}
-
-		IEnumerable<string> Dependable.Paths
-		{
-			get { return Enumerable.Empty<string>(); }
 		}
 
 		public override string ToString()

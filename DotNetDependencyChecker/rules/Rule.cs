@@ -12,7 +12,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 
 		List<OutputEntry> Process(DependencyGraph graph);
 
-		List<OutputEntry> Process(DependencyGraph graph, Dependable proj);
+		List<OutputEntry> Process(DependencyGraph graph, Assembly proj);
 
 		/// <returns>null if didn't match</returns>
 		OutputEntry Process(Dependency dep);

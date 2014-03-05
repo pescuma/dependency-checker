@@ -21,7 +21,7 @@ namespace org.pescuma.dotnetdependencychecker
 			}
 
 			var projs = graph.Vertices.ToList();
-			projs.Sort(DependableUtils.NaturalOrdering);
+			projs.Sort(Assembly.NaturalOrdering);
 
 			foreach (var proj in projs)
 			{

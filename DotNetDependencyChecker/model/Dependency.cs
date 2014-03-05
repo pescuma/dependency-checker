@@ -1,19 +1,18 @@
 ﻿using System;
-using System.Linq;
 using org.pescuma.dotnetdependencychecker.utils;
 using QuickGraph;
 
 namespace org.pescuma.dotnetdependencychecker.model
 {
-	public class Dependency : Edge<Dependable>
+	public class Dependency : Edge<Assembly>
 	{
 		public static Comparison<Dependency> NaturalOrdering = (d1, d2) =>
 		{
-			var comp = string.Compare(d1.Source.Names.First(), d2.Source.Names.First(), StringComparison.CurrentCultureIgnoreCase);
+			var comp = string.Compare(d1.Source.Name, d2.Source.Name, StringComparison.CurrentCultureIgnoreCase);
 			if (comp != 0)
 				return comp;
 
-			return string.Compare(d1.Target.Names.First(), d2.Target.Names.First(), StringComparison.CurrentCultureIgnoreCase);
+			return string.Compare(d1.Target.Name, d2.Target.Name, StringComparison.CurrentCultureIgnoreCase);
 		};
 
 		public readonly Types Type;
@@ -26,17 +25,17 @@ namespace org.pescuma.dotnetdependencychecker.model
 			DllReference
 		}
 
-		public static Dependency WithProject(Dependable source, Dependable target, Location location)
+		public static Dependency WithProject(Assembly source, Assembly target, Location location)
 		{
 			return new Dependency(source, target, Types.ProjectReference, location, null);
 		}
 
-		public static Dependency WithAssembly(Dependable source, Dependable target, Location location, string dllPath)
+		public static Dependency WithAssembly(Assembly source, Assembly target, Location location, string dllPath)
 		{
 			return new Dependency(source, target, Types.DllReference, location, dllPath);
 		}
 
-		private Dependency(Dependable source, Dependable target, Types type, Location location, string dllHintPath)
+		private Dependency(Assembly source, Assembly target, Types type, Location location, string dllHintPath)
 			: base(source, target)
 		{
 			Argument.ThrowIfNull(source);
@@ -47,17 +46,17 @@ namespace org.pescuma.dotnetdependencychecker.model
 			DLLHintPath = dllHintPath;
 		}
 
-		public Dependency WithTarget(Dependable otherTarget)
+		public Dependency WithTarget(Assembly otherTarget)
 		{
-			if (otherTarget == Target)
+			if (Equals(otherTarget, Target))
 				return this;
 
 			return new Dependency(Source, otherTarget, Type, Location, DLLHintPath);
 		}
 
-		public Dependency WithSource(Dependable otherSource)
+		public Dependency WithSource(Assembly otherSource)
 		{
-			if (otherSource == Source)
+			if (Equals(otherSource, Source))
 				return this;
 
 			return new Dependency(otherSource, Target, Type, Location, DLLHintPath);
@@ -92,7 +91,7 @@ namespace org.pescuma.dotnetdependencychecker.model
 
 		public override string ToString()
 		{
-			return string.Format("{0} -> {1} ({2})", Source.Names.First(), Target.Names.First(), Type);
+			return string.Format("{0} -> {1} ({2})", Source.Name, Target.Name, Type);
 		}
 	}
 }

@@ -21,7 +21,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			return null;
 		}
 
-		public virtual List<OutputEntry> Process(DependencyGraph graph, Dependable proj)
+		public virtual List<OutputEntry> Process(DependencyGraph graph, Assembly proj)
 		{
 			return null;
 		}

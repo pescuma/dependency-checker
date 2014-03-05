@@ -25,9 +25,8 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 
 		private void AppendProjects(StringBuilder result, DependencyGraph graph)
 		{
-			var projs = graph.Vertices.OfType<Assembly>()
-				.ToList();
-			projs.Sort(DependableUtils.NaturalOrdering);
+			var projs = graph.Vertices.ToList();
+			projs.Sort(Assembly.NaturalOrdering);
 
 			foreach (var assembly in projs)
 			{
@@ -64,9 +63,9 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 			foreach (var dep in deps)
 			{
 				result.Append("Dependency: ")
-					.Append(dep.Source.Names.First())
+					.Append(dep.Source.Name)
 					.Append(" depends on ")
-					.Append(dep.Target.Names.First())
+					.Append(dep.Target.Name)
 					.Append("\n");
 
 				AppendProperty(result, "Reference type", dep.Type == Dependency.Types.DllReference ? "DLL" : "project");

@@ -19,8 +19,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 		public void FillGroups()
 		{
-			graph.Vertices.Cast<Assembly>()
-				.ForEach(proj => proj.GroupElement = FindGroupElement(proj));
+			graph.Vertices.ForEach(proj => proj.GroupElement = FindGroupElement(proj));
 		}
 
 		private GroupElement FindGroupElement(Assembly proj)

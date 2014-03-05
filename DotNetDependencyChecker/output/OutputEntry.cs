@@ -9,7 +9,7 @@ namespace org.pescuma.dotnetdependencychecker.output
 		string Type { get; }
 		Severity Severity { get; }
 		OutputMessage Messsage { get; }
-		List<Dependable> Projects { get; }
+		List<Assembly> Projects { get; }
 		List<Dependency> Dependencies { get; }
 	}
 }

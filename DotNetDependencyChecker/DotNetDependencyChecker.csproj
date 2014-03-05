@@ -72,7 +72,6 @@
     <Compile Include="output\results\ConsoleEntryOutputer.cs" />
     <Compile Include="output\LoadingOutputWarning.cs" />
     <Compile Include="model\Assembly.cs" />
-    <Compile Include="model\Dependable.cs" />
     <Compile Include="model\Dependency.cs" />
     <Compile Include="model\DependencyGraph.cs" />
     <Compile Include="model\GroupElement.cs" />

@@ -1,11 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using org.pescuma.dotnetdependencychecker.utils;
 
 namespace org.pescuma.dotnetdependencychecker.model
 {
-	public class Assembly : Dependable
+	public class Assembly
 	{
+		public static Comparison<Assembly> NaturalOrdering =
+			(p1, p2) => String.Compare(p1.Name, p2.Name, StringComparison.CurrentCultureIgnoreCase);
+
 		public readonly string AssemblyName;
 		public readonly HashSet<string> Paths = new HashSet<string>();
 		public GroupElement GroupElement;
@@ -17,14 +21,14 @@ namespace org.pescuma.dotnetdependencychecker.model
 			AssemblyName = assemblyName;
 		}
 
-		IEnumerable<string> Dependable.Names
+		public virtual string Name
 		{
-			get { return AssemblyName.AsList(); }
+			get { return AssemblyName; }
 		}
 
-		IEnumerable<string> Dependable.Paths
+		public virtual List<string> Names
 		{
-			get { return Paths; }
+			get { return AssemblyName.AsList(); }
 		}
 
 		protected bool Equals(Assembly other)

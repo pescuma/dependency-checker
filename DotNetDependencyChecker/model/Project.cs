@@ -6,24 +6,32 @@ using org.pescuma.dotnetdependencychecker.utils;
 
 namespace org.pescuma.dotnetdependencychecker.model
 {
-	public class Project : Assembly, Dependable
+	public class Project : Assembly
 	{
-		public readonly string Name;
+		private readonly string name;
 		public readonly Guid Guid;
+
+		public override string Name
+		{
+			get { return name; }
+		}
 
 		public string CsprojPath
 		{
 			get { return Paths.First(); }
 		}
 
-		IEnumerable<string> Dependable.Names
+		public override List<string> Names
 		{
 			get
 			{
-				var result = new HashSet<string>();
+				var result = new List<string>();
+
 				result.Add(Name);
-				if (AssemblyName != null)
+
+				if (AssemblyName != Name)
 					result.Add(AssemblyName);
+
 				return result;
 			}
 		}
@@ -32,9 +40,10 @@ namespace org.pescuma.dotnetdependencychecker.model
 			: base(assemblyName)
 		{
 			Argument.ThrowIfNull(name);
+			Argument.ThrowIfNull(assemblyName);
 			Argument.ThrowIfNull(csprojPath);
 
-			Name = name;
+			this.name = name;
 			Guid = guid;
 
 			Paths.Add(csprojPath);

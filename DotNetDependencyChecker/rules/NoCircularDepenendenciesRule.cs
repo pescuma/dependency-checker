@@ -18,7 +18,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 		{
 			var result = new List<OutputEntry>();
 
-			IDictionary<Dependable, int> components;
+			IDictionary<Assembly, int> components;
 			graph.StronglyConnectedComponents(out components);
 
 			var circularDependencies = components.Select(c => new { Proj = c.Key, Group = c.Value })
@@ -29,9 +29,9 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			{
 				var projs = g.Select(i => i.Proj)
 					.ToList();
+				projs.Sort(Assembly.NaturalOrdering);
 
-				var projsSet = new HashSet<Dependable>(projs);
-				projs.Sort(DependableUtils.NaturalOrdering);
+				var projsSet = new HashSet<Assembly>(projs);
 
 				var deps = graph.Edges.Where(e => projsSet.Contains(e.Source) && projsSet.Contains(e.Target));
 

@@ -10,10 +10,10 @@ namespace org.pescuma.dotnetdependencychecker.output
 		public string Type { get; private set; }
 		public Severity Severity { get; private set; }
 		public OutputMessage Messsage { get; private set; }
-		public List<Dependable> Projects { get; private set; }
+		public List<Assembly> Projects { get; private set; }
 		public List<Dependency> Dependencies { get; private set; }
 
-		protected BaseOutputEntry(string type, Severity severity, OutputMessage messsage, IEnumerable<Dependable> projects,
+		protected BaseOutputEntry(string type, Severity severity, OutputMessage messsage, IEnumerable<Assembly> projects,
 			IEnumerable<Dependency> dependencies)
 		{
 			Type = type;
@@ -36,7 +36,7 @@ namespace org.pescuma.dotnetdependencychecker.output
 					.Distinct();
 
 			Projects = projects.ToList();
-			Projects.Sort(DependableUtils.NaturalOrdering);
+			Projects.Sort(Assembly.NaturalOrdering);
 		}
 
 		protected BaseOutputEntry(string type, Severity severity, OutputMessage messsage, IEnumerable<Dependency> dependencies)

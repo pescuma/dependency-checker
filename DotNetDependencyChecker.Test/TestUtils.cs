@@ -32,8 +32,8 @@ namespace org.pescuma.dotnetdependencychecker
 		{
 			var graph = new DependencyGraph();
 
-			graph.AddVertexRange(os.OfType<Dependable>());
-			graph.AddVertexRange(os.OfType<IEnumerable<Dependable>>()
+			graph.AddVertexRange(os.OfType<Assembly>());
+			graph.AddVertexRange(os.OfType<IEnumerable<Assembly>>()
 				.SelectMany(e => e));
 
 			graph.AddEdgeRange(os.OfType<Dependency>());

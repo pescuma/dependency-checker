@@ -14,7 +14,7 @@ namespace org.pescuma.dotnetdependencychecker
 	{
 		private readonly Config config;
 		private readonly List<OutputEntry> warnings;
-		private Func<Dependable, bool> ignore;
+		private Func<Assembly, bool> ignore;
 		private List<Assembly> assemblies;
 		private List<Dependency> dependencies;
 		private List<ProcessingProject> processing;
@@ -51,7 +51,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 			CreateDLLReferences();
 
-			assemblies.Sort(DependableUtils.NaturalOrdering);
+			assemblies.Sort(Assembly.NaturalOrdering);
 			dependencies.Sort(Dependency.NaturalOrdering);
 
 			var graph = new DependencyGraph();

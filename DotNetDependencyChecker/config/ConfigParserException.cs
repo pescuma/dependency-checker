@@ -2,6 +2,7 @@
 
 namespace org.pescuma.dotnetdependencychecker.config
 {
+	[Serializable]
 	public class ConfigParserException : Exception
 	{
 		public ConfigParserException(string message)

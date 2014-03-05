@@ -13,7 +13,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 		private const string INDENT = "    ";
 
 		private readonly string file;
-		private readonly Dictionary<Dependable, int> ids = new Dictionary<Dependable, int>();
+		private readonly Dictionary<Assembly, int> ids = new Dictionary<Assembly, int>();
 
 		private DependencyGraph graph;
 		private List<OutputEntry> warnings;
@@ -40,7 +40,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 		{
 			var rand = new Random();
 
-			var selected = new HashSet<Dependable>(aWarnings.SelectMany(w => w.Projects)
+			var selected = new HashSet<Assembly>(aWarnings.SelectMany(w => w.Projects)
 				.Concat(aGraph.Vertices.Where(v => rand.Next(100) < percent)));
 
 			var result = new DependencyGraph();
@@ -59,8 +59,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 
 			int clusterIndex = 1;
 
-			foreach (var group in graph.Vertices.OfType<Assembly>()
-				.Where(a => a.GroupElement != null)
+			foreach (var group in graph.Vertices.Where(a => a.GroupElement != null)
 				.GroupBy(a => a.GroupElement.Name))
 			{
 				result.Append(INDENT)
@@ -70,7 +69,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 
 				const string subprefix = INDENT + INDENT;
 
-				var projs = new HashSet<Dependable>(@group);
+				var projs = new HashSet<Assembly>(group);
 
 				projs.ForEach(a => AppendProject(result, subprefix, a));
 
@@ -96,8 +95,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 					.Append("}\n\n");
 			}
 
-			graph.Vertices.OfType<Assembly>()
-				.Where(a => a.GroupElement == null)
+			graph.Vertices.Where(a => a.GroupElement == null)
 				.ForEach(a => AppendProject(result, INDENT, a));
 
 			result.Append("\n");
@@ -110,18 +108,15 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 			return result.ToString();
 		}
 
-		private bool AreFromDifferentGroups(Dependable source, Dependable target)
+		private bool AreFromDifferentGroups(Assembly p1, Assembly p2)
 		{
-			var p1 = (Assembly) source;
-			var p2 = (Assembly) target;
-
 			if (p1.GroupElement == null || p2.GroupElement == null)
 				return true;
 
 			return p1.GroupElement.Name != p2.GroupElement.Name;
 		}
 
-		private void AppendProject(StringBuilder result, string prefix, Dependable assembly)
+		private void AppendProject(StringBuilder result, string prefix, Assembly assembly)
 		{
 			var id = ids[assembly];
 			result.Append(prefix)

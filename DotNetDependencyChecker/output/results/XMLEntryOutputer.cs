@@ -67,46 +67,37 @@ namespace org.pescuma.dotnetdependencychecker.output.results
 			File.WriteAllText(file, xdoc.ToString());
 		}
 
-		private XElement CreateXProject(Dependable dependable)
+		private XElement CreateXProject(Assembly assembly)
 		{
 			var result = new XElement("Element");
 
-			if (dependable is GroupElement)
-				dependable = ((GroupElement) dependable).Representing;
-
-			if (dependable is Project)
+			if (assembly is Project)
 			{
-				var proj = (Project) dependable;
+				var proj = (Project) assembly;
 				result.Add(new XAttribute("Type", "Project"));
 				result.Add(new XAttribute("Name", proj.Name));
 				result.Add(new XAttribute("AssemblyName", proj.AssemblyName));
 				result.Add(new XAttribute("Guid", proj.Guid.ToString()));
 				result.Add(new XAttribute("Csproj", proj.CsprojPath));
 			}
-			else if (dependable is Assembly)
+			else
 			{
-				var assembly = (Assembly) dependable;
 				result.Add(new XAttribute("Type", "Assembly"));
 				result.Add(new XAttribute("AssemblyName", assembly.AssemblyName));
 			}
-			else
-			{
-				throw new InvalidDataException();
-			}
 
-			var group = ((Assembly) dependable).GroupElement;
-			if (group != null)
+			if (assembly.GroupElement != null)
 			{
 				var xgroup = new XElement("Group");
 				result.Add(xgroup);
 
-				xgroup.Add(new XAttribute("Name", group.Name));
+				xgroup.Add(new XAttribute("Name", assembly.GroupElement.Name));
 				xgroup.Add(new XElement("Rule", //
-					new XAttribute("Line", group.Location.LineNum), //
-					group.Location.LineText));
+					new XAttribute("Line", assembly.GroupElement.Location.LineNum), //
+					assembly.GroupElement.Location.LineText));
 			}
 
-			dependable.Paths.ForEach(p => result.Add(new XElement("Path", p)));
+			assembly.Paths.ForEach(p => result.Add(new XElement("Path", p)));
 
 			return result;
 		}
@@ -116,8 +107,8 @@ namespace org.pescuma.dotnetdependencychecker.output.results
 			var result = new XElement("Dependency");
 
 			result.Add(new XAttribute("Type", dep.Type.ToString()));
-			result.Add(new XAttribute("Source", GetProjectName(dep.Source)));
-			result.Add(new XAttribute("Target", GetProjectName(dep.Target)));
+			result.Add(new XAttribute("Source", dep.Source.Name));
+			result.Add(new XAttribute("Target", dep.Target.Name));
 			result.Add(new XElement("Location", //
 				new XAttribute("File", dep.Location.File), //
 				new XAttribute("Line", dep.Location.Line)));
@@ -125,14 +116,6 @@ namespace org.pescuma.dotnetdependencychecker.output.results
 				result.Add(new XElement("DLLHintPath", dep.DLLHintPath));
 
 			return result;
-		}
-
-		private string GetProjectName(Dependable source)
-		{
-			if (source is GroupElement)
-				return GetProjectName(((GroupElement) source).Representing);
-
-			return source.Names.First();
 		}
 	}
 }

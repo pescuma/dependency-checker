@@ -80,13 +80,13 @@ namespace org.pescuma.dotnetdependencychecker
 				.ToLower() + "(s)")));
 		}
 
-		private static void DumpProjects(IEnumerable<Dependable> projects, List<string> filenames)
+		private static void DumpProjects(IEnumerable<Assembly> projects, List<string> filenames)
 		{
 			if (!filenames.Any())
 				return;
 
 			var projs = projects.ToList();
-			projs.Sort(DependableUtils.NaturalOrdering);
+			projs.Sort(Assembly.NaturalOrdering);
 
 			var names = projs.Select(p => string.Join(" or ", p.Names))
 				.ToList();
@@ -94,13 +94,12 @@ namespace org.pescuma.dotnetdependencychecker
 			filenames.ForEach(f => File.WriteAllLines(f, names));
 		}
 
-		private static void DumpGroups(IEnumerable<Dependable> projects, List<string> filenames)
+		private static void DumpGroups(IEnumerable<Assembly> projects, List<string> filenames)
 		{
 			if (!filenames.Any())
 				return;
 
-			var groups = projects.OfType<Assembly>()
-				.GroupBy(p => p.GroupElement)
+			var groups = projects.GroupBy(p => p.GroupElement)
 				.ToList();
 
 			groups.Sort((e1, e2) =>
@@ -127,11 +126,10 @@ namespace org.pescuma.dotnetdependencychecker
 					.Append(":\n");
 
 				var projs = g.ToList();
-				projs.Sort(DependableUtils.NaturalOrdering);
-				projs.Cast<Dependable>()
-					.ForEach(p => result.Append("  - ")
-						.Append(string.Join(" or ", p.Names))
-						.Append("\n"));
+				projs.Sort(Assembly.NaturalOrdering);
+				projs.ForEach(p => result.Append("  - ")
+					.Append(string.Join(" or ", p.Names))
+					.Append("\n"));
 
 				result.Append("\n");
 			});

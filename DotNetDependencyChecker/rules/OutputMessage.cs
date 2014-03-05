@@ -24,7 +24,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			return this;
 		}
 
-		public OutputMessage Append(Dependable proj, ProjInfo info)
+		public OutputMessage Append(Assembly proj, ProjInfo info)
 		{
 			elements.Add(new Element(proj, info));
 			return this;
@@ -56,7 +56,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 		public class Element
 		{
 			public readonly string Text;
-			public readonly Dependable Project;
+			public readonly Assembly Project;
 			public readonly ProjInfo ProjInfo;
 			public readonly Dependency Dependendcy;
 			public readonly DepInfo DepInfo;
@@ -67,17 +67,17 @@ namespace org.pescuma.dotnetdependencychecker.rules
 				Project = null;
 			}
 
-			public Element(Dependable project, ProjInfo projInfo)
+			public Element(Assembly project, ProjInfo projInfo)
 			{
 				Project = project;
-				this.ProjInfo = projInfo;
+				ProjInfo = projInfo;
 				Text = null;
 			}
 
 			public Element(Dependency dependendcy, DepInfo depInfo)
 			{
-				this.Dependendcy = dependendcy;
-				this.DepInfo = depInfo;
+				Dependendcy = dependendcy;
+				DepInfo = depInfo;
 			}
 		}
 	}

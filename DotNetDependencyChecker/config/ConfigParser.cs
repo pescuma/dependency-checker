@@ -104,9 +104,9 @@ namespace org.pescuma.dotnetdependencychecker.config
 			config.Groups.Add(new Config.Group(name, matcher, location));
 		}
 
-		private Func<Dependable, bool> ParseMatcher(string matchLine, ConfigLocation location)
+		private Func<Assembly, bool> ParseMatcher(string matchLine, ConfigLocation location)
 		{
-			Func<Dependable, bool> result = null;
+			Func<Assembly, bool> result = null;
 
 			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
@@ -120,14 +120,14 @@ namespace org.pescuma.dotnetdependencychecker.config
 			return result;
 		}
 
-		private Func<Dependable, bool> ParseRE(string line)
+		private Func<Assembly, bool> ParseRE(string line)
 		{
 			var re = new Regex("^" + line + "$", RegexOptions.IgnoreCase);
 
 			return proj => proj.Names.Any(re.IsMatch);
 		}
 
-		private Func<Dependable, bool> ParsePath(string line)
+		private Func<Assembly, bool> ParsePath(string line)
 		{
 			var path = PathUtils.ToAbsolute(basePath, line);
 
@@ -140,7 +140,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 			       || fullPath.StartsWith(beginPath + "\\", StringComparison.CurrentCultureIgnoreCase);
 		}
 
-		private Func<Dependable, bool> ParseSimpleMatch(string line)
+		private Func<Assembly, bool> ParseSimpleMatch(string line)
 		{
 			return proj => proj.Names.Any(n => line.Equals(n, StringComparison.CurrentCultureIgnoreCase));
 		}

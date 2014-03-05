@@ -21,9 +21,9 @@ namespace org.pescuma.dotnetdependencychecker.config
 		{
 			public readonly string Name;
 			public readonly ConfigLocation Location;
-			public readonly Func<Dependable, bool> Matches;
+			public readonly Func<Assembly, bool> Matches;
 
-			public Group(string name, Func<Dependable, bool> matches, ConfigLocation location)
+			public Group(string name, Func<Assembly, bool> matches, ConfigLocation location)
 			{
 				Name = name;
 				Matches = matches;
@@ -38,10 +38,10 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		public class Ignore
 		{
-			public readonly Func<Dependable, bool> Matches;
+			public readonly Func<Assembly, bool> Matches;
 			private readonly ConfigLocation location;
 
-			public Ignore(Func<Dependable, bool> matches, ConfigLocation location)
+			public Ignore(Func<Assembly, bool> matches, ConfigLocation location)
 			{
 				Matches = matches;
 				this.location = location;
@@ -63,6 +63,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		public class InOutputConfig
 		{
+// ReSharper disable once MemberHidesStaticFromOuterClass
 			public readonly List<Func<OutputEntry, bool>> Ignore = new List<Func<OutputEntry, bool>>();
 		}
 	}
