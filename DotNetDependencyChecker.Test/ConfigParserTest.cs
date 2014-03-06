@@ -104,6 +104,16 @@ input: c:\b");
 		}
 
 		[Test]
+		public void TestGroupWithSimpleMatchAndNot()
+		{
+			var config = Parse(@"group: My name += not: A.Project.Name");
+
+			var group = config.Groups[0];
+			Assert.AreEqual(false, group.Matches(TestUtils.ProjWithName("A.Project.Name")));
+			Assert.AreEqual(true, group.Matches(TestUtils.ProjWithName("X")));
+		}
+
+		[Test]
 		public void TestGroupWithREMatch()
 		{
 			var config = Parse(@"group: My name += regex: Ab+");

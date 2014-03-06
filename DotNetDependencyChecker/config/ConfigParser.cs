@@ -111,6 +111,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
+				{ "not:", (line, loc) => result = ParseNot(line, loc) },
 				{ "regex:", (line, loc) => result = ParseRE(line) },
 				{ "path:", (line, loc) => result = ParsePath(line) },
 				{ "", (line, loc) => result = ParseSimpleMatch(line) },
@@ -119,6 +120,13 @@ namespace org.pescuma.dotnetdependencychecker.config
 			ParseLine(lineTypes, matchLine, location);
 
 			return result;
+		}
+
+		private Func<Library, bool> ParseNot(string line, ConfigLocation loc)
+		{
+			var inner = ParseMatcher(line, loc);
+
+			return lib => !inner(lib);
 		}
 
 		private Func<Library, bool> ParseRE(string line)
