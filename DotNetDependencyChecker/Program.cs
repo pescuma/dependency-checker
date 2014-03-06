@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
+using org.pescuma.dotnetdependencychecker.input;
 using org.pescuma.dotnetdependencychecker.model;
 using org.pescuma.dotnetdependencychecker.output;
 using org.pescuma.dotnetdependencychecker.rules;
@@ -27,7 +28,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 				var config = new ConfigParser().Parse(args[0]);
 
-				var graph = new ProjectsLoader(config, warnings).LoadGraph();
+				var graph = ProjectsLoader.LoadGraph(config, warnings);
 
 				DumpProjects(graph.Vertices, config.Output.Projects);
 
