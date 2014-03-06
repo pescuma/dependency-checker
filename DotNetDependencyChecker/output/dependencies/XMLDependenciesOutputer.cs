@@ -70,10 +70,10 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 
 				el.Add(new XAttribute("Source", dep.Source.Name));
 				el.Add(new XAttribute("Target", dep.Target.Name));
-				el.Add(new XAttribute("ReferenceType", dep.Type == Dependency.Types.DllReference ? "DLL" : "Project"));
+				el.Add(new XAttribute("ReferenceType", dep.Type == Dependency.Types.LibraryReference ? "Library" : "Project"));
 
-				if (dep.DLLHintPath != null)
-					el.Add(new XAttribute("DLLPath", dep.DLLHintPath));
+				if (dep.ReferencedPath != null)
+					el.Add(new XAttribute("ReferencedPath", dep.ReferencedPath));
 			}
 		}
 	}

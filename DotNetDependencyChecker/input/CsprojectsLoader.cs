@@ -24,7 +24,7 @@ namespace org.pescuma.dotnetdependencychecker.input
 					builder.AddProjectReference(proj, csref.Name, null, csref.ProjectGuid, csref.Include, new Location(csproj.Filename, csref.LineNumber));
 
 				foreach (var csref in csproj.References)
-					builder.AddDllReference(proj, null, csref.Include.Name, null, csref.HintPath, new Location(csproj.Filename, csref.LineNumber));
+					builder.AddLibraryReference(proj, null, csref.Include.Name, null, csref.HintPath, new Location(csproj.Filename, csref.LineNumber));
 			}
 
 			var externalCsprojFiles = csprojs.SelectMany(p => p.ProjectReferences)

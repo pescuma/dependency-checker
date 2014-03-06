@@ -47,10 +47,10 @@ namespace org.pescuma.dotnetdependencychecker.input
 				referenceFilename, referenceLocation));
 		}
 
-		public void AddDllReference(object proj, string referenceName, string referenceLibraryName, Guid? referenceGuid, string referenceFilename,
-			Location referenceLocation)
+		public void AddLibraryReference(object proj, string referenceName, string referenceLibraryName, Guid? referenceGuid,
+			string referenceFilename, Location referenceLocation)
 		{
-			refs.Add(new TempReference((TempProject) proj, Dependency.Types.DllReference, referenceName, referenceLibraryName, referenceGuid,
+			refs.Add(new TempReference((TempProject) proj, Dependency.Types.LibraryReference, referenceName, referenceLibraryName, referenceGuid,
 				referenceFilename, referenceLocation));
 		}
 
@@ -64,9 +64,10 @@ namespace org.pescuma.dotnetdependencychecker.input
 
 			CreateInitialProjects();
 
+			// Create project references first so we can create the entries as Project if possible
 			CreateProjectReferences();
 
-			CreateDLLReferences();
+			CreateLibraryReferences();
 
 			libraries.Sort(Library.NaturalOrdering);
 			dependencies.Sort(Dependency.NaturalOrdering);
@@ -303,9 +304,9 @@ namespace org.pescuma.dotnetdependencychecker.input
 			return result;
 		}
 
-		private void CreateDLLReferences()
+		private void CreateLibraryReferences()
 		{
-			foreach (var tmp in refs.Where(r => r.Type == Dependency.Types.DllReference && !r.Source.Ignored))
+			foreach (var tmp in refs.Where(r => r.Type == Dependency.Types.LibraryReference && !r.Source.Ignored))
 			{
 				var projRef = tmp;
 				var proj = projRef.Source.Project;

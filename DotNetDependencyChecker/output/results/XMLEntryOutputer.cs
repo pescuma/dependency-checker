@@ -112,8 +112,8 @@ namespace org.pescuma.dotnetdependencychecker.output.results
 			result.Add(new XElement("Location", //
 				new XAttribute("File", dep.Location.File), //
 				new XAttribute("Line", dep.Location.Line)));
-			if (dep.DLLHintPath != null)
-				result.Add(new XElement("DLLHintPath", dep.DLLHintPath));
+			if (dep.ReferencedPath != null)
+				result.Add(new XElement("ReferencedPath", dep.ReferencedPath));
 
 			return result;
 		}

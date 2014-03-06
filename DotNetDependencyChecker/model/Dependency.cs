@@ -17,12 +17,12 @@ namespace org.pescuma.dotnetdependencychecker.model
 
 		public readonly Types Type;
 		public readonly Location Location;
-		public readonly string DLLHintPath;
+		public readonly string ReferencedPath;
 
 		public enum Types
 		{
 			ProjectReference,
-			DllReference
+			LibraryReference
 		}
 
 		public static Dependency WithProject(Library source, Library target, Location location)
@@ -30,12 +30,12 @@ namespace org.pescuma.dotnetdependencychecker.model
 			return new Dependency(source, target, Types.ProjectReference, location, null);
 		}
 
-		public static Dependency WithLibrary(Library source, Library target, Location location, string dllPath)
+		public static Dependency WithLibrary(Library source, Library target, Location location, string referencedPath)
 		{
-			return new Dependency(source, target, Types.DllReference, location, dllPath);
+			return new Dependency(source, target, Types.LibraryReference, location, referencedPath);
 		}
 
-		private Dependency(Library source, Library target, Types type, Location location, string dllHintPath)
+		private Dependency(Library source, Library target, Types type, Location location, string referencedPath)
 			: base(source, target)
 		{
 			Argument.ThrowIfNull(source);
@@ -43,7 +43,7 @@ namespace org.pescuma.dotnetdependencychecker.model
 
 			Type = type;
 			Location = location;
-			DLLHintPath = dllHintPath;
+			ReferencedPath = referencedPath;
 		}
 
 		public Dependency WithTarget(Library otherTarget)
@@ -51,7 +51,7 @@ namespace org.pescuma.dotnetdependencychecker.model
 			if (Equals(otherTarget, Target))
 				return this;
 
-			return new Dependency(Source, otherTarget, Type, Location, DLLHintPath);
+			return new Dependency(Source, otherTarget, Type, Location, ReferencedPath);
 		}
 
 		public Dependency WithSource(Library otherSource)
@@ -59,7 +59,7 @@ namespace org.pescuma.dotnetdependencychecker.model
 			if (Equals(otherSource, Source))
 				return this;
 
-			return new Dependency(otherSource, Target, Type, Location, DLLHintPath);
+			return new Dependency(otherSource, Target, Type, Location, ReferencedPath);
 		}
 
 		protected bool Equals(Dependency other)

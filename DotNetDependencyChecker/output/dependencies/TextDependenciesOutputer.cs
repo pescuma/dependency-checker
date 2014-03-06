@@ -68,10 +68,10 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 					.Append(dep.Target.Name)
 					.Append("\n");
 
-				AppendProperty(result, "Reference type", dep.Type == Dependency.Types.DllReference ? "DLL" : "project");
+				AppendProperty(result, "Reference type", dep.Type == Dependency.Types.LibraryReference ? "library" : "project");
 
-				if (dep.DLLHintPath != null)
-					AppendProperty(result, "DLL path", dep.DLLHintPath);
+				if (dep.ReferencedPath != null)
+					AppendProperty(result, "Referenced path", dep.ReferencedPath);
 
 				result.Append("\n");
 			}

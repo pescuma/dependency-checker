@@ -130,8 +130,8 @@ namespace org.pescuma.dotnetdependencychecker.output.results
 				{
 					switch (dep.Type)
 					{
-						case Dependency.Types.DllReference:
-							return "DLL reference";
+						case Dependency.Types.LibraryReference:
+							return "library reference";
 						case Dependency.Types.ProjectReference:
 							return "project reference";
 						default:

@@ -191,7 +191,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 
 			var attribs = new List<string>();
 
-			if (dep.Type == Dependency.Types.DllReference)
+			if (dep.Type == Dependency.Types.LibraryReference)
 				attribs.Add("style=dashed");
 
 			var color = GetColor(warnings.Where(w => w.Dependencies.Contains(dep)));
