@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using org.pescuma.dotnetdependencychecker.config;
@@ -37,6 +38,9 @@ namespace org.pescuma.dotnetdependencychecker.input
 				result = proj;
 			}
 
+			result.Names.Add(name);
+			result.LibraryNames.Add(name);
+
 			return result;
 		}
 
@@ -59,6 +63,10 @@ namespace org.pescuma.dotnetdependencychecker.input
 			projs.Keys.ForEach(p =>
 			{
 				p.Project = new Project(p.Name, p.LibraryName, p.Guid, p.Filename);
+				p.Project.Names.AddRange(p.Names.Where(n => !p.Project.Names.Contains(n))
+					.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase));
+				p.Project.LibraryNames.AddRange(p.LibraryNames.Where(n => !p.Project.LibraryNames.Contains(n))
+					.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase));
 				p.Ignored = Ignore(p.Project);
 			});
 
@@ -156,6 +164,14 @@ namespace org.pescuma.dotnetdependencychecker.input
 						WarnIfSimilarFound(found, proj, dep, projRef.ReferenceFilename, string.Format("named {0}", projRef.ReferenceName));
 				}
 
+				if (found == null && projRef.ReferenceLibraryName != null)
+				{
+					found = FindLibraryByLibraryName(proj, dep, projRef.ReferenceLibraryName);
+
+					if (projRef.ReferenceFilename != null)
+						WarnIfSimilarFound(found, proj, dep, projRef.ReferenceFilename, string.Format("with library name {0}", projRef.ReferenceLibraryName));
+				}
+
 				if (found == null)
 					found = CreateFakeProject(proj, dep, projRef)
 						.AsList<Library>();
@@ -163,10 +179,19 @@ namespace org.pescuma.dotnetdependencychecker.input
 				if (found == null || !found.Any())
 					continue;
 
-				if (projRef.ReferenceFilename != null)
-					found.ForEach(rf => rf.Paths.Add(projRef.ReferenceFilename));
+				foreach (var target in found)
+				{
+					if (projRef.ReferenceFilename != null)
+						target.Paths.Add(projRef.ReferenceFilename);
 
-				found.ForEach(rf => dependencies.Add(dep.WithTarget(rf)));
+					if (projRef.ReferenceName != null)
+						target.Names.Add(projRef.ReferenceName);
+
+					if (projRef.ReferenceLibraryName != null)
+						target.LibraryNames.Add(projRef.ReferenceLibraryName);
+
+					dependencies.Add(dep.WithTarget(target));
+				}
 			}
 		}
 
@@ -354,6 +379,8 @@ namespace org.pescuma.dotnetdependencychecker.input
 			public readonly string LibraryName;
 			public readonly Guid? Guid;
 			public readonly string Filename;
+			public readonly HashSet<string> Names = new HashSet<string>();
+			public readonly HashSet<string> LibraryNames = new HashSet<string>();
 
 			public Project Project;
 			public bool Ignored;
@@ -368,12 +395,16 @@ namespace org.pescuma.dotnetdependencychecker.input
 				LibraryName = libraryName;
 				Guid = guid;
 				Filename = filename;
+
+				Names.Add(name);
+				LibraryNames.Add(libraryName);
 			}
 
 			private bool Equals(TempProject other)
 			{
-				return string.Equals(Name, other.Name) && string.Equals(LibraryName, other.LibraryName) && Guid.Equals(other.Guid)
-				       && string.Equals(Filename, other.Filename);
+				return string.Equals(Name, other.Name, StringComparison.CurrentCultureIgnoreCase)
+				       && string.Equals(LibraryName, other.LibraryName, StringComparison.CurrentCultureIgnoreCase) && Guid.Equals(other.Guid)
+				       && string.Equals(Filename, other.Filename, StringComparison.CurrentCultureIgnoreCase);
 			}
 
 			public override bool Equals(object obj)
@@ -391,12 +422,26 @@ namespace org.pescuma.dotnetdependencychecker.input
 			{
 				unchecked
 				{
-					var hashCode = (Name != null ? Name.GetHashCode() : 0);
-					hashCode = (hashCode * 397) ^ (LibraryName != null ? LibraryName.GetHashCode() : 0);
+					var hashCode = (Name != null
+						? Name.ToLower(CultureInfo.CurrentCulture)
+							.GetHashCode()
+						: 0);
+					hashCode = (hashCode * 397) ^ (LibraryName != null
+						? LibraryName.ToLower(CultureInfo.CurrentCulture)
+							.GetHashCode()
+						: 0);
 					hashCode = (hashCode * 397) ^ Guid.GetHashCode();
-					hashCode = (hashCode * 397) ^ (Filename != null ? Filename.GetHashCode() : 0);
+					hashCode = (hashCode * 397) ^ (Filename != null
+						? Filename.ToLower(CultureInfo.CurrentCulture)
+							.GetHashCode()
+						: 0);
 					return hashCode;
 				}
+			}
+
+			public override string ToString()
+			{
+				return Name;
 			}
 		}
 
@@ -424,6 +469,11 @@ namespace org.pescuma.dotnetdependencychecker.input
 				ReferenceGuid = referenceGuid;
 				ReferenceFilename = referenceFilename;
 				ReferenceLocation = referenceLocation;
+			}
+
+			public override string ToString()
+			{
+				return string.Format("{0} -> {1}", Source.Name, ReferenceName ?? ReferenceLibraryName);
 			}
 		}
 	}

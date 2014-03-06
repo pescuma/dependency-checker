@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using org.pescuma.dotnetdependencychecker.utils;
 
@@ -13,12 +14,17 @@ namespace org.pescuma.dotnetdependencychecker.model
 		public readonly string LibraryName;
 		public readonly HashSet<string> Paths = new HashSet<string>();
 		public GroupElement GroupElement;
+		public readonly HashSet<string> Names = new HashSet<string>();
+		public readonly HashSet<string> LibraryNames = new HashSet<string>();
 
 		public Library(string libraryName)
 		{
 			Argument.ThrowIfNull(libraryName);
 
 			LibraryName = libraryName;
+
+			Names.Add(libraryName);
+			LibraryNames.Add(libraryName);
 		}
 
 		public virtual string Name
@@ -26,9 +32,30 @@ namespace org.pescuma.dotnetdependencychecker.model
 			get { return LibraryName; }
 		}
 
-		public virtual List<string> Names
+		public List<string> SortedNames
 		{
-			get { return LibraryName.AsList(); }
+			get
+			{
+				var result = new List<string>();
+				result.Add(Name);
+				if (LibraryName != Name)
+					result.Add(LibraryName);
+				result.AddRange(Names.Where(n => !result.Contains(n))
+					.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase));
+				return result;
+			}
+		}
+
+		public List<string> SortedLibraryNames
+		{
+			get
+			{
+				var result = new List<string>();
+				result.Add(LibraryName);
+				result.AddRange(LibraryNames.Where(n => !result.Contains(n))
+					.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase));
+				return result;
+			}
 		}
 
 		protected bool Equals(Library other)

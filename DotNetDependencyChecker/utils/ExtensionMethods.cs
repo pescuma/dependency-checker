@@ -22,5 +22,11 @@ namespace org.pescuma.dotnetdependencychecker.utils
 			result.AddEdgeRange(graph.Edges);
 			return result;
 		}
+
+		public static void AddRange<T>(this HashSet<T> set, IEnumerable<T> toAdd)
+		{
+			foreach (var e in toAdd)
+				set.Add(e);
+		}
 	}
 }

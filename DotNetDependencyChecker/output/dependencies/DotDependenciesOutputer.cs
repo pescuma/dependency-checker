@@ -167,8 +167,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 				result.Append("shape=ellipse");
 
 			result.Append(",label=\"")
-				.Append(library.Names.First()
-					.Replace('"', ' '))
+				.Append(library.Name.Replace('"', ' '))
 				.Append("\"");
 
 			var color = GetColor(warnings.Where(w => w.Projects.Contains(library)));

@@ -89,7 +89,7 @@ namespace org.pescuma.dotnetdependencychecker
 			var projs = projects.ToList();
 			projs.Sort(Library.NaturalOrdering);
 
-			var names = projs.Select(p => string.Join(" or ", p.Names))
+			var names = projs.Select(p => string.Join(" or ", p.SortedNames))
 				.ToList();
 
 			filenames.ForEach(f => File.WriteAllLines(f, names));
@@ -129,7 +129,7 @@ namespace org.pescuma.dotnetdependencychecker
 				var projs = g.ToList();
 				projs.Sort(Library.NaturalOrdering);
 				projs.ForEach(p => result.Append("  - ")
-					.Append(string.Join(" or ", p.Names))
+					.Append(string.Join(" or ", p.SortedNames))
 					.Append("\n"));
 
 				result.Append("\n");

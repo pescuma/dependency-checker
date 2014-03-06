@@ -216,7 +216,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		private static UniqueProjectRule NewUniqueNameAndGuidProjectRule(Severity s, ConfigLocation l)
 		{
-			return new UniqueProjectRule(p => p.Name != null && p.Guid != null, p => p.Name + "\n" + p.Guid,
+			return new UniqueProjectRule(p => p.ProjectName != null && p.Guid != null, p => p.Name + "\n" + p.Guid,
 				p => "named " + p.Name + " and with GUID " + p.Guid, s, l);
 		}
 
@@ -227,7 +227,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		private static UniqueProjectRule NewUniqueNameProjectRule(Severity s, ConfigLocation l)
 		{
-			return new UniqueProjectRule(p => p.Name != null, p => p.Name, p => "named " + p.Name, s, l);
+			return new UniqueProjectRule(p => p.ProjectName != null, p => p.Name, p => "named " + p.Name, s, l);
 		}
 
 		private void ParseRule(string line, ConfigLocation location)

@@ -80,7 +80,7 @@ namespace org.pescuma.dotnetdependencychecker.output.results
 			{
 				case OutputMessage.ProjInfo.Name:
 				{
-					return string.Join(" or ", proj.Names);
+					return string.Join(" or ", proj.SortedNames);
 				}
 				case OutputMessage.ProjInfo.NameAndGroup:
 				{
