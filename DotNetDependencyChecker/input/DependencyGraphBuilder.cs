@@ -104,7 +104,7 @@ namespace org.pescuma.dotnetdependencychecker.input
 					.Append(sameLibraries.Count)
 					.Append(" projects that are the same:");
 				sameLibraries.ForEach(p => msg.Append("\n  - ")
-					.Append(((Project) p).CsprojPath));
+					.Append(((Project) p).ProjectPath));
 
 				throw new ConfigException(msg.ToString());
 			}
@@ -233,7 +233,7 @@ namespace org.pescuma.dotnetdependencychecker.input
 		private OutputEntry CreateMultipleReferencesWarning(Project proj, Dependency dep, string refName, List<Library> candidates)
 		{
 			var message = new OutputMessage().Append("The project ")
-				.Append(proj, OutputMessage.ProjInfo.NameAndCsproj)
+				.Append(proj, OutputMessage.ProjInfo.NameAndProjectPath)
 				.Append(" references the project ")
 				.Append(refName)
 				.Append(", but there are ")
@@ -241,7 +241,7 @@ namespace org.pescuma.dotnetdependencychecker.input
 				.Append(" projects that match:");
 
 			candidates.ForEach(c => message.Append("\n  - ")
-				.Append(c, OutputMessage.ProjInfo.Csproj));
+				.Append(c, OutputMessage.ProjInfo.ProjectPath));
 			message.Append("\nMultiple dependencies will be created.");
 
 			return new LoadingOutputWarning("Multiple projects found", message, candidates.Select(dep.WithTarget)
@@ -264,10 +264,10 @@ namespace org.pescuma.dotnetdependencychecker.input
 				.Append(" instead:");
 
 			if (result.Count == 1)
-				result.ForEach(p => message.Append(result.First(), OutputMessage.ProjInfo.Csproj));
+				result.ForEach(p => message.Append(result.First(), OutputMessage.ProjInfo.ProjectPath));
 			else
 				result.ForEach(p => message.Append("\n  - ")
-					.Append(p, OutputMessage.ProjInfo.Csproj));
+					.Append(p, OutputMessage.ProjInfo.ProjectPath));
 
 			warnings.Add(new LoadingOutputWarning("Only similar project found", message, result.Select(dep.WithTarget)
 				.ToArray()));

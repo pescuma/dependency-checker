@@ -92,9 +92,9 @@ namespace org.pescuma.dotnetdependencychecker.output.results
 
 					return result;
 				}
-				case OutputMessage.ProjInfo.NameAndCsproj:
+				case OutputMessage.ProjInfo.NameAndProjectPath:
 				{
-					return string.Format("{0} ({1})", ToConsole(proj, OutputMessage.ProjInfo.Name), ToConsole(proj, OutputMessage.ProjInfo.Csproj));
+					return string.Format("{0} ({1})", ToConsole(proj, OutputMessage.ProjInfo.Name), ToConsole(proj, OutputMessage.ProjInfo.ProjectPath));
 				}
 				case OutputMessage.ProjInfo.NameAndPath:
 				{
@@ -110,10 +110,10 @@ namespace org.pescuma.dotnetdependencychecker.output.results
 					else
 						return ToConsole(proj, OutputMessage.ProjInfo.Name);
 				}
-				case OutputMessage.ProjInfo.Csproj:
+				case OutputMessage.ProjInfo.ProjectPath:
 				{
 					if (proj is Project)
-						return ((Project) proj).CsprojPath;
+						return ((Project) proj).ProjectPath;
 					else
 						throw new InvalidDataException();
 				}
@@ -145,7 +145,7 @@ namespace org.pescuma.dotnetdependencychecker.output.results
 				case OutputMessage.DepInfo.FullDescription:
 				{
 					return string.Format("{0} in {1} of {2} pointing to {3}", ToConsole(dep, OutputMessage.DepInfo.Type),
-						ToConsole(dep, OutputMessage.DepInfo.Line), ToConsole(dep.Source, OutputMessage.ProjInfo.NameAndCsproj),
+						ToConsole(dep, OutputMessage.DepInfo.Line), ToConsole(dep.Source, OutputMessage.ProjInfo.NameAndProjectPath),
 						ToConsole(dep.Target, OutputMessage.ProjInfo.NameAndPath));
 				}
 				default:

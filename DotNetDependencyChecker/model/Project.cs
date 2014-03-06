@@ -16,7 +16,7 @@ namespace org.pescuma.dotnetdependencychecker.model
 			get { return name; }
 		}
 
-		public string CsprojPath
+		public string ProjectPath
 		{
 			get { return Paths.First(); }
 		}
@@ -36,22 +36,22 @@ namespace org.pescuma.dotnetdependencychecker.model
 			}
 		}
 
-		public Project(string name, string libraryName, Guid guid, string csprojPath)
+		public Project(string name, string libraryName, Guid guid, string projectPath)
 			: base(libraryName)
 		{
 			Argument.ThrowIfNull(name);
 			Argument.ThrowIfNull(libraryName);
-			Argument.ThrowIfNull(csprojPath);
+			Argument.ThrowIfNull(projectPath);
 
 			this.name = name;
 			Guid = guid;
 
-			Paths.Add(csprojPath);
+			Paths.Add(projectPath);
 		}
 
 		protected bool Equals(Project other)
 		{
-			return base.Equals(other) && string.Equals(Name, other.Name) && string.Equals(CsprojPath, other.CsprojPath);
+			return base.Equals(other) && string.Equals(Name, other.Name) && string.Equals(ProjectPath, other.ProjectPath);
 		}
 
 		public override bool Equals(object obj)
@@ -71,7 +71,7 @@ namespace org.pescuma.dotnetdependencychecker.model
 			{
 				var hashCode = base.GetHashCode();
 				hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
-				hashCode = (hashCode * 397) ^ (CsprojPath != null ? CsprojPath.GetHashCode() : 0);
+				hashCode = (hashCode * 397) ^ (ProjectPath != null ? ProjectPath.GetHashCode() : 0);
 				return hashCode;
 			}
 		}
@@ -90,8 +90,8 @@ namespace org.pescuma.dotnetdependencychecker.model
 			result.Append(Guid)
 				.Append(", ");
 
-			if (CsprojPath != null)
-				result.Append(CsprojPath)
+			if (ProjectPath != null)
+				result.Append(ProjectPath)
 					.Append(", ");
 
 			result.Append("Paths: ")

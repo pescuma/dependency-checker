@@ -37,7 +37,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 						.Append(proj.Name)
 						.Append("\n");
 					AppendProperty(result, "Library name", proj.LibraryName);
-					AppendProperty(result, "Path", proj.CsprojPath);
+					AppendProperty(result, "Path", proj.ProjectPath);
 					AppendProperty(result, "GUID", proj.Guid);
 				}
 				else

@@ -276,8 +276,8 @@ namespace org.pescuma.dotnetdependencychecker.config
 			if (line != "")
 				throw new ConfigParserException(location, "The line has more text than it should");
 
-			config.Ignores.Add(new Config.Ignore(
-				el => !(el is Project) || !config.Inputs.Any(input => PathMatches(((Project) el).CsprojPath, input)), location));
+			config.Ignores.Add(
+				new Config.Ignore(el => !(el is Project) || !config.Inputs.Any(input => PathMatches(((Project) el).ProjectPath, input)), location));
 		}
 
 		private void ParseInOutput(string line, ConfigLocation location)

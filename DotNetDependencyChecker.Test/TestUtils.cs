@@ -9,7 +9,7 @@ namespace org.pescuma.dotnetdependencychecker
 	{
 		public static Project ProjWithName(string name)
 		{
-			return new Project(name, "NO LIB NAME", new Guid(), "CSPROJ");
+			return new Project(name, "NO LIB NAME", new Guid(), "PROJ.PATH");
 		}
 
 		public static Project[] ProjsWithName(params string[] ps)

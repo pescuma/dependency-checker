@@ -78,7 +78,7 @@ namespace org.pescuma.dotnetdependencychecker.output.results
 				result.Add(new XAttribute("Name", proj.Name));
 				result.Add(new XAttribute("LibraryName", proj.LibraryName));
 				result.Add(new XAttribute("Guid", proj.Guid.ToString()));
-				result.Add(new XAttribute("Csproj", proj.CsprojPath));
+				result.Add(new XAttribute("ProjectPath", proj.ProjectPath));
 			}
 			else
 			{
