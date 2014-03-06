@@ -66,6 +66,7 @@
     <Compile Include="input\ProjectLoader.cs" />
     <Compile Include="input\DependencyGraphBuilder.cs" />
     <Compile Include="model\Group.cs" />
+    <Compile Include="model\xml\XMLHelper.cs" />
     <Compile Include="output\BaseOutputEntry.cs" />
     <Compile Include="output\CircularDependencyRuleMatch.cs" />
     <Compile Include="output\dependencies\DependenciesOutputer.cs" />

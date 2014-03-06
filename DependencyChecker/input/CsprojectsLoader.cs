@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using org.pescuma.dependencychecker.output;
@@ -14,8 +15,8 @@ namespace org.pescuma.dependencychecker.input
 				.Select(Path.GetFullPath));
 
 			var csprojs = csprojsFiles.Select(f => new CsprojReader(f))
+				.OrderBy(n => n.Filename, StringComparer.CurrentCultureIgnoreCase)
 				.ToList();
-
 			foreach (var csproj in csprojs)
 			{
 				var proj = builder.AddProject(csproj.Name, csproj.AssemblyName, csproj.ProjectGuid, csproj.Filename);
@@ -30,7 +31,8 @@ namespace org.pescuma.dependencychecker.input
 			var externalCsprojFiles = csprojs.SelectMany(p => p.ProjectReferences)
 				.Select(r => r.Include)
 				.Distinct()
-				.Where(f => !csprojsFiles.Contains(f));
+				.Where(f => !csprojsFiles.Contains(f))
+				.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase);
 			foreach (var externalCsprojFile in externalCsprojFiles)
 			{
 				try
@@ -38,7 +40,7 @@ namespace org.pescuma.dependencychecker.input
 					var csproj = new CsprojReader(externalCsprojFile);
 					builder.AddProject(csproj.Name, csproj.AssemblyName, csproj.ProjectGuid, csproj.Filename);
 				}
-				catch (IOException e)
+				catch (IOException)
 				{
 					var msg = new OutputMessage().Append("Failed to load a project outside of input folders: ")
 						.Append(externalCsprojFile);
