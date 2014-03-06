@@ -9,12 +9,15 @@ namespace org.pescuma.dotnetdependencychecker.rules
 {
 	public class UniqueProjectRule : BaseRule
 	{
+		private readonly Func<Project, bool> filter;
 		private readonly Func<Project, string> id;
 		private readonly Func<Project, string> description;
 
-		public UniqueProjectRule(Func<Project, string> id, Func<Project, string> description, Severity severity, ConfigLocation location)
+		public UniqueProjectRule(Func<Project, bool> filter, Func<Project, string> id, Func<Project, string> description, Severity severity,
+			ConfigLocation location)
 			: base(severity, location)
 		{
+			this.filter = filter;
 			this.id = id;
 			this.description = description;
 		}
@@ -24,6 +27,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			var result = new List<OutputEntry>();
 
 			var same = graph.Vertices.OfType<Project>()
+				.Where(v => filter(v))
 				.GroupBy(v => id(v))
 				.Where(g => g.Count() > 1);
 			same.ForEach(g =>

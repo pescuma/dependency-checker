@@ -9,7 +9,7 @@ namespace org.pescuma.dotnetdependencychecker.model
 	public class Project : Library
 	{
 		private readonly string name;
-		public readonly Guid Guid;
+		public readonly Guid? Guid;
 
 		public override string Name
 		{
@@ -36,7 +36,7 @@ namespace org.pescuma.dotnetdependencychecker.model
 			}
 		}
 
-		public Project(string name, string libraryName, Guid guid, string projectPath)
+		public Project(string name, string libraryName, Guid? guid, string projectPath)
 			: base(libraryName)
 		{
 			Argument.ThrowIfNull(name);
@@ -87,8 +87,9 @@ namespace org.pescuma.dotnetdependencychecker.model
 				result.Append(LibraryName)
 					.Append(", ");
 
-			result.Append(Guid)
-				.Append(", ");
+			if (Guid != null)
+				result.Append(Guid)
+					.Append(", ");
 
 			if (ProjectPath != null)
 				result.Append(ProjectPath)

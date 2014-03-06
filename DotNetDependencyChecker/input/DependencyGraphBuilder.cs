@@ -26,9 +26,9 @@ namespace org.pescuma.dotnetdependencychecker.input
 			this.warnings = warnings;
 		}
 
-		public object AddProject(string name, string libraryName, Guid projectGuid, string filename)
+		public object AddProject(string name, string libraryName, Guid? guid, string filename)
 		{
-			var proj = new TempProject(name, libraryName, projectGuid, filename);
+			var proj = new TempProject(name, libraryName, guid, filename);
 
 			TempProject result;
 			if (!projs.TryGetValue(proj, out result))
@@ -58,7 +58,7 @@ namespace org.pescuma.dotnetdependencychecker.input
 		{
 			projs.Keys.ForEach(p =>
 			{
-				p.Project = new Project(p.Name, p.LibraryName, p.ProjectGuid, p.Filename);
+				p.Project = new Project(p.Name, p.LibraryName, p.Guid, p.Filename);
 				p.Ignored = Ignore(p.Project);
 			});
 
@@ -352,13 +352,13 @@ namespace org.pescuma.dotnetdependencychecker.input
 		{
 			public readonly string Name;
 			public readonly string LibraryName;
-			public readonly Guid ProjectGuid;
+			public readonly Guid? Guid;
 			public readonly string Filename;
 
 			public Project Project;
 			public bool Ignored;
 
-			public TempProject(string name, string libraryName, Guid projectGuid, string filename)
+			public TempProject(string name, string libraryName, Guid? guid, string filename)
 			{
 				Argument.ThrowIfNull(name);
 				Argument.ThrowIfNull(libraryName);
@@ -366,13 +366,13 @@ namespace org.pescuma.dotnetdependencychecker.input
 
 				Name = name;
 				LibraryName = libraryName;
-				ProjectGuid = projectGuid;
+				Guid = guid;
 				Filename = filename;
 			}
 
 			private bool Equals(TempProject other)
 			{
-				return string.Equals(Name, other.Name) && string.Equals(LibraryName, other.LibraryName) && ProjectGuid.Equals(other.ProjectGuid)
+				return string.Equals(Name, other.Name) && string.Equals(LibraryName, other.LibraryName) && Guid.Equals(other.Guid)
 				       && string.Equals(Filename, other.Filename);
 			}
 
@@ -393,7 +393,7 @@ namespace org.pescuma.dotnetdependencychecker.input
 				{
 					var hashCode = (Name != null ? Name.GetHashCode() : 0);
 					hashCode = (hashCode * 397) ^ (LibraryName != null ? LibraryName.GetHashCode() : 0);
-					hashCode = (hashCode * 397) ^ ProjectGuid.GetHashCode();
+					hashCode = (hashCode * 397) ^ Guid.GetHashCode();
 					hashCode = (hashCode * 397) ^ (Filename != null ? Filename.GetHashCode() : 0);
 					return hashCode;
 				}

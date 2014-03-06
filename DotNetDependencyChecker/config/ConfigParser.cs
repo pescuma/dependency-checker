@@ -197,30 +197,43 @@ namespace org.pescuma.dotnetdependencychecker.config
 			}
 		}
 
-		private static readonly Dictionary<string, Severity> SEVERITIES = new Dictionary<string, Severity>
+		private readonly Dictionary<string, Severity> severities = new Dictionary<string, Severity>
 		{
 			{ "info", Severity.Info },
 			{ "warning", Severity.Warning },
 			{ "error", Severity.Error },
 		};
 
-		private static readonly Dictionary<string, Func<Severity, ConfigLocation, Rule>> CUSTOM_RULES =
+		private readonly Dictionary<string, Func<Severity, ConfigLocation, Rule>> customRules =
 			new Dictionary<string, Func<Severity, ConfigLocation, Rule>>
 			{
 				{ "don't allow circular dependencies", (s, l) => new NoCircularDepenendenciesRule(s, l) },
-				{ "no two projects with same name", (s, l) => new UniqueProjectRule(p => p.Name, p => "named " + p.Name, s, l) },
-				{ "no two projects with same guid", (s, l) => new UniqueProjectRule(p => p.Guid.ToString(), p => "with GUID " + p.Guid, s, l) },
-				{
-					"no two projects with same name and guid",
-					(s, l) => new UniqueProjectRule(p => p.Name + "\n" + p.Guid, p => "named " + p.Name + " and with GUID " + p.Guid, s, l)
-				},
+				{ "no two projects with same name", NewUniqueNameProjectRule },
+				{ "no two projects with same guid", NewUniqueGuidProjectRule },
+				{ "no two projects with same name and guid", NewUniqueNameAndGuidProjectRule },
 				{ "avoid same dependency twice", (s, l) => new UniqueDependenciesRule(s, l) },
 			};
+
+		private static UniqueProjectRule NewUniqueNameAndGuidProjectRule(Severity s, ConfigLocation l)
+		{
+			return new UniqueProjectRule(p => p.Name != null && p.Guid != null, p => p.Name + "\n" + p.Guid,
+				p => "named " + p.Name + " and with GUID " + p.Guid, s, l);
+		}
+
+		private static UniqueProjectRule NewUniqueGuidProjectRule(Severity s, ConfigLocation l)
+		{
+			return new UniqueProjectRule(p => p.Guid != null, p => p.Guid.ToString(), p => "with GUID " + p.Guid, s, l);
+		}
+
+		private static UniqueProjectRule NewUniqueNameProjectRule(Severity s, ConfigLocation l)
+		{
+			return new UniqueProjectRule(p => p.Name != null, p => p.Name, p => "named " + p.Name, s, l);
+		}
 
 		private void ParseRule(string line, ConfigLocation location)
 		{
 			var severity = Severity.Error;
-			foreach (var s in SEVERITIES)
+			foreach (var s in severities)
 			{
 				var suffix = "[" + s.Key + "]";
 				if (line.EndsWith(suffix, StringComparison.CurrentCultureIgnoreCase))
@@ -233,7 +246,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 			}
 
 			Func<Severity, ConfigLocation, Rule> factory;
-			if (CUSTOM_RULES.TryGetValue(line.ToLower(), out factory))
+			if (customRules.TryGetValue(line.ToLower(), out factory))
 			{
 				config.Rules.Add(factory(severity, location));
 				return;
