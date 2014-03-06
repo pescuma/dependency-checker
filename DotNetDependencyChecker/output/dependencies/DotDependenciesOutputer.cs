@@ -18,7 +18,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 		private readonly Config config;
 		private readonly string file;
 		private readonly bool onlyWithMessages;
-		private readonly Dictionary<Assembly, int> ids = new Dictionary<Assembly, int>();
+		private readonly Dictionary<Library, int> ids = new Dictionary<Library, int>();
 
 		private DependencyGraph fullGraph;
 		private DependencyGraph graph;
@@ -60,7 +60,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 		//{
 		//	var rand = new Random();
 
-		//	var selected = new HashSet<Assembly>(aWarnings.SelectMany(w => w.Projects)
+		//	var selected = new HashSet<Library>(aWarnings.SelectMany(w => w.Projects)
 		//		.Concat(aGraph.Vertices.Where(v => rand.Next(100) < percent)));
 
 		//	var result = new DependencyGraph();
@@ -112,7 +112,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 
 				result.Append("\n");
 
-				var projs = new HashSet<Assembly>(group);
+				var projs = new HashSet<Library>(group);
 
 				projs.ForEach(a => AppendProject(result, subprefix, a));
 
@@ -146,7 +146,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 			return result.ToString();
 		}
 
-		private bool AreFromDifferentGroups(Assembly p1, Assembly p2)
+		private bool AreFromDifferentGroups(Library p1, Library p2)
 		{
 			if (p1.GroupElement == null || p2.GroupElement == null)
 				return true;
@@ -154,24 +154,24 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 			return p1.GroupElement.Name != p2.GroupElement.Name;
 		}
 
-		private void AppendProject(StringBuilder result, string prefix, Assembly assembly)
+		private void AppendProject(StringBuilder result, string prefix, Library library)
 		{
-			var id = ids[assembly];
+			var id = ids[library];
 			result.Append(prefix)
 				.Append(id)
 				.Append(" [");
 
-			if (assembly is Project)
+			if (library is Project)
 				result.Append("shape=box");
 			else
 				result.Append("shape=ellipse");
 
 			result.Append(",label=\"")
-				.Append(assembly.Names.First()
+				.Append(library.Names.First()
 					.Replace('"', ' '))
 				.Append("\"");
 
-			var color = GetColor(warnings.Where(w => w.Projects.Contains(assembly)));
+			var color = GetColor(warnings.Where(w => w.Projects.Contains(library)));
 			if (color != null)
 				result.Append(",color=\"")
 					.Append(color)
@@ -296,7 +296,7 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 			}
 		}
 
-		private BidirectionalGraph<string, GroupDependency> CreateGroupsGraph(List<Assembly> projs)
+		private BidirectionalGraph<string, GroupDependency> CreateGroupsGraph(List<Library> projs)
 		{
 			var groupGraph = new BidirectionalGraph<string, GroupDependency>();
 

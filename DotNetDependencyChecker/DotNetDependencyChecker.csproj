@@ -65,7 +65,6 @@
     <Compile Include="input\CsprojectsLoader.cs" />
     <Compile Include="input\ProjectLoader.cs" />
     <Compile Include="input\DependencyGraphBuilder.cs" />
-    <Compile Include="input\ProjectsLoader - Copy.cs" />
     <Compile Include="model\Group.cs" />
     <Compile Include="output\BaseOutputEntry.cs" />
     <Compile Include="output\CircularDependencyRuleMatch.cs" />
@@ -75,7 +74,7 @@
     <Compile Include="output\dependencies\XMLDependenciesOutputer.cs" />
     <Compile Include="output\results\ConsoleEntryOutputer.cs" />
     <Compile Include="output\LoadingOutputWarning.cs" />
-    <Compile Include="model\Assembly.cs" />
+    <Compile Include="model\Library.cs" />
     <Compile Include="model\Dependency.cs" />
     <Compile Include="model\DependencyGraph.cs" />
     <Compile Include="model\GroupElement.cs" />

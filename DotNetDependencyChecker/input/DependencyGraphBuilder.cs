@@ -17,7 +17,7 @@ namespace org.pescuma.dotnetdependencychecker.input
 
 		private readonly Config config;
 		private readonly List<OutputEntry> warnings;
-		private readonly List<Assembly> assemblies = new List<Assembly>();
+		private readonly List<Library> libraries = new List<Library>();
 		private readonly List<Dependency> dependencies = new List<Dependency>();
 
 		public DependencyGraphBuilder(Config config, List<OutputEntry> warnings)
@@ -26,9 +26,9 @@ namespace org.pescuma.dotnetdependencychecker.input
 			this.warnings = warnings;
 		}
 
-		public object AddProject(string name, string assemblyName, Guid projectGuid, string filename)
+		public object AddProject(string name, string libraryName, Guid projectGuid, string filename)
 		{
-			var proj = new TempProject(name, assemblyName, projectGuid, filename);
+			var proj = new TempProject(name, libraryName, projectGuid, filename);
 
 			TempProject result;
 			if (!projs.TryGetValue(proj, out result))
@@ -40,17 +40,17 @@ namespace org.pescuma.dotnetdependencychecker.input
 			return result;
 		}
 
-		public void AddProjectReference(object proj, string referenceName, string referenceAssemblyName, Guid? referenceGuid,
+		public void AddProjectReference(object proj, string referenceName, string referenceLibraryName, Guid? referenceGuid,
 			string referenceFilename, Location referenceLocation)
 		{
-			refs.Add(new TempReference((TempProject) proj, Dependency.Types.ProjectReference, referenceName, referenceAssemblyName, referenceGuid,
+			refs.Add(new TempReference((TempProject) proj, Dependency.Types.ProjectReference, referenceName, referenceLibraryName, referenceGuid,
 				referenceFilename, referenceLocation));
 		}
 
-		public void AddDllReference(object proj, string referenceName, string referenceAssemblyName, Guid? referenceGuid, string referenceFilename,
+		public void AddDllReference(object proj, string referenceName, string referenceLibraryName, Guid? referenceGuid, string referenceFilename,
 			Location referenceLocation)
 		{
-			refs.Add(new TempReference((TempProject) proj, Dependency.Types.DllReference, referenceName, referenceAssemblyName, referenceGuid,
+			refs.Add(new TempReference((TempProject) proj, Dependency.Types.DllReference, referenceName, referenceLibraryName, referenceGuid,
 				referenceFilename, referenceLocation));
 		}
 
@@ -58,7 +58,7 @@ namespace org.pescuma.dotnetdependencychecker.input
 		{
 			projs.Keys.ForEach(p =>
 			{
-				p.Project = new Project(p.Name, p.AssemblyName, p.ProjectGuid, p.Filename);
+				p.Project = new Project(p.Name, p.LibraryName, p.ProjectGuid, p.Filename);
 				p.Ignored = Ignore(p.Project);
 			});
 
@@ -68,57 +68,57 @@ namespace org.pescuma.dotnetdependencychecker.input
 
 			CreateDLLReferences();
 
-			assemblies.Sort(Assembly.NaturalOrdering);
+			libraries.Sort(Library.NaturalOrdering);
 			dependencies.Sort(Dependency.NaturalOrdering);
 
 			var graph = new DependencyGraph();
-			assemblies.ForEach(p => graph.AddVertex(p));
+			libraries.ForEach(p => graph.AddVertex(p));
 			dependencies.ForEach(d => graph.AddEdge(d));
 			return graph;
 		}
 
-		private bool Ignore(Assembly assembly)
+		private bool Ignore(Library library)
 		{
-			return config.Ignores.Any(i => i.Matches(assembly));
+			return config.Ignores.Any(i => i.Matches(library));
 		}
 
 		private void CreateInitialProjects()
 		{
 			projs.Keys.Where(i => !i.Ignored)
 				.Select(i => i.Project)
-				.ForEach(AddAssembly);
+				.ForEach(AddLibrary);
 		}
 
-		private void AddAssembly(Assembly newAssembly)
+		private void AddLibrary(Library newLibrary)
 		{
-			var sameAssemblies = assemblies.Where(p => AreTheSame(p, newAssembly))
+			var sameLibraries = libraries.Where(p => AreTheSame(p, newLibrary))
 				.ToList();
 
-			if (sameAssemblies.Any())
+			if (sameLibraries.Any())
 			{
-				sameAssemblies.Add(newAssembly);
+				sameLibraries.Add(newLibrary);
 
 				var msg = new StringBuilder();
 				msg.Append("There are ")
-					.Append(sameAssemblies.Count)
+					.Append(sameLibraries.Count)
 					.Append(" projects that are the same:");
-				sameAssemblies.ForEach(p => msg.Append("\n  - ")
+				sameLibraries.ForEach(p => msg.Append("\n  - ")
 					.Append(((Project) p).CsprojPath));
 
 				throw new ConfigException(msg.ToString());
 			}
 
-			assemblies.Add(newAssembly);
+			libraries.Add(newLibrary);
 		}
 
-		private bool AreTheSame(Assembly a1, Assembly a2)
+		private bool AreTheSame(Library a1, Library a2)
 		{
 			if (a1.Equals(a2))
 				return true;
 
-			// Handle Proj vs Assembly
+			// Handle Proj vs Library
 			if (!(a1 is Project) || !(a2 is Project))
-				return a1.AssemblyName.Equals(a2.AssemblyName);
+				return a1.LibraryName.Equals(a2.LibraryName);
 
 			return false;
 		}
@@ -133,14 +133,14 @@ namespace org.pescuma.dotnetdependencychecker.input
 				// Dummy reference for logs in case of errors
 				var dep = Dependency.WithProject(proj, null, projRef.ReferenceLocation);
 
-				List<Assembly> found = null;
+				List<Library> found = null;
 
 				if (projRef.ReferenceFilename != null)
-					found = FindAssemblyByFilename(proj, dep, projRef.ReferenceFilename);
+					found = FindLibraryByFilename(proj, dep, projRef.ReferenceFilename);
 
 				if (found == null && projRef.ReferenceName != null && projRef.ReferenceGuid != null)
 				{
-					found = FindAssemblyByNameAndGuid(proj, dep, projRef.ReferenceName, projRef.ReferenceGuid.Value);
+					found = FindLibraryByNameAndGuid(proj, dep, projRef.ReferenceName, projRef.ReferenceGuid.Value);
 
 					if (projRef.ReferenceFilename != null)
 						WarnIfSimilarFound(found, proj, dep, projRef.ReferenceFilename,
@@ -149,7 +149,7 @@ namespace org.pescuma.dotnetdependencychecker.input
 
 				if (found == null && projRef.ReferenceName != null)
 				{
-					found = FindAssemblyByName(proj, dep, projRef.ReferenceName);
+					found = FindLibraryByName(proj, dep, projRef.ReferenceName);
 
 					if (projRef.ReferenceFilename != null)
 						WarnIfSimilarFound(found, proj, dep, projRef.ReferenceFilename, string.Format("named {0}", projRef.ReferenceName));
@@ -157,7 +157,7 @@ namespace org.pescuma.dotnetdependencychecker.input
 
 				if (found == null)
 					found = CreateFakeProject(proj, dep, projRef)
-						.AsList<Assembly>();
+						.AsList<Library>();
 
 				if (found == null || !found.Any())
 					continue;
@@ -169,48 +169,48 @@ namespace org.pescuma.dotnetdependencychecker.input
 			}
 		}
 
-		private List<Assembly> FindAssemblyByFilename(Project proj, Dependency dep, string filename)
+		private List<Library> FindLibraryByFilename(Project proj, Dependency dep, string filename)
 		{
-			return FindAssembly(proj, dep, p => p.Paths.Any(path => filename.Equals(path, StringComparison.CurrentCultureIgnoreCase)), filename);
+			return FindLibrary(proj, dep, p => p.Paths.Any(path => filename.Equals(path, StringComparison.CurrentCultureIgnoreCase)), filename);
 		}
 
-		private List<Assembly> FindAssemblyByNameAndAssemblyName(Project proj, Dependency dep, string name, string assemblyName)
+		private List<Library> FindLibraryByNameAndLibraryName(Project proj, Dependency dep, string name, string libraryName)
 		{
-			return FindAssembly(proj, dep,
+			return FindLibrary(proj, dep,
 				p =>
 					name.Equals(p.Name, StringComparison.CurrentCultureIgnoreCase)
-					&& assemblyName.Equals(p.AssemblyName, StringComparison.CurrentCultureIgnoreCase),
-				"with name " + name + " and assembly name " + assemblyName);
+					&& libraryName.Equals(p.LibraryName, StringComparison.CurrentCultureIgnoreCase),
+				"with name " + name + " and library name " + libraryName);
 		}
 
-		private List<Assembly> FindAssemblyByAssemblyName(Project proj, Dependency dep, string assemblyName)
+		private List<Library> FindLibraryByLibraryName(Project proj, Dependency dep, string libraryName)
 		{
-			return FindAssembly(proj, dep, p => assemblyName.Equals(p.AssemblyName, StringComparison.CurrentCultureIgnoreCase),
-				"with assembly name " + assemblyName);
+			return FindLibrary(proj, dep, p => libraryName.Equals(p.LibraryName, StringComparison.CurrentCultureIgnoreCase),
+				"with library name " + libraryName);
 		}
 
-		private List<Assembly> FindAssemblyByName(Project proj, Dependency dep, string name)
+		private List<Library> FindLibraryByName(Project proj, Dependency dep, string name)
 		{
-			return FindAssembly(proj, dep, p => name.Equals(p.Name, StringComparison.CurrentCultureIgnoreCase), "with name " + name);
+			return FindLibrary(proj, dep, p => name.Equals(p.Name, StringComparison.CurrentCultureIgnoreCase), "with name " + name);
 		}
 
-		private List<Assembly> FindAssemblyByNameAndGuid(Project proj, Dependency dep, string name, Guid guid)
+		private List<Library> FindLibraryByNameAndGuid(Project proj, Dependency dep, string name, Guid guid)
 		{
-			return FindAssembly(proj, dep,
+			return FindLibrary(proj, dep,
 				p => p is Project && name.Equals(p.Name, StringComparison.CurrentCultureIgnoreCase) && ((Project) p).Guid == guid,
 				"with name " + name + " and GUID " + guid);
 		}
 
-		private List<Assembly> FindAssembly(Project proj, Dependency dep, Func<Assembly, bool> matches, string searchDetails)
+		private List<Library> FindLibrary(Project proj, Dependency dep, Func<Library, bool> matches, string searchDetails)
 		{
 			var candidates = projs.Keys.Where(p => !p.Ignored && matches(p.Project))
 				.Select(i => i.Project)
-				.Cast<Assembly>()
+				.Cast<Library>()
 				.ToList();
 
 			if (!candidates.Any())
 				// Search new projects too
-				candidates = assemblies.Where(matches)
+				candidates = libraries.Where(matches)
 					.ToList();
 
 			if (candidates.Count == 1)
@@ -224,12 +224,12 @@ namespace org.pescuma.dotnetdependencychecker.input
 
 			if (projs.Keys.Any(p => p.Ignored && matches(p.Project)))
 				// The project exists but was ignored
-				return new List<Assembly>();
+				return new List<Library>();
 
 			return null;
 		}
 
-		private OutputEntry CreateMultipleReferencesWarning(Project proj, Dependency dep, string refName, List<Assembly> candidates)
+		private OutputEntry CreateMultipleReferencesWarning(Project proj, Dependency dep, string refName, List<Library> candidates)
 		{
 			var message = new OutputMessage().Append("The project ")
 				.Append(proj, OutputMessage.ProjInfo.NameAndCsproj)
@@ -247,7 +247,7 @@ namespace org.pescuma.dotnetdependencychecker.input
 				.ToArray());
 		}
 
-		private void WarnIfSimilarFound(List<Assembly> result, Project proj, Dependency dep, string filename, string refName)
+		private void WarnIfSimilarFound(List<Library> result, Project proj, Dependency dep, string filename, string refName)
 		{
 			if (result == null || !result.Any())
 				return;
@@ -274,16 +274,16 @@ namespace org.pescuma.dotnetdependencychecker.input
 
 		private Project CreateFakeProject(Project proj, Dependency dep, TempReference reference)
 		{
-			var result = new Project(reference.ReferenceName ?? reference.ReferenceAssemblyName,
-				reference.ReferenceAssemblyName ?? reference.ReferenceName, reference.ReferenceGuid ?? Guid.NewGuid(), reference.ReferenceFilename);
+			var result = new Project(reference.ReferenceName ?? reference.ReferenceLibraryName,
+				reference.ReferenceLibraryName ?? reference.ReferenceName, reference.ReferenceGuid ?? Guid.NewGuid(), reference.ReferenceFilename);
 
 			if (Ignore(result))
 				return null;
 
-			if (reference.ReferenceName == null || reference.ReferenceAssemblyName == null)
+			if (reference.ReferenceName == null || reference.ReferenceLibraryName == null)
 			{
-				var guessed = reference.ReferenceName == null ? "project name" : "assembly name";
-				var used = reference.ReferenceName == null ? "assembly name" : "project name";
+				var guessed = reference.ReferenceName == null ? "project name" : "library name";
+				var used = reference.ReferenceName == null ? "library name" : "project name";
 
 				var msg = new OutputMessage().Append("The project ")
 					.Append(proj, OutputMessage.ProjInfo.Name)
@@ -298,7 +298,7 @@ namespace org.pescuma.dotnetdependencychecker.input
 				warnings.Add(new LoadingOutputWarning("Project not found", msg, dep.WithTarget(result)));
 			}
 
-			AddAssembly(result);
+			AddLibrary(result);
 
 			return result;
 		}
@@ -311,29 +311,29 @@ namespace org.pescuma.dotnetdependencychecker.input
 				var proj = projRef.Source.Project;
 
 				// Dummy reference for logs in case of errors
-				var dep = Dependency.WithAssembly(proj, null, projRef.ReferenceLocation, projRef.ReferenceFilename);
+				var dep = Dependency.WithLibrary(proj, null, projRef.ReferenceLocation, projRef.ReferenceFilename);
 
-				List<Assembly> found = null;
+				List<Library> found = null;
 
 				if (projRef.ReferenceFilename != null)
-					found = FindAssemblyByFilename(proj, dep, projRef.ReferenceFilename);
+					found = FindLibraryByFilename(proj, dep, projRef.ReferenceFilename);
 
-				if (projRef.ReferenceName != null && projRef.ReferenceAssemblyName != null)
-					found = FindAssemblyByNameAndAssemblyName(proj, dep, projRef.ReferenceName, projRef.ReferenceAssemblyName);
+				if (projRef.ReferenceName != null && projRef.ReferenceLibraryName != null)
+					found = FindLibraryByNameAndLibraryName(proj, dep, projRef.ReferenceName, projRef.ReferenceLibraryName);
 
-				if (projRef.ReferenceAssemblyName != null)
-					found = FindAssemblyByAssemblyName(proj, dep, projRef.ReferenceAssemblyName);
+				if (projRef.ReferenceLibraryName != null)
+					found = FindLibraryByLibraryName(proj, dep, projRef.ReferenceLibraryName);
 
 				if (projRef.ReferenceName != null)
-					found = FindAssemblyByName(proj, dep, projRef.ReferenceName);
+					found = FindLibraryByName(proj, dep, projRef.ReferenceName);
 
 				if (found == null)
 				{
-					var assembly = new Assembly(projRef.ReferenceAssemblyName ?? projRef.ReferenceName);
-					if (!Ignore(assembly))
+					var lib = new Library(projRef.ReferenceLibraryName ?? projRef.ReferenceName);
+					if (!Ignore(lib))
 					{
-						AddAssembly(assembly);
-						found = assembly.AsList();
+						AddLibrary(lib);
+						found = lib.AsList();
 					}
 				}
 
@@ -350,28 +350,28 @@ namespace org.pescuma.dotnetdependencychecker.input
 		private class TempProject
 		{
 			public readonly string Name;
-			public readonly string AssemblyName;
+			public readonly string LibraryName;
 			public readonly Guid ProjectGuid;
 			public readonly string Filename;
 
 			public Project Project;
 			public bool Ignored;
 
-			public TempProject(string name, string assemblyName, Guid projectGuid, string filename)
+			public TempProject(string name, string libraryName, Guid projectGuid, string filename)
 			{
 				Argument.ThrowIfNull(name);
-				Argument.ThrowIfNull(assemblyName);
+				Argument.ThrowIfNull(libraryName);
 				Argument.ThrowIfNull(filename);
 
 				Name = name;
-				AssemblyName = assemblyName;
+				LibraryName = libraryName;
 				ProjectGuid = projectGuid;
 				Filename = filename;
 			}
 
 			private bool Equals(TempProject other)
 			{
-				return string.Equals(Name, other.Name) && string.Equals(AssemblyName, other.AssemblyName) && ProjectGuid.Equals(other.ProjectGuid)
+				return string.Equals(Name, other.Name) && string.Equals(LibraryName, other.LibraryName) && ProjectGuid.Equals(other.ProjectGuid)
 				       && string.Equals(Filename, other.Filename);
 			}
 
@@ -391,7 +391,7 @@ namespace org.pescuma.dotnetdependencychecker.input
 				unchecked
 				{
 					var hashCode = (Name != null ? Name.GetHashCode() : 0);
-					hashCode = (hashCode * 397) ^ (AssemblyName != null ? AssemblyName.GetHashCode() : 0);
+					hashCode = (hashCode * 397) ^ (LibraryName != null ? LibraryName.GetHashCode() : 0);
 					hashCode = (hashCode * 397) ^ ProjectGuid.GetHashCode();
 					hashCode = (hashCode * 397) ^ (Filename != null ? Filename.GetHashCode() : 0);
 					return hashCode;
@@ -404,22 +404,22 @@ namespace org.pescuma.dotnetdependencychecker.input
 			public readonly TempProject Source;
 			public readonly Dependency.Types Type;
 			public readonly string ReferenceName;
-			public readonly string ReferenceAssemblyName;
+			public readonly string ReferenceLibraryName;
 			public readonly Guid? ReferenceGuid;
 			public readonly string ReferenceFilename;
 			public readonly Location ReferenceLocation;
 
-			public TempReference(TempProject source, Dependency.Types type, string referenceName, string referenceAssemblyName, Guid? referenceGuid,
+			public TempReference(TempProject source, Dependency.Types type, string referenceName, string referenceLibraryName, Guid? referenceGuid,
 				string referenceFilename, Location referenceLocation)
 			{
 				Argument.ThrowIfNull(source);
-				Argument.ThrowIfAllNull(referenceName, referenceAssemblyName);
+				Argument.ThrowIfAllNull(referenceName, referenceLibraryName);
 				Argument.ThrowIfNull(referenceLocation);
 
 				Source = source;
 				Type = type;
 				ReferenceName = referenceName;
-				ReferenceAssemblyName = referenceAssemblyName;
+				ReferenceLibraryName = referenceLibraryName;
 				ReferenceGuid = referenceGuid;
 				ReferenceFilename = referenceFilename;
 				ReferenceLocation = referenceLocation;

@@ -105,9 +105,9 @@ namespace org.pescuma.dotnetdependencychecker.config
 			config.Groups.Add(new Config.Group(name, matcher, location));
 		}
 
-		private Func<Assembly, bool> ParseMatcher(string matchLine, ConfigLocation location)
+		private Func<Library, bool> ParseMatcher(string matchLine, ConfigLocation location)
 		{
-			Func<Assembly, bool> result = null;
+			Func<Library, bool> result = null;
 
 			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
@@ -121,14 +121,14 @@ namespace org.pescuma.dotnetdependencychecker.config
 			return result;
 		}
 
-		private Func<Assembly, bool> ParseRE(string line)
+		private Func<Library, bool> ParseRE(string line)
 		{
 			var re = new Regex("^" + line + "$", RegexOptions.IgnoreCase);
 
 			return proj => proj.Names.Any(re.IsMatch);
 		}
 
-		private Func<Assembly, bool> ParsePath(string line)
+		private Func<Library, bool> ParsePath(string line)
 		{
 			var path = PathUtils.ToAbsolute(basePath, line);
 
@@ -141,7 +141,7 @@ namespace org.pescuma.dotnetdependencychecker.config
 			       || fullPath.StartsWith(beginPath + "\\", StringComparison.CurrentCultureIgnoreCase);
 		}
 
-		private Func<Assembly, bool> ParseSimpleMatch(string line)
+		private Func<Library, bool> ParseSimpleMatch(string line)
 		{
 			return proj => proj.Names.Any(n => line.Equals(n, StringComparison.CurrentCultureIgnoreCase));
 		}
@@ -162,14 +162,14 @@ namespace org.pescuma.dotnetdependencychecker.config
 			var extension = Path.GetExtension(file) ?? "";
 
 			if (extension.Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
-				config.Output.Dependencies.Add(filterIfNeeded(onlyWithMessages, new XMLDependenciesOutputer(file)));
+				config.Output.Dependencies.Add(FilterIfNeeded(onlyWithMessages, new XMLDependenciesOutputer(file)));
 			else if (extension.Equals(".dot", StringComparison.CurrentCultureIgnoreCase))
 				config.Output.Dependencies.Add(new DotDependenciesOutputer(config, file, onlyWithMessages));
 			else
-				config.Output.Dependencies.Add(filterIfNeeded(onlyWithMessages, new TextDependenciesOutputer(file)));
+				config.Output.Dependencies.Add(FilterIfNeeded(onlyWithMessages, new TextDependenciesOutputer(file)));
 		}
 
-		private DependenciesOutputer filterIfNeeded(bool onlyWithMessages, DependenciesOutputer next)
+		private DependenciesOutputer FilterIfNeeded(bool onlyWithMessages, DependenciesOutputer next)
 		{
 			if (onlyWithMessages)
 				return new OnlyWithMessagesDependenciesOutputer(next);

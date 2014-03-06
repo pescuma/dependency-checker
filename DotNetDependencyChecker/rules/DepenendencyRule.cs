@@ -8,11 +8,11 @@ namespace org.pescuma.dotnetdependencychecker.rules
 	public class DepenendencyRule : BaseRule
 	{
 		// HACK [pescuma] Fields are public for tests
-		public readonly Func<Assembly, bool> Source;
-		public readonly Func<Assembly, bool> Target;
+		public readonly Func<Library, bool> Source;
+		public readonly Func<Library, bool> Target;
 		public readonly bool Allow;
 
-		public DepenendencyRule(Severity severity, Func<Assembly, bool> source, Func<Assembly, bool> target, bool allow, ConfigLocation location)
+		public DepenendencyRule(Severity severity, Func<Library, bool> source, Func<Library, bool> target, bool allow, ConfigLocation location)
 			: base(severity, location)
 		{
 			Source = source;
@@ -36,7 +36,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 			return new DependencyRuleMatch(Allow, "Dependency", Severity, messsage, this, dep.AsList());
 		}
 
-		private bool Matches(Func<Assembly, bool> test, Assembly proj)
+		private bool Matches(Func<Library, bool> test, Library proj)
 		{
 			if (test(proj))
 				return true;
@@ -45,11 +45,6 @@ namespace org.pescuma.dotnetdependencychecker.rules
 				return true;
 
 			return false;
-		}
-
-		private Assembly CreateFakeAssembly(GroupElement groupElement)
-		{
-			return new Assembly(groupElement.Name);
 		}
 	}
 }

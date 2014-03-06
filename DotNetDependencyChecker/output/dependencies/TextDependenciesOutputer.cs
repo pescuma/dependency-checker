@@ -26,30 +26,30 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 		private void AppendProjects(StringBuilder result, DependencyGraph graph)
 		{
 			var projs = graph.Vertices.ToList();
-			projs.Sort(Assembly.NaturalOrdering);
+			projs.Sort(Library.NaturalOrdering);
 
-			foreach (var assembly in projs)
+			foreach (var library in projs)
 			{
-				if (assembly is Project)
+				if (library is Project)
 				{
-					var proj = (Project) assembly;
+					var proj = (Project) library;
 					result.Append("Project ")
 						.Append(proj.Name)
 						.Append("\n");
-					AppendProperty(result, "Assembly name", proj.AssemblyName);
-					AppendProperty(result, "csproj path", proj.CsprojPath);
+					AppendProperty(result, "Library name", proj.LibraryName);
+					AppendProperty(result, "Path", proj.CsprojPath);
 					AppendProperty(result, "GUID", proj.Guid);
 				}
 				else
 				{
-					result.Append("Assembly ")
-						.Append(assembly.AssemblyName)
+					result.Append("Library ")
+						.Append(library.LibraryName)
 						.Append("\n");
-					assembly.Paths.ForEach(p => AppendProperty(result, "Path", p));
+					library.Paths.ForEach(p => AppendProperty(result, "Path", p));
 				}
 
-				if (assembly.GroupElement != null)
-					AppendProperty(result, "Group", assembly.GroupElement.Name);
+				if (library.GroupElement != null)
+					AppendProperty(result, "Group", library.GroupElement.Name);
 
 				result.Append("\n");
 			}

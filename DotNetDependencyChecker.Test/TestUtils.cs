@@ -9,7 +9,7 @@ namespace org.pescuma.dotnetdependencychecker
 	{
 		public static Project ProjWithName(string name)
 		{
-			return new Project(name, "NO ASSEMBLY NAME", new Guid(), "CSPROJ");
+			return new Project(name, "NO LIB NAME", new Guid(), "CSPROJ");
 		}
 
 		public static Project[] ProjsWithName(params string[] ps)
@@ -20,7 +20,7 @@ namespace org.pescuma.dotnetdependencychecker
 
 		public static Project ProjWithPath(string path)
 		{
-			return new Project("NO NAME", "NO ASSEMBLY NAME", new Guid(), path);
+			return new Project("NO NAME", "NO LIB NAME", new Guid(), path);
 		}
 
 		public static Dependency Dependency(Project p1, Project p2)
@@ -32,8 +32,8 @@ namespace org.pescuma.dotnetdependencychecker
 		{
 			var graph = new DependencyGraph();
 
-			graph.AddVertexRange(os.OfType<Assembly>());
-			graph.AddVertexRange(os.OfType<IEnumerable<Assembly>>()
+			graph.AddVertexRange(os.OfType<Library>());
+			graph.AddVertexRange(os.OfType<IEnumerable<Library>>()
 				.SelectMany(e => e));
 
 			graph.AddEdgeRange(os.OfType<Dependency>());

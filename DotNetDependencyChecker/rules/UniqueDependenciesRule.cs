@@ -13,7 +13,7 @@ namespace org.pescuma.dotnetdependencychecker.rules
 		{
 		}
 
-		public override List<OutputEntry> Process(DependencyGraph graph, Assembly element)
+		public override List<OutputEntry> Process(DependencyGraph graph, Library element)
 		{
 			var proj = element as Project;
 			if (proj == null)

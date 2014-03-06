@@ -2,13 +2,13 @@
 
 namespace org.pescuma.dotnetdependencychecker.model
 {
-	public class GroupElement : Assembly
+	public class GroupElement : Library
 	{
 		public readonly Group Group;
 		public readonly ConfigLocation Location;
-		public readonly Assembly Representing;
+		public readonly Library Representing;
 
-		public GroupElement(Group group, ConfigLocation location, Assembly representing)
+		public GroupElement(Group group, ConfigLocation location, Library representing)
 			: base(group.Name)
 		{
 			Group = group;

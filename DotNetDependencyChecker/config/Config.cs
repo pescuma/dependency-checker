@@ -21,9 +21,9 @@ namespace org.pescuma.dotnetdependencychecker.config
 		{
 			public readonly string Name;
 			public readonly ConfigLocation Location;
-			public readonly Func<Assembly, bool> Matches;
+			public readonly Func<Library, bool> Matches;
 
-			public Group(string name, Func<Assembly, bool> matches, ConfigLocation location)
+			public Group(string name, Func<Library, bool> matches, ConfigLocation location)
 			{
 				Name = name;
 				Matches = matches;
@@ -38,10 +38,10 @@ namespace org.pescuma.dotnetdependencychecker.config
 
 		public class Ignore
 		{
-			public readonly Func<Assembly, bool> Matches;
+			public readonly Func<Library, bool> Matches;
 			private readonly ConfigLocation location;
 
-			public Ignore(Func<Assembly, bool> matches, ConfigLocation location)
+			public Ignore(Func<Library, bool> matches, ConfigLocation location)
 			{
 				Matches = matches;
 				this.location = location;

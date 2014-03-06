@@ -22,7 +22,7 @@ namespace org.pescuma.dotnetdependencychecker
 			graph.Vertices.ForEach(proj => proj.GroupElement = FindGroupElement(proj));
 		}
 
-		private GroupElement FindGroupElement(Assembly proj)
+		private GroupElement FindGroupElement(Library proj)
 		{
 			var configGroup = config.Groups.FirstOrDefault(g => g.Matches(proj));
 			if (configGroup == null)

@@ -5,35 +5,35 @@ using org.pescuma.dotnetdependencychecker.utils;
 
 namespace org.pescuma.dotnetdependencychecker.model
 {
-	public class Assembly
+	public class Library
 	{
-		public static Comparison<Assembly> NaturalOrdering =
+		public static Comparison<Library> NaturalOrdering =
 			(p1, p2) => String.Compare(p1.Name, p2.Name, StringComparison.CurrentCultureIgnoreCase);
 
-		public readonly string AssemblyName;
+		public readonly string LibraryName;
 		public readonly HashSet<string> Paths = new HashSet<string>();
 		public GroupElement GroupElement;
 
-		public Assembly(string assemblyName)
+		public Library(string libraryName)
 		{
-			Argument.ThrowIfNull(assemblyName);
+			Argument.ThrowIfNull(libraryName);
 
-			AssemblyName = assemblyName;
+			LibraryName = libraryName;
 		}
 
 		public virtual string Name
 		{
-			get { return AssemblyName; }
+			get { return LibraryName; }
 		}
 
 		public virtual List<string> Names
 		{
-			get { return AssemblyName.AsList(); }
+			get { return LibraryName.AsList(); }
 		}
 
-		protected bool Equals(Assembly other)
+		protected bool Equals(Library other)
 		{
-			return string.Equals(AssemblyName, other.AssemblyName);
+			return string.Equals(LibraryName, other.LibraryName);
 		}
 
 		public override bool Equals(object obj)
@@ -44,19 +44,19 @@ namespace org.pescuma.dotnetdependencychecker.model
 				return true;
 			if (obj.GetType() != GetType())
 				return false;
-			return Equals((Assembly) obj);
+			return Equals((Library) obj);
 		}
 
 		public override int GetHashCode()
 		{
-			return (AssemblyName != null ? AssemblyName.GetHashCode() : 0);
+			return (LibraryName != null ? LibraryName.GetHashCode() : 0);
 		}
 
 		public override string ToString()
 		{
 			var result = new StringBuilder();
 
-			result.Append(AssemblyName)
+			result.Append(LibraryName)
 				.Append("[")
 				.Append("Paths: ")
 				.Append(string.Join(", ", Paths))

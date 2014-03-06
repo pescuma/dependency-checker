@@ -4,7 +4,7 @@ using QuickGraph;
 
 namespace org.pescuma.dotnetdependencychecker.model
 {
-	public class Dependency : Edge<Assembly>
+	public class Dependency : Edge<Library>
 	{
 		public static Comparison<Dependency> NaturalOrdering = (d1, d2) =>
 		{
@@ -25,17 +25,17 @@ namespace org.pescuma.dotnetdependencychecker.model
 			DllReference
 		}
 
-		public static Dependency WithProject(Assembly source, Assembly target, Location location)
+		public static Dependency WithProject(Library source, Library target, Location location)
 		{
 			return new Dependency(source, target, Types.ProjectReference, location, null);
 		}
 
-		public static Dependency WithAssembly(Assembly source, Assembly target, Location location, string dllPath)
+		public static Dependency WithLibrary(Library source, Library target, Location location, string dllPath)
 		{
 			return new Dependency(source, target, Types.DllReference, location, dllPath);
 		}
 
-		private Dependency(Assembly source, Assembly target, Types type, Location location, string dllHintPath)
+		private Dependency(Library source, Library target, Types type, Location location, string dllHintPath)
 			: base(source, target)
 		{
 			Argument.ThrowIfNull(source);
@@ -46,7 +46,7 @@ namespace org.pescuma.dotnetdependencychecker.model
 			DLLHintPath = dllHintPath;
 		}
 
-		public Dependency WithTarget(Assembly otherTarget)
+		public Dependency WithTarget(Library otherTarget)
 		{
 			if (Equals(otherTarget, Target))
 				return this;
@@ -54,7 +54,7 @@ namespace org.pescuma.dotnetdependencychecker.model
 			return new Dependency(Source, otherTarget, Type, Location, DLLHintPath);
 		}
 
-		public Dependency WithSource(Assembly otherSource)
+		public Dependency WithSource(Library otherSource)
 		{
 			if (Equals(otherSource, Source))
 				return this;

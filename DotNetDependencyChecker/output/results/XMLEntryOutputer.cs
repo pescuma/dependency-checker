@@ -67,37 +67,37 @@ namespace org.pescuma.dotnetdependencychecker.output.results
 			File.WriteAllText(file, xdoc.ToString());
 		}
 
-		private XElement CreateXProject(Assembly assembly)
+		private XElement CreateXProject(Library library)
 		{
 			var result = new XElement("Element");
 
-			if (assembly is Project)
+			if (library is Project)
 			{
-				var proj = (Project) assembly;
+				var proj = (Project) library;
 				result.Add(new XAttribute("Type", "Project"));
 				result.Add(new XAttribute("Name", proj.Name));
-				result.Add(new XAttribute("AssemblyName", proj.AssemblyName));
+				result.Add(new XAttribute("LibraryName", proj.LibraryName));
 				result.Add(new XAttribute("Guid", proj.Guid.ToString()));
 				result.Add(new XAttribute("Csproj", proj.CsprojPath));
 			}
 			else
 			{
-				result.Add(new XAttribute("Type", "Assembly"));
-				result.Add(new XAttribute("AssemblyName", assembly.AssemblyName));
+				result.Add(new XAttribute("Type", "Library"));
+				result.Add(new XAttribute("LibraryName", library.LibraryName));
 			}
 
-			if (assembly.GroupElement != null)
+			if (library.GroupElement != null)
 			{
 				var xgroup = new XElement("Group");
 				result.Add(xgroup);
 
-				xgroup.Add(new XAttribute("Name", assembly.GroupElement.Name));
+				xgroup.Add(new XAttribute("Name", library.GroupElement.Name));
 				xgroup.Add(new XElement("Rule", //
-					new XAttribute("Line", assembly.GroupElement.Location.LineNum), //
-					assembly.GroupElement.Location.LineText));
+					new XAttribute("Line", library.GroupElement.Location.LineNum), //
+					library.GroupElement.Location.LineText));
 			}
 
-			assembly.Paths.ForEach(p => result.Add(new XElement("Path", p)));
+			library.Paths.ForEach(p => result.Add(new XElement("Path", p)));
 
 			return result;
 		}

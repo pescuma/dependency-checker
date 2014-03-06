@@ -74,7 +74,7 @@ namespace org.pescuma.dotnetdependencychecker.output.results
 			}));
 		}
 
-		private static string ToConsole(Assembly proj, OutputMessage.ProjInfo info)
+		private static string ToConsole(Library proj, OutputMessage.ProjInfo info)
 		{
 			switch (info)
 			{

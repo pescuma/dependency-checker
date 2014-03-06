@@ -30,31 +30,31 @@ namespace org.pescuma.dotnetdependencychecker.output.dependencies
 		private void AppendProjects(XElement xroot, DependencyGraph graph)
 		{
 			var projs = graph.Vertices.ToList();
-			projs.Sort(Assembly.NaturalOrdering);
+			projs.Sort(Library.NaturalOrdering);
 
-			foreach (var assembly in projs)
+			foreach (var library in projs)
 			{
 				var el = new XElement("Element");
 				xroot.Add(el);
 
-				if (assembly is Project)
+				if (library is Project)
 				{
-					var proj = (Project) assembly;
+					var proj = (Project) library;
 					el.Add(new XAttribute("Type", "Project"));
 					el.Add(new XAttribute("Name", proj.Name));
-					el.Add(new XAttribute("AssemblyName", proj.AssemblyName));
-					el.Add(new XAttribute("CsprojPath", proj.CsprojPath));
+					el.Add(new XAttribute("LibraryName", proj.LibraryName));
+					el.Add(new XAttribute("Path", proj.CsprojPath));
 					el.Add(new XAttribute("GUID", proj.Guid));
 				}
 				else
 				{
-					el.Add(new XAttribute("Type", "Assembly"));
-					el.Add(new XAttribute("Name", assembly.AssemblyName));
-					assembly.Paths.ForEach(p => el.Add(new XAttribute("Path", p)));
+					el.Add(new XAttribute("Type", "Library"));
+					el.Add(new XAttribute("Name", library.LibraryName));
+					library.Paths.ForEach(p => el.Add(new XAttribute("Path", p)));
 				}
 
-				if (assembly.GroupElement != null)
-					el.Add(new XAttribute("Group", assembly.GroupElement.Name));
+				if (library.GroupElement != null)
+					el.Add(new XAttribute("Group", library.GroupElement.Name));
 			}
 		}
 

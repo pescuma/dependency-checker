@@ -6,7 +6,7 @@ using org.pescuma.dotnetdependencychecker.utils;
 
 namespace org.pescuma.dotnetdependencychecker.model
 {
-	public class Project : Assembly
+	public class Project : Library
 	{
 		private readonly string name;
 		public readonly Guid Guid;
@@ -29,18 +29,18 @@ namespace org.pescuma.dotnetdependencychecker.model
 
 				result.Add(Name);
 
-				if (AssemblyName != Name)
-					result.Add(AssemblyName);
+				if (LibraryName != Name)
+					result.Add(LibraryName);
 
 				return result;
 			}
 		}
 
-		public Project(string name, string assemblyName, Guid guid, string csprojPath)
-			: base(assemblyName)
+		public Project(string name, string libraryName, Guid guid, string csprojPath)
+			: base(libraryName)
 		{
 			Argument.ThrowIfNull(name);
-			Argument.ThrowIfNull(assemblyName);
+			Argument.ThrowIfNull(libraryName);
 			Argument.ThrowIfNull(csprojPath);
 
 			this.name = name;
@@ -83,8 +83,8 @@ namespace org.pescuma.dotnetdependencychecker.model
 			result.Append(Name)
 				.Append("[");
 
-			if (AssemblyName != null)
-				result.Append(AssemblyName)
+			if (LibraryName != null)
+				result.Append(LibraryName)
 					.Append(", ");
 
 			result.Append(Guid)

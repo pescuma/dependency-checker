@@ -23,7 +23,7 @@ namespace org.pescuma.dotnetdependencychecker.output.results
 
 		public static DependencyGraph Filter(DependencyGraph graph, List<OutputEntry> warnings)
 		{
-			var projs = new HashSet<Assembly>(warnings.SelectMany(w => w.Projects)
+			var projs = new HashSet<Library>(warnings.SelectMany(w => w.Projects)
 				.Concat(warnings.SelectMany(w => w.Dependencies.SelectMany(d => new[] { d.Source, d.Target }))));
 
 			var deps = new HashSet<Dependency>(warnings.SelectMany(w => w.Dependencies));

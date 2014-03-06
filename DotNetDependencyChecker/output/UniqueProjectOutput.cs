@@ -9,7 +9,7 @@ namespace org.pescuma.dotnetdependencychecker.output
 	{
 		public readonly ConfigLocation Location;
 
-		public UniqueProjectOutput(Severity severity, OutputMessage messsage, ConfigLocation location, IEnumerable<Assembly> projs)
+		public UniqueProjectOutput(Severity severity, OutputMessage messsage, ConfigLocation location, IEnumerable<Library> projs)
 			: base("Non unique project", severity, messsage, projs, null)
 		{
 			Location = location;
