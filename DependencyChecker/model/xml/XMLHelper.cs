@@ -24,7 +24,8 @@ namespace org.pescuma.dependencychecker.model.xml
 				result.Add(new XAttribute("Type", "Project"));
 				result.Add(new XAttribute("ProjectName", proj.Name));
 				result.Add(new XAttribute("LibraryName", proj.LibraryName));
-				result.Add(new XAttribute("ProjectPath", proj.ProjectPath));
+				if (proj.ProjectPath != null)
+					result.Add(new XAttribute("ProjectPath", proj.ProjectPath));
 				if (proj.Guid != null)
 					result.Add(new XAttribute("Guid", proj.Guid.Value));
 			}

@@ -20,14 +20,15 @@ namespace org.pescuma.dependencychecker.model
 		{
 			Argument.ThrowIfNull(projectName);
 			Argument.ThrowIfNull(libraryName);
-			Argument.ThrowIfNull(projectPath);
 
 			ProjectName = projectName;
 			ProjectPath = projectPath;
 			Guid = guid;
 
 			Names.Add(projectName);
-			Paths.Add(projectPath);
+
+			if (projectPath != null)
+				Paths.Add(projectPath);
 		}
 
 		protected bool Equals(Project other)

@@ -63,7 +63,7 @@ namespace org.pescuma.dependencychecker.rules
 
 			public Element(string text)
 			{
-				Text = text;
+				Text = text ?? "<null>";
 				Project = null;
 			}
 

@@ -5,9 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Linq;
-using org.pescuma.dependencychecker.utils;
 
-namespace org.pescuma.dependencychecker
+namespace org.pescuma.dependencychecker.utils
 {
 	// http://stackoverflow.com/questions/4649989/reading-a-csproj-file-in-c-sharp
 	public class CsprojReader
@@ -25,6 +24,9 @@ namespace org.pescuma.dependencychecker
 			Filename = Path.GetFullPath(csproj);
 
 			xdoc = XDocument.Load(csproj, LoadOptions.SetLineInfo);
+
+			if (xdoc.Root == null || xdoc.Root.Name != "Project")
+				throw new IOException("Invalid csproj file: " + csproj);
 		}
 
 		public Guid ProjectGuid

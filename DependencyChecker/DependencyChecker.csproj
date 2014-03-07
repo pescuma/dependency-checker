@@ -60,10 +60,11 @@
     <Compile Include="config\Config.cs" />
     <Compile Include="config\ConfigParser.cs" />
     <Compile Include="config\ConfigParserException.cs" />
-    <Compile Include="CsprojReader.cs" />
+    <Compile Include="utils\CsprojReader.cs" />
     <Compile Include="GroupsLoader.cs" />
-    <Compile Include="input\CsprojectsLoader.cs" />
-    <Compile Include="input\ProjectLoader.cs" />
+    <Compile Include="input\loaders\CsprojectsLoader.cs" />
+    <Compile Include="input\loaders\EclipseProjectsLoader.cs" />
+    <Compile Include="input\loaders\ProjectLoader.cs" />
     <Compile Include="input\DependencyGraphBuilder.cs" />
     <Compile Include="model\Group.cs" />
     <Compile Include="model\xml\XMLHelper.cs" />

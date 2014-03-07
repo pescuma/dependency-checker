@@ -92,7 +92,12 @@ namespace org.pescuma.dependencychecker
 			var names = projs.Select(p => string.Join(" or ", p.SortedNames))
 				.ToList();
 
-			filenames.ForEach(f => File.WriteAllLines(f, names));
+			foreach (var filename in filenames)
+			{
+// ReSharper disable once AssignNullToNotNullAttribute
+				Directory.CreateDirectory(Path.GetDirectoryName(filename));
+				File.WriteAllLines(filename, names);
+			}
 		}
 
 		private static void DumpGroups(IEnumerable<Library> projects, List<string> filenames)
@@ -136,7 +141,12 @@ namespace org.pescuma.dependencychecker
 			});
 			var text = result.ToString();
 
-			filenames.ForEach(f => File.WriteAllText(f, text));
+			foreach (var filename in filenames)
+			{
+				// ReSharper disable once AssignNullToNotNullAttribute
+				Directory.CreateDirectory(Path.GetDirectoryName(filename));
+				File.WriteAllText(filename, text);
+			}
 		}
 	}
 }

@@ -314,7 +314,7 @@ namespace org.pescuma.dependencychecker.input
 				var msg = new OutputMessage().Append("The project ")
 					.Append(proj, OutputMessage.ProjInfo.Name)
 					.Append(" references the project ")
-					.Append(reference.ReferenceFilename)
+					.Append(reference.ReferenceFilename ?? reference.ReferenceName ?? reference.ReferenceLibraryName)
 					.Append(" but it could not be loaded. Guessing the ")
 					.Append(guessed)
 					.Append(" to be the same as the ")

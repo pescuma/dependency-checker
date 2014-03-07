@@ -85,7 +85,7 @@ namespace org.pescuma.dependencychecker.config
 
 		private void ParseInput(string line, ConfigLocation configLocation)
 		{
-			config.Inputs.Add(line);
+			config.Inputs.Add(PathUtils.ToAbsolute(basePath, line));
 		}
 
 		private void ParseGroup(string line, ConfigLocation location)
@@ -145,6 +145,9 @@ namespace org.pescuma.dependencychecker.config
 
 		private static bool PathMatches(string fullPath, string beginPath)
 		{
+			if (fullPath == null)
+				return false;
+
 			return fullPath.Equals(beginPath, StringComparison.CurrentCultureIgnoreCase)
 			       || fullPath.StartsWith(beginPath + "\\", StringComparison.CurrentCultureIgnoreCase);
 		}

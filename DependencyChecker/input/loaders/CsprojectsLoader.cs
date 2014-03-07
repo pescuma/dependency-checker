@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using org.pescuma.dependencychecker.output;
 using org.pescuma.dependencychecker.rules;
+using org.pescuma.dependencychecker.utils;
 
-namespace org.pescuma.dependencychecker.input
+namespace org.pescuma.dependencychecker.input.loaders
 {
 	public class CsprojectsLoader : ProjectLoader
 	{
