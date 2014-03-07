@@ -41,7 +41,7 @@ namespace org.pescuma.dependencychecker.rules
 					.Append(description(projs.First()))
 					.Append(" found");
 
-				result.Add(new UniqueProjectOutput(Severity, message, Location, projs));
+				result.Add(new UniqueProjectOutput(Severity, message, this, projs));
 			});
 
 			return result;

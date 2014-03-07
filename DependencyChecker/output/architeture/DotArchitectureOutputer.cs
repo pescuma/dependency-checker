@@ -8,8 +8,6 @@ namespace org.pescuma.dependencychecker.output.architeture
 {
 	public class DotArchitectureOutputer : ArchitectureOutputer
 	{
-		private const string INDENT = "    ";
-
 		private readonly string file;
 		private readonly Dictionary<string, int> ids = new Dictionary<string, int>();
 
@@ -24,7 +22,7 @@ namespace org.pescuma.dependencychecker.output.architeture
 
 			var result = new DotStringBuilder("Architecture");
 
-			architecture.Vertices.ForEach(v => result.AppendNode(v, "shape", "box"));
+			architecture.Vertices.ForEach(v => result.AppendNode(v, v, "shape", "box"));
 
 			result.AppendSpace();
 

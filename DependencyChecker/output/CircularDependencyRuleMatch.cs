@@ -4,10 +4,10 @@ using org.pescuma.dependencychecker.rules;
 
 namespace org.pescuma.dependencychecker.output
 {
-	public class CircularDependencyRuleMatch : DependencyRuleMatch
+	public class CircularDependencyRuleMatch : RuleOutputEntry
 	{
 		public CircularDependencyRuleMatch(Severity severity, OutputMessage messsage, Rule rule, IEnumerable<Dependency> deps)
-			: base(false, "Circular dependency", severity, messsage, rule, deps)
+			: base("Circular dependency", severity, messsage, rule, deps)
 		{
 		}
 	}

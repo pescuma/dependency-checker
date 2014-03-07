@@ -42,9 +42,9 @@ namespace org.pescuma.dependencychecker.output.results
 				xentry.Add(new XAttribute("Severity", entry.Severity.ToString()));
 				xentry.Add(new XElement("Message", ConsoleEntryOutputer.ToConsole(entry.Messsage)));
 
-				if (entry is DependencyRuleMatch)
+				if (entry is RuleOutputEntry)
 				{
-					var drm = (DependencyRuleMatch) entry;
+					var drm = (RuleOutputEntry) entry;
 					xentry.Add(new XElement("Rule", //
 						new XAttribute("Line", drm.Rule.Location.LineNum), //
 						drm.Rule.Location.LineText));

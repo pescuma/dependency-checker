@@ -67,6 +67,8 @@
     <Compile Include="output\architeture\DotArchitectureOutputer.cs" />
     <Compile Include="output\architeture\TextArchitectureOutputer.cs" />
     <Compile Include="output\architeture\XMLArchitectureOutputer.cs" />
+    <Compile Include="output\RuleOutputEntry.cs" />
+    <Compile Include="output\UniqueDependencyOutput.cs" />
     <Compile Include="utils\CsprojReader.cs" />
     <Compile Include="GroupsLoader.cs" />
     <Compile Include="input\loaders\CsprojectsLoader.cs" />

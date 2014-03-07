@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using org.pescuma.dependencychecker.architecture;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.rules;
@@ -12,10 +11,7 @@ namespace org.pescuma.dependencychecker.output.dependencies
 {
 	public class DotDependenciesOutputer : DependenciesOutputer
 	{
-		private const string INDENT = "    ";
-
 		private readonly string file;
-		private readonly Dictionary<Library, int> ids = new Dictionary<Library, int>();
 
 		private DependencyGraph graph;
 		private ArchitectureGraph architecture;
@@ -35,11 +31,8 @@ namespace org.pescuma.dependencychecker.output.dependencies
 			warnings = aWarnings;
 
 			wrongDependencies = new HashSet<Dependency>(warnings.OfType<DependencyRuleMatch>()
-				.Where(w => !(w is CircularDependencyRuleMatch))
 				.Where(w => !w.Allowed)
 				.SelectMany(w => w.Dependencies));
-
-			graph.Vertices.ForEach((proj, i) => ids.Add(proj, i + 1));
 
 			var result = GenerateDot();
 
@@ -61,11 +54,9 @@ namespace org.pescuma.dependencychecker.output.dependencies
 
 		private string GenerateDot()
 		{
-			var result = new StringBuilder();
+			var result = new DotStringBuilder("Dependencies");
 
-			result.Append("digraph Dependencies {\n");
-			result.Append(INDENT)
-				.Append("concentrate=true;\n");
+			result.AppendConfig("concentrate", "true");
 
 			int clusterIndex = 1;
 
@@ -78,60 +69,48 @@ namespace org.pescuma.dependencychecker.output.dependencies
 				var groupInfo = new GroupInfo(clusterName + "_top", clusterName + "_bottom");
 				groupInfos.Add(groupName, groupInfo);
 
-				result.Append(INDENT)
-					.Append("subgraph ")
-					.Append(clusterName)
-					.Append("{\n");
+				result.StartSubgraph(clusterName);
 
-				const string subprefix = INDENT + INDENT;
+				result.AppendConfig("label", groupName);
+				result.AppendConfig("color", "lightgray");
+				result.AppendConfig("style", "filled");
+				result.AppendConfig("fontsize", "20");
 
-				result.Append(subprefix)
-					.Append("label=\"")
-					.Append(groupName.Replace('"', ' '))
-					.Append("\";\n");
-				result.Append(subprefix)
-					.Append("color=lightgray;\n");
-				result.Append(subprefix)
-					.Append("style=filled;\n");
-				result.Append(subprefix)
-					.Append("fontsize=20;\n");
+				result.AppendSpace();
 
-				result.Append("\n");
+				AppendGroupNode(result, "min", groupInfo.TopNode);
 
-				AppendGroupBottom(result, subprefix, groupInfo);
-
-				result.Append("\n");
+				result.AppendSpace();
 
 				var projs = new HashSet<Library>(group);
 
-				projs.ForEach(a => AppendProject(result, subprefix, a));
+				projs.ForEach(a => AppendProject(result, a));
 
-				result.Append("\n");
+				result.AppendSpace();
 
 				graph.Edges.Where(e => projs.Contains(e.Source) && projs.Contains(e.Target))
-					.ForEach(d => AppendDependency(result, subprefix, d));
+					.ForEach(d => AppendDependency(result, d));
 
-				result.Append("\n");
+				result.AppendSpace();
 
-				AppendGroupTop(result, subprefix, groupInfo);
+				AppendGroupNode(result, "max", groupInfo.BottomNode);
 
-				result.Append(INDENT)
-					.Append("}\n\n");
+				result.EndSubgraph();
+
+				result.AppendSpace();
 			}
 
 			graph.Vertices.Where(a => a.GroupElement == null)
-				.ForEach(a => AppendProject(result, INDENT, a));
+				.ForEach(a => AppendProject(result, a));
 
-			result.Append("\n");
+			result.AppendSpace();
 
 			graph.Edges.Where(e => AreFromDifferentGroups(e.Source, e.Target))
-				.ForEach(d => AppendDependency(result, INDENT, d));
+				.ForEach(d => AppendDependency(result, d));
 
-			result.Append("\n");
+			result.AppendSpace();
 
-			AddDependenciesBetweenGroups(result, INDENT);
-
-			result.Append("}\n");
+			AddDependenciesBetweenGroups(result);
 
 			return result.ToString();
 		}
@@ -144,58 +123,20 @@ namespace org.pescuma.dependencychecker.output.dependencies
 			return p1.GroupElement.Name != p2.GroupElement.Name;
 		}
 
-		private void AppendProject(StringBuilder result, string prefix, Library library)
+		private void AppendProject(DotStringBuilder result, Library library)
 		{
-			var id = ids[library];
-			result.Append(prefix)
-				.Append(id)
-				.Append(" [");
-
-			if (library is Project)
-				result.Append("shape=box");
-			else
-				result.Append("shape=ellipse");
-
-			result.Append(",label=\"")
-				.Append(library.Name.Replace('"', ' '))
-				.Append("\"");
-
-			var color = GetColor(warnings.Where(w => w.Projects.Contains(library)));
-			if (color != null)
-				result.Append(",color=\"")
-					.Append(color)
-					.Append("\"");
-
-			result.Append("];\n");
+			result.AppendNode(library, library.Name, "shape", library is Project ? "box" : "ellipse", "color",
+				GetColor(warnings.Where(w => w.Projects.Contains(library))));
 		}
 
-		private void AppendDependency(StringBuilder result, string prefix, Dependency dep)
+		private void AppendDependency(DotStringBuilder result, Dependency dep)
 		{
 			var invert = wrongDependencies.Contains(dep);
 
-			result.Append(prefix);
-			result.Append(ids[invert ? dep.Target : dep.Source]);
-			result.Append(" -> ");
-			result.Append(ids[invert ? dep.Source : dep.Target]);
-
-			var attribs = new List<string>();
-
-			if (dep.Type == Dependency.Types.LibraryReference)
-				attribs.Add("style=dashed");
-
-			var color = GetColor(warnings.Where(w => w.Dependencies.Contains(dep)));
-			if (color != null)
-				attribs.Add("color=\"" + color + "\"");
-
-			if (invert)
-				attribs.Add("dir=back");
-
-			if (attribs.Any())
-				result.Append(" [")
-					.Append(string.Join(",", attribs))
-					.Append("]");
-
-			result.Append(";\n");
+			result.AppendEdge(invert ? dep.Target : dep.Source, invert ? dep.Source : dep.Target, //
+				"style", dep.Type == Dependency.Types.LibraryReference ? "dashed" : null, // 
+				"color", GetColor(warnings.Where(w => w.Dependencies.Contains(dep))), // 
+				"dir", invert ? "back" : null);
 		}
 
 		private string GetColor(IEnumerable<OutputEntry> warns)
@@ -214,23 +155,15 @@ namespace org.pescuma.dependencychecker.output.dependencies
 				return null;
 		}
 
-		private static void AppendGroupTop(StringBuilder result, string subprefix, GroupInfo groupInfo)
+		private static void AppendGroupNode(DotStringBuilder result, string rank, string cluster)
 		{
-			result.Append(subprefix)
-				.Append("{ rank=min; ")
-				.Append(groupInfo.TopNode)
-				.Append(" [style=invis,shape=none,fixedsize=true,width=0,height=0,label=\"\"] }\n");
+			result.StartGroup()
+				.AppendConfig("rank", rank)
+				.AppendNode(cluster, "", "style", "invis", "shape", "none", "fixedsize", "true", "width", "0", "height", "0")
+				.EndGroup();
 		}
 
-		private static void AppendGroupBottom(StringBuilder result, string subprefix, GroupInfo groupInfo)
-		{
-			result.Append(subprefix)
-				.Append("{ rank=max; ")
-				.Append(groupInfo.BottomNode)
-				.Append(" [style=invis,shape=none,fixedsize=true,width=0,height=0,label=\"\"] }\n");
-		}
-
-		private void AddDependenciesBetweenGroups(StringBuilder result, string prefix)
+		private void AddDependenciesBetweenGroups(DotStringBuilder result)
 		{
 			var usedGroups = new HashSet<string>(graph.Vertices.Where(v => v.GroupElement != null)
 				.Select(g => g.GroupElement.Name));
@@ -277,11 +210,7 @@ namespace org.pescuma.dependencychecker.output.dependencies
 				if (components[dep.Source] == components[dep.Target])
 					continue;
 
-				result.Append(prefix)
-					.Append(groupInfos[dep.Source].BottomNode)
-					.Append(" -> ")
-					.Append(groupInfos[dep.Target].TopNode)
-					.Append(" [style=invis,weight=1000];\n");
+				result.AppendEdge(groupInfos[dep.Source].BottomNode, groupInfos[dep.Target].TopNode, "style", "invis", "weight", "1000");
 			}
 		}
 
