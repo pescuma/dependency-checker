@@ -17,6 +17,8 @@ namespace org.pescuma.dependencychecker.utils
 		public readonly string Name;
 		public readonly string Filename;
 
+		private static XNamespace ns = "http://schemas.microsoft.com/developer/msbuild/2003";
+
 		public CsprojReader(string csproj)
 		{
 			folder = Path.GetDirectoryName(csproj);
@@ -25,7 +27,7 @@ namespace org.pescuma.dependencychecker.utils
 
 			xdoc = XDocument.Load(csproj, LoadOptions.SetLineInfo);
 
-			if (xdoc.Root == null || xdoc.Root.Name != "Project")
+			if (xdoc.Root == null || xdoc.Root.Name != ns + "Project")
 				throw new IOException("Invalid csproj file: " + csproj);
 		}
 
@@ -67,15 +69,22 @@ namespace org.pescuma.dependencychecker.utils
 			}
 		}
 
+		public IEnumerable<COMReference> COMReferences
+		{
+			get
+			{
+				return Nodes("COMReference")
+					.Select(n => new COMReference(this, n));
+			}
+		}
+
 		private IEnumerable<XElement> Nodes(string name)
 		{
-			XNamespace ns = "http://schemas.microsoft.com/developer/msbuild/2003";
 			return xdoc.Descendants(ns + name);
 		}
 
 		private static XElement Node(XElement node, string name)
 		{
-			XNamespace ns = "http://schemas.microsoft.com/developer/msbuild/2003";
 			return node.Element(ns + name);
 		}
 
@@ -133,6 +142,48 @@ namespace org.pescuma.dependencychecker.utils
 						return null;
 
 					return PathUtils.ToAbsolute(reader.folder, result);
+				}
+			}
+		}
+
+		public class COMReference
+		{
+			private readonly CsprojReader reader;
+			private readonly XElement node;
+
+			public COMReference(CsprojReader reader, XElement node)
+			{
+				this.reader = reader;
+				this.node = node;
+			}
+
+			public int LineNumber
+			{
+				get
+				{
+					var info = (IXmlLineInfo) node;
+					return info.LineNumber;
+				}
+			}
+
+			public Guid Guid
+			{
+				get
+				{
+					return new Guid(Node(node, "Guid")
+						.Value);
+				}
+			}
+
+			public string Include
+			{
+				get
+				{
+					var result = Attribute(node, "Include");
+					if (string.IsNullOrWhiteSpace(result))
+						return null;
+
+					return result;
 				}
 			}
 		}
