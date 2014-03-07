@@ -2,12 +2,10 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using org.pescuma.dependencychecker.config;
+using org.pescuma.dependencychecker.architecture;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.output.results;
 using org.pescuma.dependencychecker.rules;
 using org.pescuma.dependencychecker.utils;
-using QuickGraph;
 using QuickGraph.Algorithms;
 
 namespace org.pescuma.dependencychecker.output.dependencies
@@ -16,33 +14,24 @@ namespace org.pescuma.dependencychecker.output.dependencies
 	{
 		private const string INDENT = "    ";
 
-		private readonly Config config;
 		private readonly string file;
-		private readonly bool onlyWithMessages;
 		private readonly Dictionary<Library, int> ids = new Dictionary<Library, int>();
 
-		private DependencyGraph fullGraph;
 		private DependencyGraph graph;
+		private ArchitectureGraph architecture;
 		private List<OutputEntry> warnings;
 		private HashSet<Dependency> wrongDependencies;
 		private readonly Dictionary<string, GroupInfo> groupInfos = new Dictionary<string, GroupInfo>();
 
-		public DotDependenciesOutputer(Config config, string file, bool onlyWithMessages)
+		public DotDependenciesOutputer(string file)
 		{
-			this.config = config;
 			this.file = file;
-			this.onlyWithMessages = onlyWithMessages;
 		}
 
-		public void Output(DependencyGraph aGraph, List<OutputEntry> aWarnings)
+		public void Output(DependencyGraph aGraph, ArchitectureGraph aArchitecture, List<OutputEntry> aWarnings)
 		{
-			fullGraph = aGraph;
-
-			if (onlyWithMessages)
-				graph = OnlyWithMessagesDependenciesOutputer.Filter(aGraph, aWarnings);
-			else
-				graph = aGraph;
-
+			graph = aGraph;
+			architecture = aArchitecture;
 			warnings = aWarnings;
 
 			wrongDependencies = new HashSet<Dependency>(warnings.OfType<DependencyRuleMatch>()
@@ -249,14 +238,14 @@ namespace org.pescuma.dependencychecker.output.dependencies
 			if (usedGroups.Count < 2)
 				return;
 
-			var groupsGraph = CreateGroupsGraph(fullGraph.Vertices.Where(v => v.GroupElement != null)
-				.ToList());
+			var usedDeps = architecture.Edges.Where(e => usedGroups.Contains(e.Source) && usedGroups.Contains(e.Target))
+				.ToList();
 
-			if (!groupsGraph.Edges.Any())
+			if (!usedDeps.Any())
 				return;
 
 			IDictionary<string, int> components;
-			int numConnectedComponents = groupsGraph.StronglyConnectedComponents(out components);
+			int numConnectedComponents = architecture.StronglyConnectedComponents(out components);
 			if (numConnectedComponents < 2)
 				return;
 
@@ -283,7 +272,7 @@ namespace org.pescuma.dependencychecker.output.dependencies
 			//		.Append("}\n");
 			//}
 
-			foreach (var dep in groupsGraph.Edges.Where(e => usedGroups.Contains(e.Source) && usedGroups.Contains(e.Target)))
+			foreach (var dep in usedDeps)
 			{
 				if (components[dep.Source] == components[dep.Target])
 					continue;
@@ -293,70 +282,6 @@ namespace org.pescuma.dependencychecker.output.dependencies
 					.Append(" -> ")
 					.Append(groupInfos[dep.Target].TopNode)
 					.Append(" [style=invis,weight=1000];\n");
-			}
-		}
-
-		private BidirectionalGraph<string, GroupDependency> CreateGroupsGraph(List<Library> projs)
-		{
-			var groupGraph = new BidirectionalGraph<string, GroupDependency>();
-
-			groupGraph.AddVertexRange(projs.Select(p => p.GroupElement.Name)
-				.Distinct());
-
-			var deps = new HashSet<GroupDependency>();
-			foreach (var p1 in projs)
-			{
-				foreach (var p2 in projs)
-				{
-// ReSharper disable once PossibleUnintendedReferenceComparison
-					if (p1 == p2)
-						continue;
-
-					var match = RulesMatcher.FindMatch(config.Rules, Dependency.WithProject(p1, p2, new Location("a", 1))) as DependencyRuleMatch;
-					if (match == null)
-						continue;
-
-					if (match.Allowed)
-						deps.Add(new GroupDependency(p1.GroupElement.Name, p2.GroupElement.Name));
-					else
-						deps.Add(new GroupDependency(p2.GroupElement.Name, p1.GroupElement.Name));
-				}
-			}
-
-			groupGraph.AddEdgeRange(deps);
-
-			return groupGraph;
-		}
-
-		private class GroupDependency : Edge<string>
-		{
-			public GroupDependency(string source, string target)
-				: base(source, target)
-			{
-			}
-
-			private bool Equals(GroupDependency other)
-			{
-				return string.Equals(Source, other.Source) && string.Equals(Target, other.Target);
-			}
-
-			public override bool Equals(object obj)
-			{
-				if (ReferenceEquals(null, obj))
-					return false;
-				if (ReferenceEquals(this, obj))
-					return true;
-				if (obj.GetType() != GetType())
-					return false;
-				return Equals((GroupDependency) obj);
-			}
-
-			public override int GetHashCode()
-			{
-				unchecked
-				{
-					return ((Source != null ? Source.GetHashCode() : 0) * 397) ^ (Target != null ? Target.GetHashCode() : 0);
-				}
 			}
 		}
 

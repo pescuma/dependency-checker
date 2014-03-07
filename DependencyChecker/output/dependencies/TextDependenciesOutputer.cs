@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using org.pescuma.dependencychecker.architecture;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.utils;
 
@@ -16,7 +17,7 @@ namespace org.pescuma.dependencychecker.output.dependencies
 			this.file = file;
 		}
 
-		public void Output(DependencyGraph graph, List<OutputEntry> warnings)
+		public void Output(DependencyGraph graph, ArchitectureGraph architecture, List<OutputEntry> warnings)
 		{
 			var result = new StringBuilder();
 			AppendProjects(result, graph);

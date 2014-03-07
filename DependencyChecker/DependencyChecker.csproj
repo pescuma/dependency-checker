@@ -55,11 +55,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConfigException.cs" />
+    <Compile Include="architecture\ArchitectureGraph.cs" />
+    <Compile Include="architecture\ArchitectureLoader.cs" />
+    <Compile Include="architecture\GroupDependency.cs" />
+    <Compile Include="config\ConfigException.cs" />
     <Compile Include="config\ConfigLocation.cs" />
     <Compile Include="config\Config.cs" />
     <Compile Include="config\ConfigParser.cs" />
     <Compile Include="config\ConfigParserException.cs" />
+    <Compile Include="output\architeture\ArchitectureOutputer.cs" />
+    <Compile Include="output\architeture\DotArchitectureOutputer.cs" />
+    <Compile Include="output\architeture\TextArchitectureOutputer.cs" />
+    <Compile Include="output\architeture\XMLArchitectureOutputer.cs" />
     <Compile Include="utils\CsprojReader.cs" />
     <Compile Include="GroupsLoader.cs" />
     <Compile Include="input\loaders\CsprojectsLoader.cs" />
@@ -89,6 +96,7 @@
     <Compile Include="rules\OutputMessage.cs" />
     <Compile Include="rules\BaseRule.cs" />
     <Compile Include="rules\DepenendencyRule.cs" />
+    <Compile Include="utils\DotStringBuilder.cs" />
     <Compile Include="utils\LinqHelper.cs" />
     <Compile Include="Location.cs" />
     <Compile Include="rules\NoCircularDepenendenciesRule.cs" />

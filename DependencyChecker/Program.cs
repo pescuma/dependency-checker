@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using org.pescuma.dependencychecker.architecture;
 using org.pescuma.dependencychecker.config;
 using org.pescuma.dependencychecker.input;
 using org.pescuma.dependencychecker.model;
@@ -30,11 +31,9 @@ namespace org.pescuma.dependencychecker
 
 				var graph = ProjectsLoader.LoadGraph(config, warnings);
 
-				DumpProjects(graph.Vertices, config.Output.Projects);
-
 				new GroupsLoader(config, graph).FillGroups();
 
-				DumpGroups(graph.Vertices, config.Output.Groups);
+				var architecture = ArchitectureLoader.Load(config, graph);
 
 				warnings.AddRange(RulesMatcher.Match(graph, config));
 
@@ -42,9 +41,11 @@ namespace org.pescuma.dependencychecker
 					.Where(w => !config.InOutput.Ignore.Any(f => f(w)))
 					.ToList();
 
+				DumpProjects(graph.Vertices, config.Output.Projects);
+				DumpGroups(graph.Vertices, config.Output.Groups);
 				config.Output.Results.ForEach(o => o.Output(warnings));
-
-				config.Output.Dependencies.ForEach(o => o.Output(graph, warnings));
+				config.Output.Dependencies.ForEach(o => o.Output(graph, architecture, warnings));
+				config.Output.Architecture.ForEach(o => o.Output(architecture, warnings));
 
 				DumpNumberOfErrorsFound(warnings);
 				Console.WriteLine();

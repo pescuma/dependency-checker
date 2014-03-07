@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencychecker.output.architeture;
 using org.pescuma.dependencychecker.output.dependencies;
 using org.pescuma.dependencychecker.output.results;
 using org.pescuma.dependencychecker.rules;
@@ -46,6 +47,7 @@ namespace org.pescuma.dependencychecker.config
 				{ "output groups:", ParseOutputGroups },
 				{ "output dependencies:", (line, loc) => ParseOutputDependencies(line, loc, false) },
 				{ "output dependencies with errors:", (line, loc) => ParseOutputDependencies(line, loc, true) },
+				{ "output architecture:", ParseOutputArchitecture },
 				{ "output results:", ParseOutputResults },
 				{ "rule:", ParseRule },
 				{ "ignore:", ParseIgnore },
@@ -181,7 +183,7 @@ namespace org.pescuma.dependencychecker.config
 			if (extension.Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
 				config.Output.Dependencies.Add(FilterIfNeeded(onlyWithMessages, new XMLDependenciesOutputer(file)));
 			else if (extension.Equals(".dot", StringComparison.CurrentCultureIgnoreCase))
-				config.Output.Dependencies.Add(new DotDependenciesOutputer(config, file, onlyWithMessages));
+				config.Output.Dependencies.Add(FilterIfNeeded(onlyWithMessages, new DotDependenciesOutputer(file)));
 			else
 				config.Output.Dependencies.Add(FilterIfNeeded(onlyWithMessages, new TextDependenciesOutputer(file)));
 		}
@@ -192,6 +194,19 @@ namespace org.pescuma.dependencychecker.config
 				return new OnlyWithMessagesDependenciesOutputer(next);
 			else
 				return next;
+		}
+
+		private void ParseOutputArchitecture(string line, ConfigLocation location)
+		{
+			var file = PathUtils.ToAbsolute(basePath, line);
+			var extension = Path.GetExtension(file) ?? "";
+
+			if (extension.Equals(".xml", StringComparison.CurrentCultureIgnoreCase))
+				config.Output.Architecture.Add(new XMLArchitectureOutputer(file));
+			else if (extension.Equals(".dot", StringComparison.CurrentCultureIgnoreCase))
+				config.Output.Architecture.Add(new DotArchitectureOutputer(file));
+			else
+				config.Output.Architecture.Add(new TextArchitectureOutputer(file));
 		}
 
 		private void ParseOutputResults(string line, ConfigLocation location)

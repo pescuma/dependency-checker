@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
+using org.pescuma.dependencychecker.architecture;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.model.xml;
 
@@ -15,7 +16,7 @@ namespace org.pescuma.dependencychecker.output.dependencies
 			this.file = file;
 		}
 
-		public void Output(DependencyGraph graph, List<OutputEntry> warnings)
+		public void Output(DependencyGraph graph, ArchitectureGraph architecture, List<OutputEntry> warnings)
 		{
 			var xdoc = new XDocument();
 			var xroot = new XElement("Depedencies");

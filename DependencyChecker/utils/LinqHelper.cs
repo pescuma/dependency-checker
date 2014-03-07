@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace org.pescuma.dependencychecker.utils
 {
@@ -48,6 +49,13 @@ namespace org.pescuma.dependencychecker.utils
 			{
 				return new IndexedElement<T>(other, Index);
 			}
+		}
+
+		public static IEnumerable<T> Sort<T>(this IEnumerable<T> list, Comparison<T> comp)
+		{
+			var result = list.ToList();
+			result.Sort(comp);
+			return result;
 		}
 	}
 }

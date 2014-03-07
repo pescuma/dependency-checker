@@ -1,6 +1,6 @@
 using System;
 
-namespace org.pescuma.dependencychecker
+namespace org.pescuma.dependencychecker.config
 {
 	[Serializable]
 	public class ConfigException : Exception

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using org.pescuma.dependencychecker.architecture;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.output.dependencies;
 
@@ -14,11 +15,11 @@ namespace org.pescuma.dependencychecker.output.results
 			this.next = next;
 		}
 
-		public void Output(DependencyGraph graph, List<OutputEntry> warnings)
+		public void Output(DependencyGraph graph, ArchitectureGraph architecture, List<OutputEntry> warnings)
 		{
 			var filtered = Filter(graph, warnings);
 
-			next.Output(filtered, warnings);
+			next.Output(filtered, architecture, warnings);
 		}
 
 		public static DependencyGraph Filter(DependencyGraph graph, List<OutputEntry> warnings)
