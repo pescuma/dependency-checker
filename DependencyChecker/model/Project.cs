@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using org.pescuma.dependencychecker.utils;
 
@@ -15,8 +16,8 @@ namespace org.pescuma.dependencychecker.model
 			get { return ProjectName; }
 		}
 
-		public Project(string projectName, string libraryName, Guid? guid, string projectPath)
-			: base(libraryName)
+		public Project(string projectName, string libraryName, Guid? guid, string projectPath, IEnumerable<string> languages)
+			: base(libraryName, languages)
 		{
 			Argument.ThrowIfNull(projectName);
 			Argument.ThrowIfNull(libraryName);

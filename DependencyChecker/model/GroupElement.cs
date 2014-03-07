@@ -1,4 +1,5 @@
-﻿using org.pescuma.dependencychecker.config;
+﻿using System.Linq;
+using org.pescuma.dependencychecker.config;
 
 namespace org.pescuma.dependencychecker.model
 {
@@ -9,7 +10,7 @@ namespace org.pescuma.dependencychecker.model
 		public readonly Library Representing;
 
 		public GroupElement(Group group, ConfigLocation location, Library representing)
-			: base(group.Name)
+			: base(@group.Name, null)
 		{
 			Group = group;
 			Location = location;

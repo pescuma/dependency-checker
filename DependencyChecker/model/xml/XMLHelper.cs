@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using org.pescuma.dependencychecker.utils;
 
 namespace org.pescuma.dependencychecker.model.xml
 {
@@ -46,6 +47,7 @@ namespace org.pescuma.dependencychecker.model.xml
 					library.GroupElement.Location.LineText));
 			}
 
+			library.Languages.ForEach(p => result.Add(new XElement("Language", p)));
 			library.Paths.ForEach(p => result.Add(new XElement("Path", p)));
 
 			return result;

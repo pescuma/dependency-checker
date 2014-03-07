@@ -89,7 +89,7 @@
     <Compile Include="rules\OutputMessage.cs" />
     <Compile Include="rules\BaseRule.cs" />
     <Compile Include="rules\DepenendencyRule.cs" />
-    <Compile Include="LinqHelper.cs" />
+    <Compile Include="utils\LinqHelper.cs" />
     <Compile Include="Location.cs" />
     <Compile Include="rules\NoCircularDepenendenciesRule.cs" />
     <Compile Include="Program.cs" />
@@ -110,7 +110,6 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

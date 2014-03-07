@@ -37,7 +37,7 @@ namespace org.pescuma.dependencychecker.input.loaders
 		[Test]
 		public void GuessLibraryName_Version1()
 		{
-			AssertGuess("a-1", "a-1.jar");
+			AssertGuess("a", "a-1.jar");
 		}
 
 		[Test]
@@ -62,6 +62,19 @@ namespace org.pescuma.dependencychecker.input.loaders
 		public void GuessLibraryName_Version2333()
 		{
 			AssertGuess("a", "a-1.234.567.890.jar");
+		}
+
+		[Test]
+		public void GuessLibraryName_Version1b()
+		{
+			AssertGuess("a", "a-1.b1.jar");
+		}
+
+		[Test]
+		public void GuessLibraryName_Version1GA()
+		{
+			// Hibernate likes this
+			AssertGuess("a", "a-1-GA.jar");
 		}
 	}
 }

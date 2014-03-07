@@ -9,7 +9,7 @@ namespace org.pescuma.dependencychecker
 	{
 		public static Project ProjWithName(string name)
 		{
-			return new Project(name, "NO LIB NAME", new Guid(), "PROJ.PATH");
+			return new Project(name, "NO LIB NAME", new Guid(), "PROJ.PATH", null);
 		}
 
 		public static Project[] ProjsWithName(params string[] ps)
@@ -20,7 +20,7 @@ namespace org.pescuma.dependencychecker
 
 		public static Project ProjWithPath(string path)
 		{
-			return new Project("NO NAME", "NO LIB NAME", new Guid(), path);
+			return new Project("NO NAME", "NO LIB NAME", new Guid(), path, null);
 		}
 
 		public static Dependency Dependency(Project p1, Project p2)

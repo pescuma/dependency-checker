@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace org.pescuma.dependencychecker
+namespace org.pescuma.dependencychecker.utils
 {
 	public static class LinqHelper
 	{

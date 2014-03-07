@@ -6,6 +6,7 @@ using org.pescuma.dependencychecker.config;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.output.results;
 using org.pescuma.dependencychecker.rules;
+using org.pescuma.dependencychecker.utils;
 using QuickGraph;
 using QuickGraph.Algorithms;
 

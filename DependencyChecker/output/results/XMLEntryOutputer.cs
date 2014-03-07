@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using org.pescuma.dependencychecker.model.xml;
+using org.pescuma.dependencychecker.utils;
 
 namespace org.pescuma.dependencychecker.output.results
 {

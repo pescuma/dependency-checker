@@ -43,16 +43,36 @@ namespace org.pescuma.dependencychecker.input.loaders
 
 			var basePath = Path.GetDirectoryName(classpathFile);
 
-			var proj = builder.AddProject(name, name, null, projectFile);
+			var languages = FindLanguages(xproject);
+
+			var proj = builder.AddProject(name, name, null, projectFile, languages);
 
 			var referencedProjects = AddReferencesFromClassPath(builder, proj, xclasspath, basePath, classpathFile);
 
-			foreach (var xtarget in xproject.XPathSelectElements("/projectDescription/projects/project"))
+			AddReferencesFromProject(builder, proj, xproject, projectFile, referencedProjects);
+		}
+
+		private HashSet<string> FindLanguages(XDocument xproject)
+		{
+			var result = new HashSet<string>();
+
+			foreach (var xtarget in xproject.XPathSelectElements("/projectDescription/natures/nature"))
 			{
-				var targetProjectName = xtarget.Value;
-				if (!referencedProjects.Contains(targetProjectName))
-					builder.AddProjectReference(proj, targetProjectName, null, null, null, ToLocation(classpathFile, xtarget));
+				var nature = xtarget.Value;
+
+				if (nature == "org.eclipse.jdt.core.javanature")
+					result.Add("Java");
+				else if (nature == "org.python.pydev.pythonNature")
+					result.Add("Python");
+				else if (nature == "org.scala-ide.sdt.core.scalanature")
+					result.Add("Scala");
+				else if (nature == "org.eclipse.cdt.core.cnature")
+					result.Add("C");
+				else if (nature == "org.eclipse.cdt.core.ccnature")
+					result.Add("Python");
 			}
+
+			return result;
 		}
 
 		private static HashSet<string> AddReferencesFromClassPath(DependencyGraphBuilder builder, object proj, XDocument xclasspath,
@@ -76,17 +96,39 @@ namespace org.pescuma.dependencychecker.input.loaders
 					{
 						var targetPath = PathUtils.ToAbsolute(basePath, path);
 						var targetName = GuessLibraryName(targetPath);
-						builder.AddLibraryReference(proj, null, targetName, null, targetPath, ToLocation(classpathFile, xcpe));
+						var language = GuessLanguage(targetPath);
+						builder.AddLibraryReference(proj, null, targetName, null, targetPath, ToLocation(classpathFile, xcpe), language.AsList());
 					}
 					else if (kind == "src" && path.StartsWith("/"))
 					{
 						var targetProjectName = path.Substring(1);
-						builder.AddProjectReference(proj, targetProjectName, null, null, null, ToLocation(classpathFile, xcpe));
+						builder.AddProjectReference(proj, targetProjectName, null, null, null, ToLocation(classpathFile, xcpe), null);
 						referencedProjects.Add(targetProjectName);
 					}
 				}
 			}
 			return referencedProjects;
+		}
+
+		private static void AddReferencesFromProject(DependencyGraphBuilder builder, object proj, XDocument xproject, string projectFile,
+			HashSet<string> referencedProjects)
+		{
+			foreach (var xtarget in xproject.XPathSelectElements("/projectDescription/projects/project"))
+			{
+				var targetProjectName = xtarget.Value;
+				if (!referencedProjects.Contains(targetProjectName))
+					builder.AddProjectReference(proj, targetProjectName, null, null, null, ToLocation(projectFile, xtarget), null);
+			}
+		}
+
+		private static string GuessLanguage(string path)
+		{
+			var ext = Path.GetExtension(path);
+
+			if (ext == ".jar" || ext == ".war")
+				return "Java";
+
+			return null;
 		}
 
 		public static string GuessLibraryName(string name)
@@ -107,7 +149,7 @@ namespace org.pescuma.dependencychecker.input.loaders
 			return name;
 		}
 
-		private static Regex versionRegex = new Regex(@"-\d{1,2}(\.\d{1,3}){1,3}$", RegexOptions.IgnoreCase);
+		private static Regex versionRegex = new Regex(@"-\d{1,2}(\.\d{1,3}){0,3}(\.b\d|-GA)?$", RegexOptions.IgnoreCase);
 
 		private static string RemoveVersion(string name)
 		{

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using QuickGraph;
 
 namespace org.pescuma.dependencychecker.utils
@@ -27,6 +28,21 @@ namespace org.pescuma.dependencychecker.utils
 		{
 			foreach (var e in toAdd)
 				set.Add(e);
+		}
+
+		public static string EmptyIfNull(this string obj)
+		{
+			return obj ?? "";
+		}
+
+		public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> obj)
+		{
+			return obj ?? Enumerable.Empty<T>();
+		}
+
+		public static List<T> EmptyIfNull<T>(this List<T> obj)
+		{
+			return obj ?? new List<T>();
 		}
 	}
 }

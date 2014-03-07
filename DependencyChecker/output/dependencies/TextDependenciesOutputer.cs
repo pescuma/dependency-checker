@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencychecker.utils;
 
 namespace org.pescuma.dependencychecker.output.dependencies
 {
@@ -51,6 +52,8 @@ namespace org.pescuma.dependencychecker.output.dependencies
 
 				if (library.GroupElement != null)
 					AppendProperty(result, "Group", library.GroupElement.Name);
+
+				library.Languages.ForEach(p => AppendProperty(result, "Language", p));
 
 				var projectPath = (library is Project ? ((Project) library).ProjectPath : null);
 				library.Paths.Where(p => p != projectPath)

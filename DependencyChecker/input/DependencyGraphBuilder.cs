@@ -27,9 +27,12 @@ namespace org.pescuma.dependencychecker.input
 			this.warnings = warnings;
 		}
 
-		public object AddProject(string name, string libraryName, Guid? guid, string filename)
+		public object AddProject(string name, string libraryName, Guid? guid, string filename, IEnumerable<string> languages)
 		{
-			var proj = new TempProject(name, libraryName, guid, filename);
+			languages = languages.EmptyIfNull()
+				.ToList();
+
+			var proj = new TempProject(name, libraryName, guid, filename, languages);
 
 			TempProject result;
 			if (!projs.TryGetValue(proj, out result))
@@ -40,29 +43,30 @@ namespace org.pescuma.dependencychecker.input
 
 			result.Names.Add(name);
 			result.LibraryNames.Add(name);
+			result.Languages.AddRange(languages);
 
 			return result;
 		}
 
 		public void AddProjectReference(object proj, string referenceName, string referenceLibraryName, Guid? referenceGuid,
-			string referenceFilename, Location referenceLocation)
+			string referenceFilename, Location referenceLocation, IEnumerable<string> languages)
 		{
 			refs.Add(new TempReference((TempProject) proj, Dependency.Types.ProjectReference, referenceName, referenceLibraryName, referenceGuid,
-				referenceFilename, referenceLocation));
+				referenceFilename, referenceLocation, languages));
 		}
 
 		public void AddLibraryReference(object proj, string referenceName, string referenceLibraryName, Guid? referenceGuid,
-			string referenceFilename, Location referenceLocation)
+			string referenceFilename, Location referenceLocation, IEnumerable<string> languages)
 		{
 			refs.Add(new TempReference((TempProject) proj, Dependency.Types.LibraryReference, referenceName, referenceLibraryName, referenceGuid,
-				referenceFilename, referenceLocation));
+				referenceFilename, referenceLocation, languages));
 		}
 
 		public DependencyGraph Build()
 		{
 			projs.Keys.ForEach(p =>
 			{
-				p.Project = new Project(p.Name, p.LibraryName, p.Guid, p.Filename);
+				p.Project = new Project(p.Name, p.LibraryName, p.Guid, p.Filename, p.Languages);
 				p.Project.Names.AddRange(p.Names.Where(n => !p.Project.Names.Contains(n))
 					.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase));
 				p.Project.LibraryNames.AddRange(p.LibraryNames.Where(n => !p.Project.LibraryNames.Contains(n))
@@ -76,6 +80,9 @@ namespace org.pescuma.dependencychecker.input
 			CreateProjectReferences();
 
 			CreateLibraryReferences();
+
+			libraries.Where(l => !l.Languages.Any())
+				.ForEach(l => l.Languages.Add("Unknown"));
 
 			libraries.Sort(Library.NaturalOrdering);
 			dependencies.Sort(Dependency.NaturalOrdering);
@@ -179,19 +186,70 @@ namespace org.pescuma.dependencychecker.input
 				if (found == null || !found.Any())
 					continue;
 
-				foreach (var target in found)
+				Merge(found, projRef);
+
+				found.ForEach(target => dependencies.Add(dep.WithTarget(target)));
+			}
+		}
+
+		private void CreateLibraryReferences()
+		{
+			foreach (var tmp in refs.Where(r => r.Type == Dependency.Types.LibraryReference && !r.Source.Ignored))
+			{
+				var projRef = tmp;
+				var proj = projRef.Source.Project;
+
+				// Dummy reference for logs in case of errors
+				var dep = Dependency.WithLibrary(proj, null, projRef.ReferenceLocation, projRef.ReferenceFilename);
+
+				List<Library> found = null;
+
+				if (projRef.ReferenceFilename != null)
+					found = FindLibraryByFilename(proj, dep, projRef.ReferenceFilename);
+
+				if (projRef.ReferenceName != null && projRef.ReferenceLibraryName != null)
+					found = FindLibraryByNameAndLibraryName(proj, dep, projRef.ReferenceName, projRef.ReferenceLibraryName);
+
+				if (projRef.ReferenceLibraryName != null)
+					found = FindLibraryByLibraryName(proj, dep, projRef.ReferenceLibraryName);
+
+				if (projRef.ReferenceName != null)
+					found = FindLibraryByName(proj, dep, projRef.ReferenceName);
+
+				if (found == null)
 				{
-					if (projRef.ReferenceFilename != null)
-						target.Paths.Add(projRef.ReferenceFilename);
-
-					if (projRef.ReferenceName != null)
-						target.Names.Add(projRef.ReferenceName);
-
-					if (projRef.ReferenceLibraryName != null)
-						target.LibraryNames.Add(projRef.ReferenceLibraryName);
-
-					dependencies.Add(dep.WithTarget(target));
+					var lib = new Library(projRef.ReferenceLibraryName ?? projRef.ReferenceName, projRef.ReferenceLanguages.EmptyIfNull());
+					if (!Ignore(lib))
+					{
+						AddLibrary(lib);
+						found = lib.AsList();
+					}
 				}
+
+				if (found == null || !found.Any())
+					continue;
+
+				Merge(found, projRef);
+
+				found.ForEach(target => dependencies.Add(dep.WithTarget(target)));
+			}
+		}
+
+		private static void Merge(List<Library> targets, TempReference source)
+		{
+			foreach (var target in targets)
+			{
+				if (source.ReferenceFilename != null)
+					target.Paths.Add(source.ReferenceFilename);
+
+				if (source.ReferenceName != null)
+					target.Names.Add(source.ReferenceName);
+
+				if (source.ReferenceLibraryName != null)
+					target.LibraryNames.Add(source.ReferenceLibraryName);
+
+				if (source.ReferenceLanguages != null)
+					target.Languages.AddRange(source.ReferenceLanguages);
 			}
 		}
 
@@ -301,7 +359,7 @@ namespace org.pescuma.dependencychecker.input
 		private Project CreateFakeProject(Project proj, Dependency dep, TempReference reference)
 		{
 			var result = new Project(reference.ReferenceName ?? reference.ReferenceLibraryName,
-				reference.ReferenceLibraryName ?? reference.ReferenceName, reference.ReferenceGuid ?? Guid.NewGuid(), reference.ReferenceFilename);
+				reference.ReferenceLibraryName ?? reference.ReferenceName, reference.ReferenceGuid ?? Guid.NewGuid(), reference.ReferenceFilename, null);
 
 			if (Ignore(result))
 				return null;
@@ -329,50 +387,6 @@ namespace org.pescuma.dependencychecker.input
 			return result;
 		}
 
-		private void CreateLibraryReferences()
-		{
-			foreach (var tmp in refs.Where(r => r.Type == Dependency.Types.LibraryReference && !r.Source.Ignored))
-			{
-				var projRef = tmp;
-				var proj = projRef.Source.Project;
-
-				// Dummy reference for logs in case of errors
-				var dep = Dependency.WithLibrary(proj, null, projRef.ReferenceLocation, projRef.ReferenceFilename);
-
-				List<Library> found = null;
-
-				if (projRef.ReferenceFilename != null)
-					found = FindLibraryByFilename(proj, dep, projRef.ReferenceFilename);
-
-				if (projRef.ReferenceName != null && projRef.ReferenceLibraryName != null)
-					found = FindLibraryByNameAndLibraryName(proj, dep, projRef.ReferenceName, projRef.ReferenceLibraryName);
-
-				if (projRef.ReferenceLibraryName != null)
-					found = FindLibraryByLibraryName(proj, dep, projRef.ReferenceLibraryName);
-
-				if (projRef.ReferenceName != null)
-					found = FindLibraryByName(proj, dep, projRef.ReferenceName);
-
-				if (found == null)
-				{
-					var lib = new Library(projRef.ReferenceLibraryName ?? projRef.ReferenceName);
-					if (!Ignore(lib))
-					{
-						AddLibrary(lib);
-						found = lib.AsList();
-					}
-				}
-
-				if (found == null || !found.Any())
-					continue;
-
-				if (projRef.ReferenceFilename != null)
-					found.ForEach(rf => rf.Paths.Add(projRef.ReferenceFilename));
-
-				found.ForEach(rf => dependencies.Add(dep.WithTarget(rf)));
-			}
-		}
-
 		private class TempProject
 		{
 			public readonly string Name;
@@ -381,11 +395,12 @@ namespace org.pescuma.dependencychecker.input
 			public readonly string Filename;
 			public readonly HashSet<string> Names = new HashSet<string>();
 			public readonly HashSet<string> LibraryNames = new HashSet<string>();
+			public readonly HashSet<string> Languages = new HashSet<string>();
 
 			public Project Project;
 			public bool Ignored;
 
-			public TempProject(string name, string libraryName, Guid? guid, string filename)
+			public TempProject(string name, string libraryName, Guid? guid, string filename, IEnumerable<string> languages)
 			{
 				Argument.ThrowIfNull(name);
 				Argument.ThrowIfNull(libraryName);
@@ -398,6 +413,7 @@ namespace org.pescuma.dependencychecker.input
 
 				Names.Add(name);
 				LibraryNames.Add(libraryName);
+				Languages.AddRange(languages.EmptyIfNull());
 			}
 
 			private bool Equals(TempProject other)
@@ -454,9 +470,10 @@ namespace org.pescuma.dependencychecker.input
 			public readonly Guid? ReferenceGuid;
 			public readonly string ReferenceFilename;
 			public readonly Location ReferenceLocation;
+			public readonly IEnumerable<string> ReferenceLanguages;
 
 			public TempReference(TempProject source, Dependency.Types type, string referenceName, string referenceLibraryName, Guid? referenceGuid,
-				string referenceFilename, Location referenceLocation)
+				string referenceFilename, Location referenceLocation, IEnumerable<string> referenceLanguages)
 			{
 				Argument.ThrowIfNull(source);
 				Argument.ThrowIfAllNull(referenceName, referenceLibraryName);
@@ -469,6 +486,7 @@ namespace org.pescuma.dependencychecker.input
 				ReferenceGuid = referenceGuid;
 				ReferenceFilename = referenceFilename;
 				ReferenceLocation = referenceLocation;
+				ReferenceLanguages = referenceLanguages;
 			}
 
 			public override string ToString()

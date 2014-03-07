@@ -16,8 +16,9 @@ namespace org.pescuma.dependencychecker.model
 		public GroupElement GroupElement;
 		public readonly HashSet<string> Names = new HashSet<string>();
 		public readonly HashSet<string> LibraryNames = new HashSet<string>();
+		public readonly HashSet<string> Languages = new HashSet<string>();
 
-		public Library(string libraryName)
+		public Library(string libraryName, IEnumerable<string> languages)
 		{
 			Argument.ThrowIfNull(libraryName);
 
@@ -25,6 +26,9 @@ namespace org.pescuma.dependencychecker.model
 
 			Names.Add(libraryName);
 			LibraryNames.Add(libraryName);
+
+			if (languages != null)
+				Languages.AddRange(languages);
 		}
 
 		public virtual string Name

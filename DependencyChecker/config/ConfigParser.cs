@@ -114,6 +114,7 @@ namespace org.pescuma.dependencychecker.config
 				{ "not:", (line, loc) => result = ParseNot(line, loc) },
 				{ "regex:", (line, loc) => result = ParseRE(line) },
 				{ "path:", (line, loc) => result = ParsePath(line) },
+				{ "lang:", (line, loc) => result = ParseLanguage(line) },
 				{ "", (line, loc) => result = ParseSimpleMatch(line) },
 			};
 
@@ -141,6 +142,11 @@ namespace org.pescuma.dependencychecker.config
 			var path = PathUtils.ToAbsolute(basePath, line);
 
 			return proj => proj.Paths.Any(pp => PathMatches(pp, path));
+		}
+
+		private Func<Library, bool> ParseLanguage(string line)
+		{
+			return proj => proj.Languages.Any(l => l.Equals(line, StringComparison.CurrentCultureIgnoreCase));
 		}
 
 		private static bool PathMatches(string fullPath, string beginPath)

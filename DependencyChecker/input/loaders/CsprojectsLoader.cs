@@ -20,13 +20,24 @@ namespace org.pescuma.dependencychecker.input.loaders
 				.ToList();
 			foreach (var csproj in csprojs)
 			{
-				var proj = builder.AddProject(csproj.Name, csproj.AssemblyName, csproj.ProjectGuid, csproj.Filename);
+				var proj = builder.AddProject(csproj.Name, csproj.AssemblyName, csproj.ProjectGuid, csproj.Filename, "C#".AsList());
 
 				foreach (var csref in csproj.ProjectReferences)
-					builder.AddProjectReference(proj, csref.Name, null, csref.ProjectGuid, csref.Include, new Location(csproj.Filename, csref.LineNumber));
+					builder.AddProjectReference(proj, csref.Name, null, csref.ProjectGuid, csref.Include, new Location(csproj.Filename, csref.LineNumber),
+						"C#".AsList());
 
 				foreach (var csref in csproj.References)
-					builder.AddLibraryReference(proj, null, csref.Include.Name, null, csref.HintPath, new Location(csproj.Filename, csref.LineNumber));
+				{
+					string language;
+					if (csref.HintPath == null)
+						// A system lib
+						language = "C#";
+					else
+						language = null;
+
+					builder.AddLibraryReference(proj, null, csref.Include.Name, null, csref.HintPath, new Location(csproj.Filename, csref.LineNumber),
+						language.AsList());
+				}
 			}
 
 			var externalCsprojFiles = csprojs.SelectMany(p => p.ProjectReferences)
@@ -39,7 +50,7 @@ namespace org.pescuma.dependencychecker.input.loaders
 				try
 				{
 					var csproj = new CsprojReader(externalCsprojFile);
-					builder.AddProject(csproj.Name, csproj.AssemblyName, csproj.ProjectGuid, csproj.Filename);
+					builder.AddProject(csproj.Name, csproj.AssemblyName, csproj.ProjectGuid, csproj.Filename, "C#".AsList());
 				}
 				catch (IOException)
 				{
