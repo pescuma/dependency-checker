@@ -38,7 +38,7 @@ namespace org.pescuma.dependencychecker.output.dependencies
 						.Append("\n");
 					AppendProperty(result, "Library name", proj.LibraryName);
 					if (proj.ProjectPath != null)
-						AppendProperty(result, "Path", proj.ProjectPath);
+						AppendProperty(result, "Project path", proj.ProjectPath);
 					if (proj.Guid != null)
 						AppendProperty(result, "GUID", proj.Guid.Value);
 				}
@@ -47,11 +47,14 @@ namespace org.pescuma.dependencychecker.output.dependencies
 					result.Append("Library ")
 						.Append(library.LibraryName)
 						.Append("\n");
-					library.Paths.ForEach(p => AppendProperty(result, "Path", p));
 				}
 
 				if (library.GroupElement != null)
 					AppendProperty(result, "Group", library.GroupElement.Name);
+
+				var projectPath = (library is Project ? ((Project) library).ProjectPath : null);
+				library.Paths.Where(p => p != projectPath)
+					.ForEach(p => AppendProperty(result, "Path", p));
 
 				result.Append("\n");
 			}
