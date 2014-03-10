@@ -11,7 +11,7 @@ namespace org.pescuma.dependencychecker.input
 	{
 		public static DependencyGraph LoadGraph(Config config, List<OutputEntry> warnings)
 		{
-			ProjectLoader[] loaders = { new CsprojectsLoader(), new EclipseProjectsLoader() };
+			ProjectLoader[] loaders = { new VsprojectsLoader(), new EclipseProjectsLoader() };
 
 			var builder = new DependencyGraphBuilder(config, warnings);
 

@@ -8,14 +8,21 @@ using org.pescuma.dependencychecker.utils;
 
 namespace org.pescuma.dependencychecker.input.loaders
 {
-	public class CsprojectsLoader : ProjectLoader
+	public class VsprojectsLoader : ProjectLoader
 	{
 		public void LoadProjects(List<string> paths, DependencyGraphBuilder builder, List<OutputEntry> warnings)
 		{
-			var defaultLanguage = "C#".AsList();
+			LoadProjects(paths, builder, warnings, "*.csproj", "C#");
+			LoadProjects(paths, builder, warnings, "*.vbproj", "Visual Basic");
+			LoadProjects(paths, builder, warnings, "*.fsproj", "F#");
+		}
 
-			var csprojsFiles = new HashSet<string>(paths.SelectMany(folder => Directory.GetFiles(folder, "*.csproj", SearchOption.AllDirectories))
-				.Select(Path.GetFullPath));
+		private static void LoadProjects(List<string> paths, DependencyGraphBuilder builder, List<OutputEntry> warnings, string filenamePattern,
+			params string[] defaultLanguage)
+		{
+			var csprojsFiles =
+				new HashSet<string>(paths.SelectMany(folder => Directory.GetFiles(folder, filenamePattern, SearchOption.AllDirectories))
+					.Select(Path.GetFullPath));
 
 			var csprojs = csprojsFiles.Select(f => new CsprojReader(f))
 				.OrderBy(n => n.Filename, StringComparer.CurrentCultureIgnoreCase)
@@ -29,12 +36,19 @@ namespace org.pescuma.dependencychecker.input.loaders
 						defaultLanguage);
 
 				foreach (var csref in csproj.References)
-					builder.AddLibraryReference(proj, null, csref.Include.Name, null, csref.HintPath, new Location(csproj.Filename, csref.LineNumber),
-						defaultLanguage);
+				{
+					IEnumerable<string> language;
+					if (csref.HintPath == null && csref.Include.GetPublicKey() == null)
+						// A system lib
+						language = defaultLanguage;
+					else
+						language = null;
+
+					builder.AddLibraryReference(proj, null, csref.Include.Name, null, csref.HintPath, new Location(csproj.Filename, csref.LineNumber), language);
+				}
 
 				foreach (var csref in csproj.COMReferences)
-					builder.AddLibraryReference(proj, null, csref.Include, csref.Guid, null, new Location(csproj.Filename, csref.LineNumber),
-						defaultLanguage);
+					builder.AddLibraryReference(proj, null, csref.Include, csref.Guid, null, new Location(csproj.Filename, csref.LineNumber), null);
 			}
 
 			var externalCsprojFiles = csprojs.SelectMany(p => p.ProjectReferences)

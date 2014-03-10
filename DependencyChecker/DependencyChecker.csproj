@@ -71,7 +71,7 @@
     <Compile Include="output\UniqueDependencyOutput.cs" />
     <Compile Include="utils\CsprojReader.cs" />
     <Compile Include="GroupsLoader.cs" />
-    <Compile Include="input\loaders\CsprojectsLoader.cs" />
+    <Compile Include="input\loaders\VsprojectsLoader.cs" />
     <Compile Include="input\loaders\EclipseProjectsLoader.cs" />
     <Compile Include="input\loaders\ProjectLoader.cs" />
     <Compile Include="input\DependencyGraphBuilder.cs" />
