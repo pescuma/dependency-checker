@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dependencychecker.config;
 using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencychecker.output;
 using org.pescuma.dependencychecker.utils;
 
 namespace org.pescuma.dependencychecker
@@ -11,16 +12,21 @@ namespace org.pescuma.dependencychecker
 		private readonly Dictionary<string, Group> groups = new Dictionary<string, Group>();
 		private readonly Config config;
 		private readonly DependencyGraph graph;
+		private readonly List<OutputEntry> warnings;
+		private readonly HashSet<ConfigLocation> usedGroups = new HashSet<ConfigLocation>();
 
-		public GroupsLoader(Config config, DependencyGraph graph)
+		public GroupsLoader(Config config, DependencyGraph graph, List<OutputEntry> warnings)
 		{
 			this.config = config;
 			this.graph = graph;
+			this.warnings = warnings;
 		}
 
 		public void FillGroups()
 		{
 			graph.Vertices.ForEach(proj => proj.GroupElement = FindGroupElement(proj));
+
+			RuleUtils.ReportUnusedConfig(warnings, "group", config.Groups.Select(i => i.Location), usedGroups);
 		}
 
 		private GroupElement FindGroupElement(Library proj)
@@ -28,6 +34,8 @@ namespace org.pescuma.dependencychecker
 			var configGroup = config.Groups.FirstOrDefault(g => g.Matches(proj));
 			if (configGroup == null)
 				return null;
+
+			usedGroups.Add(configGroup.Location);
 
 			if (configGroup.Name == null)
 				return null;

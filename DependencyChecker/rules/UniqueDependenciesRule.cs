@@ -34,7 +34,7 @@ namespace org.pescuma.dependencychecker.rules
 					.Append(" has multiple dependencies with ")
 					.Append(g.Key, OutputMessage.ProjInfo.Name);
 
-				result.Add(new UniqueDependencyOutput(Severity, message, this, g));
+				result.Add(new UniqueDependencyOutputEntry(Severity, message, this, g));
 			});
 
 			return result;

@@ -329,8 +329,11 @@ namespace org.pescuma.dependencychecker.config
 
 		private void ParseInOutput(string line, ConfigLocation location)
 		{
-			if (line == "ignore loading errors")
+			if (line == "ignore loading infos")
 				config.InOutput.Ignore.Add(w => w.Type.StartsWith("Loading/"));
+
+			else if (line == "ignore config infos")
+				config.InOutput.Ignore.Add(w => w.Type.StartsWith("Config/"));
 
 			else
 				throw new ConfigParserException(location, "Invalid line");

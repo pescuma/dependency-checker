@@ -50,6 +50,14 @@ namespace org.pescuma.dependencychecker.output.results
 						drm.Rule.Location.LineText));
 				}
 
+				if (entry is UnusedConfigOutputEntry)
+				{
+					var ucoe = (UnusedConfigOutputEntry) entry;
+					xentry.Add(new XElement("Config", //
+						new XAttribute("Line", ucoe.Location.LineNum), //
+						new XAttribute("Text", ucoe.Location.LineText)));
+				}
+
 				if (entry.Projects.Any())
 				{
 					var xprojs = new XElement("Projects");

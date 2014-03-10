@@ -40,17 +40,17 @@ namespace org.pescuma.dependencychecker.config
 		public class Ignore
 		{
 			public readonly Func<Library, bool> Matches;
-			private readonly ConfigLocation location;
+			public readonly ConfigLocation Location;
 
 			public Ignore(Func<Library, bool> matches, ConfigLocation location)
 			{
 				Matches = matches;
-				this.location = location;
+				Location = location;
 			}
 
 			public override string ToString()
 			{
-				return location.LineText;
+				return Location.LineText;
 			}
 		}
 

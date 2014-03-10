@@ -67,7 +67,7 @@ namespace org.pescuma.dependencychecker.input.loaders
 				{
 					var msg = new OutputMessage().Append("Failed to load a project outside of input folders: ")
 						.Append(externalCsprojFile);
-					warnings.Add(new LoadingOutputWarning("External project not found", msg));
+					warnings.Add(new LoadingOutputEntry("External project not found", msg));
 				}
 			}
 		}

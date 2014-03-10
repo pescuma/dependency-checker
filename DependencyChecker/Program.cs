@@ -31,7 +31,7 @@ namespace org.pescuma.dependencychecker
 
 				var graph = ProjectsLoader.LoadGraph(config, warnings);
 
-				new GroupsLoader(config, graph).FillGroups();
+				new GroupsLoader(config, graph, warnings).FillGroups();
 
 				var architecture = ArchitectureLoader.Load(config, graph);
 

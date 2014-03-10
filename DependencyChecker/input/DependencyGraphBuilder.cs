@@ -20,6 +20,7 @@ namespace org.pescuma.dependencychecker.input
 		private readonly List<OutputEntry> warnings;
 		private readonly List<Library> libraries = new List<Library>();
 		private readonly List<Dependency> dependencies = new List<Dependency>();
+		private readonly HashSet<ConfigLocation> usedIgnores = new HashSet<ConfigLocation>();
 
 		public DependencyGraphBuilder(Config config, List<OutputEntry> warnings)
 		{
@@ -87,6 +88,8 @@ namespace org.pescuma.dependencychecker.input
 			libraries.Sort(Library.NaturalOrdering);
 			dependencies.Sort(Dependency.NaturalOrdering);
 
+			RuleUtils.ReportUnusedConfig(warnings, "ignore", config.Ignores.Select(i => i.Location), usedIgnores);
+
 			var graph = new DependencyGraph();
 			libraries.ForEach(p => graph.AddVertex(p));
 			dependencies.ForEach(d => graph.AddEdge(d));
@@ -95,7 +98,15 @@ namespace org.pescuma.dependencychecker.input
 
 		private bool Ignore(Library library)
 		{
-			return config.Ignores.Any(i => i.Matches(library));
+			foreach (var ignore in config.Ignores)
+			{
+				if (ignore.Matches(library))
+				{
+					usedIgnores.Add(ignore.Location);
+					return true;
+				}
+			}
+			return false;
 		}
 
 		private void CreateInitialProjects()
@@ -327,7 +338,7 @@ namespace org.pescuma.dependencychecker.input
 				.Append(c, OutputMessage.ProjInfo.ProjectPath));
 			message.Append("\nMultiple dependencies will be created.");
 
-			return new LoadingOutputWarning("Multiple projects found", message, candidates.Select(dep.WithTarget)
+			return new LoadingOutputEntry("Multiple projects found", message, candidates.Select(dep.WithTarget)
 				.ToArray());
 		}
 
@@ -352,7 +363,7 @@ namespace org.pescuma.dependencychecker.input
 				result.ForEach(p => message.Append("\n  - ")
 					.Append(p, OutputMessage.ProjInfo.ProjectPath));
 
-			warnings.Add(new LoadingOutputWarning("Only similar project found", message, result.Select(dep.WithTarget)
+			warnings.Add(new LoadingOutputEntry("Only similar project found", message, result.Select(dep.WithTarget)
 				.ToArray()));
 		}
 
@@ -379,7 +390,7 @@ namespace org.pescuma.dependencychecker.input
 					.Append(used)
 					.Append(".");
 
-				warnings.Add(new LoadingOutputWarning("Project not found", msg, dep.WithTarget(result)));
+				warnings.Add(new LoadingOutputEntry("Project not found", msg, dep.WithTarget(result)));
 			}
 
 			AddLibrary(result);
