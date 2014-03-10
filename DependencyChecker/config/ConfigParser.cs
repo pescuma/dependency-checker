@@ -98,6 +98,8 @@ namespace org.pescuma.dependencychecker.config
 
 			var name = line.Substring(0, pos)
 				.Trim();
+			if ("<No Group>".Equals(name, StringComparison.CurrentCultureIgnoreCase))
+				name = null;
 
 			var matchLine = line.Substring(pos + DEPENDS.Length)
 				.Trim();

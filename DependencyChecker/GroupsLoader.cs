@@ -29,6 +29,9 @@ namespace org.pescuma.dependencychecker
 			if (configGroup == null)
 				return null;
 
+			if (configGroup.Name == null)
+				return null;
+
 			Group group;
 			if (!groups.TryGetValue(configGroup.Name, out group))
 			{
