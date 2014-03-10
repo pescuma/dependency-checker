@@ -55,9 +55,9 @@ namespace org.pescuma.dependencychecker.architecture
 					var isNotAllowed = notAllowed.Contains(dep);
 
 					if (isAllowed && isNotAllowed)
-						dep = new GroupDependency(g1, g2, true);
+						dep = new GroupDependency(g1, g2, GroupDependency.Types.Conflicted);
 					else if (!isAllowed && !isNotAllowed)
-						dep = new GroupDependency(g1, g2, false, true);
+						dep = new GroupDependency(g1, g2, GroupDependency.Types.Implicit);
 					else if (isNotAllowed)
 						dep = null;
 

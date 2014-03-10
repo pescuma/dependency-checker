@@ -34,8 +34,8 @@ namespace org.pescuma.dependencychecker.output.architeture
 					.Append(v.Source)
 					.Append(" -> ")
 					.Append(v.Target)
-					.Append(v.Conflicted ? " (this reference is both allowed and not allowed)" : "")
-					.Append(v.Implicit ? " (this reference is not explicit allowed, but is also not not allowed)" : "")
+					.Append(v.Type == GroupDependency.Types.Conflicted ? " (this reference is both allowed and not allowed)" : "")
+					.Append(v.Type == GroupDependency.Types.Implicit ? " (this reference is not explicit allowed, but is also not not allowed)" : "")
 					.Append("\n"));
 
 			File.WriteAllText(file, result.ToString());

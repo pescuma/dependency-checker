@@ -14,14 +14,19 @@ namespace org.pescuma.dependencychecker.architecture
 			return string.Compare(d1.Target, d2.Target, StringComparison.CurrentCultureIgnoreCase);
 		};
 
-		public readonly bool Conflicted;
-		public readonly bool Implicit;
+		public readonly Types Type;
 
-		public GroupDependency(string source, string target, bool conflicted = false, bool @implicit = false)
+		public enum Types
+		{
+			Allowed,
+			Implicit,
+			Conflicted
+		}
+
+		public GroupDependency(string source, string target, Types type = Types.Allowed)
 			: base(source, target)
 		{
-			Conflicted = conflicted;
-			Implicit = @implicit;
+			Type = type;
 		}
 
 		private bool Equals(GroupDependency other)

@@ -29,12 +29,33 @@ namespace org.pescuma.dependencychecker.output.architeture
 			var deps = new HashSet<GroupDependency>(architecture.Edges);
 			var inversible = new HashSet<GroupDependency>(deps.Where(d => deps.Contains(new GroupDependency(d.Target, d.Source))));
 
-			architecture.Edges.ForEach(
-				d =>
-					result.AppendEdge(d.Source, d.Target, "style", d.Implicit ? "dashed" : null, "color",
-						d.Conflicted ? "yellow" : inversible.Contains(d) ? "red" : null));
+			architecture.Edges.ForEach(d => result.AppendEdge(d.Source, d.Target, "style", GetStyle(d), "color", GetColor(d, inversible)));
 
 			File.WriteAllText(file, result.ToString());
+		}
+
+		private string GetColor(GroupDependency dep, HashSet<GroupDependency> inversible)
+		{
+			if (inversible.Contains(dep))
+				return "red";
+
+			if (dep.Type == GroupDependency.Types.Conflicted)
+				return "yellow";
+
+			return null;
+		}
+
+		private string GetStyle(GroupDependency dep)
+		{
+			switch (dep.Type)
+			{
+				case GroupDependency.Types.Conflicted:
+					return "dotted";
+				case GroupDependency.Types.Implicit:
+					return "dashed";
+				default:
+					return null;
+			}
 		}
 	}
 }

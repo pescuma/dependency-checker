@@ -30,8 +30,7 @@ namespace org.pescuma.dependencychecker.output.architeture
 				xroot.Add(new XElement("Dependency", //
 					new XAttribute("Source", dep.Source), //
 					new XAttribute("Target", dep.Target), //
-					new XAttribute("Implicit", dep.Implicit), //
-					new XAttribute("Conflicted", dep.Conflicted)));
+					new XAttribute("Type", dep.Type.ToString())));
 
 			File.WriteAllText(file, xdoc.ToString());
 		}
