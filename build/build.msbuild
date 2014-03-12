@@ -6,13 +6,15 @@
 
     <SourcesDir>$(MSBuildProjectDirectory)\..</SourcesDir>
     <BuildDir>$(MSBuildProjectDirectory)\temp</BuildDir>
-
     <ResultsDir>$(MSBuildProjectDirectory)\Results</ResultsDir>
-    <NUnitReport>$(ResultsDir)\Reports\NUnit.xml</NUnitReport>
-    <OpenCoverReport>$(ResultsDir)\Reports\OpenCover.xml</OpenCoverReport>
-    <ReSharperInspectCodeReport>$(ResultsDir)\Reports\ReSharper-InspectCode.xml</ReSharperInspectCodeReport>
-    <ReSharperDupFinderReport>$(ResultsDir)\Reports\ReSharper-DupFinder.xml</ReSharperDupFinderReport>
-    <BuildHealthHome>$(ResultsDir)\Reports\buildhealth</BuildHealthHome>
+
+    <ReportsDir>$(ResultsDir)\Reports</ReportsDir>
+    <NUnitReport>$(ReportsDir)\NUnit.xml</NUnitReport>
+    <OpenCoverReport>$(ReportsDir)\OpenCover.xml</OpenCoverReport>
+    <ReSharperInspectCodeReport>$(ReportsDir)\ReSharper-InspectCode.xml</ReSharperInspectCodeReport>
+    <ReSharperDupFinderReport>$(ReportsDir)\ReSharper-DupFinder.xml</ReSharperDupFinderReport>
+    <BuildHealthHome>$(ReportsDir)\buildhealth</BuildHealthHome>
+    <ResultExecutable>$(ResultsDir)\dependency-checker-$(ProductVersion).exe</ResultExecutable>
 
     <NugetPackagesDir>$(MSBuildProjectDirectory)\..\packages</NugetPackagesDir>
     <NUnitDir>$(NugetPackagesDir)\NUnit.Runners.2.6.3\tools</NUnitDir>
@@ -38,6 +40,9 @@
     <MsBuild Targets="RestorePackages" Projects="$(MSBuildThisFileFullPath)" />
   </Target>
 
+  <UsingTask TaskName="ILMerge"
+             AssemblyFile="$(NugetPackagesDir)\ILMerge.MSBuild.Tasks.1.0.0.3\tools\ILMerge.MSBuild.Tasks.dll" />
+
   <Target Name="Testes">
     <Message Text="@(Project->'%(Result)')" />
   </Target>
@@ -52,6 +57,19 @@
 
   <Target Name="Build">
     <MSBuild Projects="%(Project.Path)" Properties="Configuration=$(BuildType)" />
+  </Target>
+
+  <Target Name="Pack">
+    <Delete Files="$(ResultExecutable)" />
+
+    <CreateItem Include="$(SourcesDir)\DependencyChecker\bin\$(BuildType)\dependency-checker.exe">
+      <Output TaskParameter="Include" ItemName="Assemblies" />
+    </CreateItem>
+    <CreateItem Include="$(SourcesDir)\DependencyChecker\bin\$(BuildType)\*.dll">
+      <Output TaskParameter="Include" ItemName="Assemblies" />
+    </CreateItem>
+
+    <ILMerge TargetKind="Exe" OutputFile="$(ResultExecutable)" InputAssemblies="@(Assemblies)" />
   </Target>
 
   <Target Name="Test">
@@ -101,9 +119,13 @@
     <Exec Command="$(BuildHealthCmd) add resharper-inspectcode &quot;$(ReSharperInspectCodeReport)&quot;" />
     <Exec Command="$(BuildHealthCmd) add resharper-dupfinder &quot;$(ReSharperDupFinderReport)&quot;" />
     <Exec Command="$(BuildHealthCmd) add opencover &quot;$(OpenCoverReport)&quot;" />
-    <Exec Command="$(BuildHealthCmd) compute loc &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
-    <Exec Command="$(BuildHealthCmd) compute tasks &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
-    <Exec Command="$(BuildHealthCmd) projects from-vsproj &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
+    <Exec
+      Command="$(BuildHealthCmd) compute loc &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
+    <Exec
+      Command="$(BuildHealthCmd) compute tasks &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
+    <Exec
+      Command="$(BuildHealthCmd) projects from-vsproj &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
+    <Exec Command="$(BuildHealthCmd) add diskusage &quot;$(ResultsDir)&quot; --exclude &quot;$(ReportsDir)&quot;" />
     <Exec Command="$(BuildHealthCmd) notify" />
     <Exec Command="$(BuildHealthCmd) report" />
   </Target>
@@ -113,7 +135,8 @@
     <MSBuild Projects="%(Project.Path)" Properties="Configuration=$(BuildType)" Targets="Clean" />
   </Target>
 
-  <Target Name="All" DependsOnTargets="Clean;Init;Build;Test;StaticAnalysis;Report">
+  <Target Name="All" DependsOnTargets="Clean;Init;Build;Test;Pack;StaticAnalysis;Report">
+    <RemoveDir Directories="$(BuildDir)" />
   </Target>
 
 </Project>
