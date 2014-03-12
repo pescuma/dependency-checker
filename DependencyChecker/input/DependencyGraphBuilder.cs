@@ -123,15 +123,45 @@ namespace org.pescuma.dependencychecker.input
 
 		private void AddLibrary(Library newLibrary)
 		{
-			if (db.Contais(newLibrary))
+			var others = new HashSet<Library>();
+
+			var otherByName = db.FindByName(newLibrary.Name);
+			if (otherByName != null)
+				others.AddRange(otherByName);
+
+			var otherByLibName = db.FindByLibraryName(newLibrary.LibraryName);
+			if (otherByLibName != null)
+				others.AddRange(otherByLibName);
+
+			var sameLibraries = others.Where(p => AreTheSame(p, newLibrary))
+				.ToList();
+			if (sameLibraries.Any())
 			{
+				sameLibraries.Add(newLibrary);
+
 				var msg = new StringBuilder();
-				msg.Append("There are 2 projects that are the same: ")
-					.Append(newLibrary.LibraryName);
+				msg.Append("There are ")
+					.Append(sameLibraries.Count)
+					.Append(" projects that are the same:");
+				sameLibraries.ForEach(p => msg.Append("\n  - ")
+					.Append(((Project) p).ProjectPath));
+
 				throw new ConfigException(msg.ToString());
 			}
 
 			db.AddLibrary(newLibrary);
+		}
+
+		private bool AreTheSame(Library a1, Library a2)
+		{
+			if (a1.Equals(a2))
+				return true;
+
+			// Handle Proj vs Library
+			if (!(a1 is Project) || !(a2 is Project))
+				return a1.LibraryName.Equals(a2.LibraryName);
+
+			return false;
 		}
 
 		private void CreateProjectReferences()
