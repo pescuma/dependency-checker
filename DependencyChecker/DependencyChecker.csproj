@@ -64,6 +64,7 @@
     <Compile Include="config\Config.cs" />
     <Compile Include="config\ConfigParser.cs" />
     <Compile Include="config\ConfigParserException.cs" />
+    <Compile Include="input\LibrariesDB.cs" />
     <Compile Include="output\architeture\ArchitectureOutputer.cs" />
     <Compile Include="output\architeture\DotArchitectureOutputer.cs" />
     <Compile Include="output\architeture\TextArchitectureOutputer.cs" />

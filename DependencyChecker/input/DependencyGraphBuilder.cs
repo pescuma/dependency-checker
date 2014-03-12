@@ -18,9 +18,10 @@ namespace org.pescuma.dependencychecker.input
 
 		private readonly Config config;
 		private readonly List<OutputEntry> warnings;
-		private readonly List<Library> libraries = new List<Library>();
 		private readonly List<Dependency> dependencies = new List<Dependency>();
 		private readonly HashSet<ConfigLocation> usedIgnores = new HashSet<ConfigLocation>();
+
+		private readonly LibrariesDB db = new LibrariesDB();
 
 		public DependencyGraphBuilder(Config config, List<OutputEntry> warnings)
 		{
@@ -82,6 +83,8 @@ namespace org.pescuma.dependencychecker.input
 
 			CreateLibraryReferences();
 
+			var libraries = db.QueryAll();
+
 			libraries.Where(l => !l.Languages.Any())
 				.ForEach(l => l.Languages.Add("Unknown"));
 
@@ -112,42 +115,23 @@ namespace org.pescuma.dependencychecker.input
 		private void CreateInitialProjects()
 		{
 			projs.Keys.Where(i => !i.Ignored)
-				.Select(i => i.Project)
-				.ForEach(AddLibrary);
+				.ForEach(i => db.AddProject(i.Project));
+
+			projs.Keys.Where(i => !i.Ignored)
+				.ForEach(i => db.AddIgnoredProject(i.Project));
 		}
 
 		private void AddLibrary(Library newLibrary)
 		{
-			var sameLibraries = libraries.Where(p => AreTheSame(p, newLibrary))
-				.ToList();
-
-			if (sameLibraries.Any())
+			if (db.Contais(newLibrary))
 			{
-				sameLibraries.Add(newLibrary);
-
 				var msg = new StringBuilder();
-				msg.Append("There are ")
-					.Append(sameLibraries.Count)
-					.Append(" projects that are the same:");
-				sameLibraries.ForEach(p => msg.Append("\n  - ")
-					.Append(((Project) p).ProjectPath));
-
+				msg.Append("There are 2 projects that are the same: ")
+					.Append(newLibrary.LibraryName);
 				throw new ConfigException(msg.ToString());
 			}
 
-			libraries.Add(newLibrary);
-		}
-
-		private bool AreTheSame(Library a1, Library a2)
-		{
-			if (a1.Equals(a2))
-				return true;
-
-			// Handle Proj vs Library
-			if (!(a1 is Project) || !(a2 is Project))
-				return a1.LibraryName.Equals(a2.LibraryName);
-
-			return false;
+			db.AddLibrary(newLibrary);
 		}
 
 		private void CreateProjectReferences()
@@ -246,7 +230,7 @@ namespace org.pescuma.dependencychecker.input
 			}
 		}
 
-		private static void Merge(List<Library> targets, TempReference source)
+		private void Merge(List<Library> targets, TempReference source)
 		{
 			foreach (var target in targets)
 			{
@@ -261,70 +245,67 @@ namespace org.pescuma.dependencychecker.input
 
 				if (source.ReferenceLanguages != null)
 					target.Languages.AddRange(source.ReferenceLanguages);
+
+				// Update DB
+
+				if (target is Project && target.Paths.Any())
+					db.AddProject((Project) target);
+				else
+					db.AddLibrary(target);
 			}
 		}
 
 		private List<Library> FindLibraryByFilename(Project proj, Dependency dep, string filename)
 		{
-			return FindLibrary(proj, dep, p => p.Paths.Any(path => filename.Equals(path, StringComparison.CurrentCultureIgnoreCase)), filename);
+			var candidates = db.FindByPath(filename);
+
+			if (candidates != null && candidates.Count > 1)
+				warnings.Add(CreateMultipleReferencesWarning(candidates, proj, dep, filename));
+
+			return candidates;
 		}
 
 		private List<Library> FindLibraryByNameAndLibraryName(Project proj, Dependency dep, string name, string libraryName)
 		{
-			return FindLibrary(proj, dep,
-				p =>
-					name.Equals(p.Name, StringComparison.CurrentCultureIgnoreCase)
-					&& libraryName.Equals(p.LibraryName, StringComparison.CurrentCultureIgnoreCase),
-				"with name " + name + " and library name " + libraryName);
+			var candidates = db.FindByNameAndLibraryName(name, libraryName);
+
+			if (candidates != null && candidates.Count > 1)
+				warnings.Add(CreateMultipleReferencesWarning(candidates, proj, dep, "with name " + name + " and library name " + libraryName));
+
+			return candidates;
 		}
 
 		private List<Library> FindLibraryByLibraryName(Project proj, Dependency dep, string libraryName)
 		{
-			return FindLibrary(proj, dep, p => libraryName.Equals(p.LibraryName, StringComparison.CurrentCultureIgnoreCase),
-				"with library name " + libraryName);
+			var candidates = db.FindByLibraryName(libraryName);
+
+			if (candidates != null && candidates.Count > 1)
+				warnings.Add(CreateMultipleReferencesWarning(candidates, proj, dep, "with library name " + libraryName));
+
+			return candidates;
 		}
 
 		private List<Library> FindLibraryByName(Project proj, Dependency dep, string name)
 		{
-			return FindLibrary(proj, dep, p => name.Equals(p.Name, StringComparison.CurrentCultureIgnoreCase), "with name " + name);
+			var candidates = db.FindByName(name);
+
+			if (candidates != null && candidates.Count > 1)
+				warnings.Add(CreateMultipleReferencesWarning(candidates, proj, dep, "with name " + name));
+
+			return candidates;
 		}
 
 		private List<Library> FindLibraryByNameAndGuid(Project proj, Dependency dep, string name, Guid guid)
 		{
-			return FindLibrary(proj, dep,
-				p => p is Project && name.Equals(p.Name, StringComparison.CurrentCultureIgnoreCase) && ((Project) p).Guid == guid,
-				"with name " + name + " and GUID " + guid);
+			var candidates = db.FindByNameAndGuid(name, guid);
+
+			if (candidates != null && candidates.Count > 1)
+				warnings.Add(CreateMultipleReferencesWarning(candidates, proj, dep, "with name " + name + " and GUID " + guid));
+
+			return candidates;
 		}
 
-		private List<Library> FindLibrary(Project proj, Dependency dep, Func<Library, bool> matches, string searchDetails)
-		{
-			var candidates = projs.Keys.Where(p => !p.Ignored && matches(p.Project))
-				.Select(i => i.Project)
-				.Cast<Library>()
-				.ToList();
-
-			if (!candidates.Any())
-				// Search new projects too
-				candidates = libraries.Where(matches)
-					.ToList();
-
-			if (candidates.Count == 1)
-				return candidates;
-
-			if (candidates.Count > 1)
-			{
-				warnings.Add(CreateMultipleReferencesWarning(proj, dep, searchDetails, candidates));
-				return candidates;
-			}
-
-			if (projs.Keys.Any(p => p.Ignored && matches(p.Project)))
-				// The project exists but was ignored
-				return new List<Library>();
-
-			return null;
-		}
-
-		private OutputEntry CreateMultipleReferencesWarning(Project proj, Dependency dep, string refName, List<Library> candidates)
+		private OutputEntry CreateMultipleReferencesWarning(List<Library> candidates, Project proj, Dependency dep, string refName)
 		{
 			var message = new OutputMessage().Append("The project ")
 				.Append(proj, OutputMessage.ProjInfo.NameAndProjectPath)
