@@ -66,18 +66,6 @@ namespace org.pescuma.dependencychecker.model
 			}
 		}
 
-		public List<string> SortedLibraryNames
-		{
-			get
-			{
-				var result = new List<string>();
-				result.Add(LibraryName);
-				result.AddRange(LibraryNames.Where(n => !result.Contains(n))
-					.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase));
-				return result;
-			}
-		}
-
 		protected bool Equals(Library other)
 		{
 			return string.Equals(LibraryName, other.LibraryName);

@@ -46,6 +46,7 @@ namespace org.pescuma.dependencychecker.model.xml
 					library.GroupElement.Location.LineText));
 			}
 
+			library.SortedNames.ForEach(p => result.Add(new XElement("Name", p)));
 			library.Languages.ForEach(p => result.Add(new XElement("Language", p)));
 			library.Paths.ForEach(p => result.Add(new XElement("Path", p)));
 
