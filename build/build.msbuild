@@ -1,0 +1,119 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+
+  <PropertyGroup>
+    <ProductVersion>0.1</ProductVersion>
+    <BuildType>Release</BuildType>
+
+    <SourcesDir>$(MSBuildProjectDirectory)\..</SourcesDir>
+    <BuildDir>$(MSBuildProjectDirectory)\temp</BuildDir>
+
+    <ResultsDir>$(MSBuildProjectDirectory)\Results</ResultsDir>
+    <NUnitReport>$(ResultsDir)\Reports\NUnit.xml</NUnitReport>
+    <OpenCoverReport>$(ResultsDir)\Reports\OpenCover.xml</OpenCoverReport>
+    <ReSharperInspectCodeReport>$(ResultsDir)\Reports\ReSharper-InspectCode.xml</ReSharperInspectCodeReport>
+    <ReSharperDupFinderReport>$(ResultsDir)\Reports\ReSharper-DupFinder.xml</ReSharperDupFinderReport>
+    <BuildHealthHome>$(ResultsDir)\Reports\buildhealth</BuildHealthHome>
+
+    <NugetPackagesDir>$(MSBuildProjectDirectory)\..\packages</NugetPackagesDir>
+    <NUnitDir>$(NugetPackagesDir)\NUnit.Runners.2.6.3\tools</NUnitDir>
+    <OpenCoverDir>$(NugetPackagesDir)\OpenCover.4.5.2506</OpenCoverDir>
+    <ReSharperDir>$(MSBuildProjectDirectory)\tools\resharper-commandline</ReSharperDir>
+    <BuildHealthCmd>java -jar "$(MSBuildProjectDirectory)\tools\buildhealth-0.2.jar" --home "$(BuildHealthHome)"</BuildHealthCmd>
+  </PropertyGroup>
+
+  <Import Project="$(SourcesDir)\.nuget\NuGet.targets" Condition="Exists('$(SourcesDir)\.nuget\NuGet.targets')" />
+
+  <ItemGroup>
+    <Project Include="P1">
+      <Path>$(SourcesDir)\DependencyChecker\DependencyChecker.csproj</Path>
+      <Result>$(SourcesDir)\DependencyChecker\bin\$(BuildType)</Result>
+    </Project>
+    <Project Include="P2">
+      <Path>$(SourcesDir)\DependencyChecker.Test\DependencyChecker.Test.csproj</Path>
+      <Result>$(SourcesDir)\DependencyChecker.Test\bin\$(BuildType)</Result>
+    </Project>
+  </ItemGroup>
+
+  <Target Name="Deps">
+    <MsBuild Targets="RestorePackages" Projects="$(MSBuildThisFileFullPath)" />
+  </Target>
+
+  <Target Name="Testes">
+    <Message Text="@(Project->'%(Result)')" />
+  </Target>
+
+  <Target Name="Init">
+    <RemoveDir Directories="$(BuildDir)" />
+    <MakeDir Directories="$(BuildDir)" />
+
+    <RemoveDir Directories="$(ResultsDir)" />
+    <MakeDir Directories="$(ResultsDir)" />
+  </Target>
+
+  <Target Name="Build">
+    <MSBuild Projects="%(Project.Path)" Properties="Configuration=$(BuildType)" />
+  </Target>
+
+  <Target Name="Test">
+    <MakeDir Directories="$(ResultsDir)\Reports" />
+    <Delete Files="$(NUnitReport)" />
+    <Delete Files="$(OpenCoverReport)" />
+
+    <CreateItem Include="%(Project.Result)\*.dll">
+      <Output TaskParameter="Include" ItemName="TestAssemblies" />
+    </CreateItem>
+
+    <Exec
+      Command="$(OpenCoverDir)\OpenCover.Console.exe -register:user -target:&quot;$(NUnitDir)\nunit-console.exe&quot; -targetargs:&quot;/noshadow /domain:single /framework=4.0 @(TestAssemblies,' ') /xml:$(NUnitReport)&quot; -output:$(OpenCoverReport)"
+      ContinueOnError="true">
+      <Output TaskParameter="ExitCode" ItemName="ExecOutputs" />
+    </Exec>
+  </Target>
+
+  <Target Name="ReSharper-InspectCode" Condition="Exists('$(ReSharperDir)')">
+    <MakeDir Directories="$(ResultsDir)\Reports" />
+    <Delete Files="$(ReSharperInspectCodeReport)" />
+
+    <Exec
+      Command="$(ReSharperDir)\inspectcode.exe &quot;$(SourcesDir)\DependencyChecker.sln&quot; /o=&quot;$(ReSharperInspectCodeReport)&quot;"
+      ContinueOnError="true">
+      <Output TaskParameter="ExitCode" ItemName="ExecOutputs" />
+    </Exec>
+  </Target>
+
+  <Target Name="ReSharper-DupFinder" Condition="Exists('$(ReSharperDir)')">
+    <MakeDir Directories="$(ResultsDir)\Reports" />
+    <Delete Files="$(ReSharperDupFinderReport)" />
+
+    <Exec
+      Command="$(ReSharperDir)\dupfinder.exe &quot;$(SourcesDir)\DependencyChecker.sln&quot; /o=&quot;$(ReSharperDupFinderReport)&quot;"
+      ContinueOnError="true">
+      <Output TaskParameter="ExitCode" ItemName="ExecOutputs" />
+    </Exec>
+  </Target>
+
+  <Target Name="StaticAnalysis" DependsOnTargets="ReSharper-InspectCode;ReSharper-DupFinder">
+  </Target>
+
+  <Target Name="Report">
+    <Exec Command="$(BuildHealthCmd) new" />
+    <Exec Command="$(BuildHealthCmd) add nunit &quot;$(NUnitReport)&quot;" />
+    <Exec Command="$(BuildHealthCmd) add resharper-inspectcode &quot;$(ReSharperInspectCodeReport)&quot;" />
+    <Exec Command="$(BuildHealthCmd) add resharper-dupfinder &quot;$(ReSharperDupFinderReport)&quot;" />
+    <Exec Command="$(BuildHealthCmd) add opencover &quot;$(OpenCoverReport)&quot;" />
+    <Exec Command="$(BuildHealthCmd) compute loc &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
+    <Exec Command="$(BuildHealthCmd) compute tasks &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
+    <Exec Command="$(BuildHealthCmd) projects from-vsproj &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
+    <Exec Command="$(BuildHealthCmd) notify" />
+    <Exec Command="$(BuildHealthCmd) report" />
+  </Target>
+
+  <Target Name="Clean">
+    <RemoveDir Directories="$(BuildDir)" />
+    <MSBuild Projects="%(Project.Path)" Properties="Configuration=$(BuildType)" Targets="Clean" />
+  </Target>
+
+  <Target Name="All" DependsOnTargets="Clean;Init;Build;Test;StaticAnalysis;Report">
+  </Target>
+
+</Project>
