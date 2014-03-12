@@ -8,11 +8,15 @@ namespace org.pescuma.dependencychecker.model
 	{
 		public static Comparison<Dependency> NaturalOrdering = (d1, d2) =>
 		{
-			var comp = string.Compare(d1.Source.Name, d2.Source.Name, StringComparison.CurrentCultureIgnoreCase);
+			var comp = Library.NaturalOrdering(d1.Source, d2.Source);
 			if (comp != 0)
 				return comp;
 
-			return string.Compare(d1.Target.Name, d2.Target.Name, StringComparison.CurrentCultureIgnoreCase);
+			comp = Library.NaturalOrdering(d1.Target, d2.Target);
+			if (comp != 0)
+				return comp;
+
+			return d1.Type - d2.Type;
 		};
 
 		public readonly Types Type;

@@ -9,9 +9,8 @@ namespace org.pescuma.dependencychecker.model.xml
 	{
 		public static List<XElement> ToXML(IEnumerable<Library> libraries)
 		{
-			var libs = libraries.ToList();
-			libs.Sort(Library.NaturalOrdering);
-			return libs.Select(ToXML)
+			return libraries.Sort(Library.NaturalOrdering)
+				.Select(ToXML)
 				.ToList();
 		}
 
@@ -55,9 +54,8 @@ namespace org.pescuma.dependencychecker.model.xml
 
 		public static List<XElement> ToXML(IEnumerable<Dependency> deps)
 		{
-			var ds = deps.ToList();
-			ds.Sort(Dependency.NaturalOrdering);
-			return ds.Select(ToXML)
+			return deps.Sort(Dependency.NaturalOrdering)
+				.Select(ToXML)
 				.ToList();
 		}
 

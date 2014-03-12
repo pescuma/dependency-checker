@@ -8,8 +8,24 @@ namespace org.pescuma.dependencychecker.model
 {
 	public class Library
 	{
-		public static Comparison<Library> NaturalOrdering =
-			(p1, p2) => String.Compare(p1.Name, p2.Name, StringComparison.CurrentCultureIgnoreCase);
+		public static Comparison<Library> NaturalOrdering = (p1, p2) =>
+		{
+			var cmp = String.Compare(p1.Name, p2.Name, StringComparison.CurrentCultureIgnoreCase);
+			if (cmp != 0)
+				return cmp;
+
+			cmp = String.Compare(p1.LibraryName, p2.LibraryName, StringComparison.CurrentCultureIgnoreCase);
+			if (cmp != 0)
+				return cmp;
+
+			cmp = String.Compare(p1.Paths.FirstOrDefault() ?? "", p2.Paths.FirstOrDefault() ?? "", StringComparison.CurrentCultureIgnoreCase);
+			if (cmp != 0)
+				return cmp;
+
+			var proj1 = (p1 is Project ? 1 : 0);
+			var proj2 = (p2 is Project ? 1 : 0);
+			return proj1 - proj2;
+		};
 
 		public readonly string LibraryName;
 		public readonly HashSet<string> Paths = new HashSet<string>();
