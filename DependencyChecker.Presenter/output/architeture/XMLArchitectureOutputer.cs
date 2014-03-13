@@ -26,7 +26,7 @@ namespace org.pescuma.dependencychecker.presenter.output.architeture
 			foreach (var group in architecture.Vertices.OrderBy(v => v, StringComparer.CurrentCultureIgnoreCase))
 				xroot.Add(new XElement("Group", new XAttribute("Name", group)));
 
-			foreach (var dep in architecture.Edges.Sort(GroupDependency.NaturalOrdering))
+			foreach (var dep in architecture.Edges.SortBy(GroupDependency.NaturalOrdering))
 				xroot.Add(new XElement("Dependency", //
 					new XAttribute("Source", dep.Source), //
 					new XAttribute("Target", dep.Target), //

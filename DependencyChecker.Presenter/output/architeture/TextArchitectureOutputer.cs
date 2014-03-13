@@ -29,7 +29,7 @@ namespace org.pescuma.dependencychecker.presenter.output.architeture
 
 			result.Append("\n");
 			result.Append("Dependencies:\n");
-			architecture.Edges.Sort(GroupDependency.NaturalOrdering)
+			architecture.Edges.SortBy(GroupDependency.NaturalOrdering)
 				.ForEach(v => result.Append("  - ")
 					.Append(v.Source)
 					.Append(" -> ")

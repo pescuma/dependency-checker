@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencychecker.model.xml;
 using org.pescuma.dependencyconsole.commands;
 
 namespace org.pescuma.dependencyconsole
@@ -21,7 +23,7 @@ namespace org.pescuma.dependencyconsole
 
 			Console.WriteLine("Graph loaded.");
 
-			var commands = new[] { new QuitCommand() };
+			var commands = new Command[] { new LibsCommand(), new DependenciesOfCommand(), new ReferencedByCommand(), new QuitCommand() };
 
 			try
 			{
@@ -40,6 +42,7 @@ namespace org.pescuma.dependencyconsole
 					if (line == "help" || line == "?")
 					{
 						Console.WriteLine("Commands: " + string.Join(", ", commands.Select(c => c.Name)));
+						Console.WriteLine("(you can also use only the first letter of the command)");
 						continue;
 					}
 
@@ -62,10 +65,10 @@ namespace org.pescuma.dependencyconsole
 		{
 			var doc = XDocument.Load(filename);
 
-			// TODO [pescuma]
+			if (doc.Root == null || doc.Root.Name != "Depedencies")
+				throw new IOException("Invalid dependencies XML file: " + filename);
 
-			var graph = new DependencyGraph();
-			return graph;
+			return XMLHelper.DependencyGraphFromXML(doc.Root);
 		}
 	}
 }

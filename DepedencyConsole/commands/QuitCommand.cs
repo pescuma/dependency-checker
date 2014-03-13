@@ -3,19 +3,16 @@ using org.pescuma.dependencychecker.model;
 
 namespace org.pescuma.dependencyconsole.commands
 {
-	internal class QuitCommand : Command
+	internal class QuitCommand : BaseCommand
 	{
-		public string Name
+		public override string Name
 		{
 			get { return "quit"; }
 		}
 
-		public bool Handle(string line, DependencyGraph graph)
+		protected override void InternalHandle(string args, DependencyGraph graph)
 		{
-			if (Name.Equals(line))
-				throw new QuitException();
-
-			return false;
+			throw new QuitException();
 		}
 	}
 

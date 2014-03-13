@@ -56,9 +56,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="commands\BaseCommand.cs" />
+    <Compile Include="commands\BaseReferencesCommand.cs" />
     <Compile Include="commands\Command.cs" />
+    <Compile Include="commands\DependenciesOfCommand.cs" />
     <Compile Include="commands\LibsCommand.cs" />
     <Compile Include="commands\QuitCommand.cs" />
+    <Compile Include="commands\ReferencedByCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

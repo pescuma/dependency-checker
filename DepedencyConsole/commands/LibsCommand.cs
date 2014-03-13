@@ -1,26 +1,26 @@
 ﻿using System;
+using System.Linq;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.utils;
 
 namespace org.pescuma.dependencyconsole.commands
 {
-	internal class LibsCommand : Command
+	internal class LibsCommand : BaseCommand
 	{
-		public string Name
+		public override string Name
 		{
 			get { return "libs"; }
 		}
 
-		public bool Handle(string line, DependencyGraph graph)
+		protected override void InternalHandle(string args, DependencyGraph graph)
 		{
-			if (!Name.Equals(line))
-				return false;
+			var libs = FilterLibs(graph, args);
 
-			Console.WriteLine("All libraries:");
-			graph.Vertices.Sort(Library.NaturalOrdering)
-				.ForEach(l => Console.WriteLine("    " + string.Join(" or ", l.Names)));
-
-			return true;
+			if (!libs.Any())
+				Console.WriteLine("No libraries found");
+			else
+				libs.SortBy(Library.NaturalOrdering)
+					.ForEach(l => Console.WriteLine(GetName(l)));
 		}
 	}
 }

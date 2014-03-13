@@ -22,11 +22,7 @@ namespace org.pescuma.dependencychecker.presenter.output.dependencies
 			var xroot = new XElement("Depedencies");
 			xdoc.Add(xroot);
 
-			XMLHelper.ToXML(graph.Vertices)
-				.ForEach(xroot.Add);
-
-			XMLHelper.ToXML(graph.Edges)
-				.ForEach(xroot.Add);
+			XMLHelper.ToXML(xroot, graph);
 
 			File.WriteAllText(file, xdoc.ToString());
 		}

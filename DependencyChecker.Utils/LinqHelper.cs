@@ -51,7 +51,7 @@ namespace org.pescuma.dependencychecker.utils
 			}
 		}
 
-		public static IEnumerable<T> Sort<T>(this IEnumerable<T> list, Comparison<T> comp)
+		public static IEnumerable<T> SortBy<T>(this IEnumerable<T> list, Comparison<T> comp)
 		{
 			var result = list.ToList();
 			result.Sort(comp);

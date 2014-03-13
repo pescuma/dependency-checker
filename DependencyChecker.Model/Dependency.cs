@@ -39,7 +39,7 @@ namespace org.pescuma.dependencychecker.model
 			return new Dependency(source, target, Types.LibraryReference, location, referencedPath);
 		}
 
-		private Dependency(Library source, Library target, Types type, Location location, string referencedPath)
+		public Dependency(Library source, Library target, Types type, Location location, string referencedPath)
 			: base(source, target)
 		{
 			Argument.ThrowIfNull(source);
