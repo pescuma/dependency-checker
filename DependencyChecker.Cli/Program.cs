@@ -38,7 +38,7 @@ namespace org.pescuma.dependencychecker.cli
 
 				warnings.AddRange(RulesMatcher.Match(graph, config));
 
-				warnings = warnings.Where(e => !(e is DependencyRuleMatch) || !((DependencyRuleMatch)e).Allowed)
+				warnings = warnings.Where(e => !(e is DependencyRuleMatch) || !((DependencyRuleMatch) e).Allowed)
 					.Where(w => !config.InOutput.Ignore.Any(f => f(w)))
 					.ToList();
 
@@ -77,7 +77,7 @@ namespace org.pescuma.dependencychecker.cli
 			var gs = warnings.GroupBy(w => w.Severity)
 				.Select(e => new { Severity = e.Key, Count = e.Count() })
 				.ToList();
-			gs.Sort((s1, s2) => (int)s2.Severity - (int)s1.Severity);
+			gs.Sort((s1, s2) => (int) s2.Severity - (int) s1.Severity);
 
 			Console.WriteLine("Found " + string.Join(", ", gs.Select(e => e.Count + " " + e.Severity.ToString()
 				.ToLower() + "(s)")));
