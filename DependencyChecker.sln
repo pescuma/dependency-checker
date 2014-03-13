@@ -10,8 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{34CB5A
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Presenter.Test", "DependencyChecker.Test\DependencyChecker.Presenter.Test.csproj", "{823D0720-F22D-4703-BD39-438CC20DC541}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepedencyConsole", "DepedencyConsole\DepedencyConsole.csproj", "{13B966DB-836C-4E72-879F-AB4B3C4D749A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Utils", "DependencyChecker.Utils\DependencyChecker.Utils.csproj", "{E5435DDE-1597-4B7B-BFA8-3140DFEBB587}"
@@ -22,16 +20,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Presenter
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Cli", "DependencyChecker.Cli\DependencyChecker.Cli.csproj", "{584B4234-F1AF-47C7-AE61-A666FE31C61D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Presenter.Test", "DependencyChecker.Presenter.Test\DependencyChecker.Presenter.Test.csproj", "{823D0720-F22D-4703-BD39-438CC20DC541}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{823D0720-F22D-4703-BD39-438CC20DC541}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{823D0720-F22D-4703-BD39-438CC20DC541}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{823D0720-F22D-4703-BD39-438CC20DC541}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{823D0720-F22D-4703-BD39-438CC20DC541}.Release|Any CPU.Build.0 = Release|Any CPU
 		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -52,6 +48,10 @@ Global
 		{584B4234-F1AF-47C7-AE61-A666FE31C61D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{584B4234-F1AF-47C7-AE61-A666FE31C61D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{584B4234-F1AF-47C7-AE61-A666FE31C61D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{823D0720-F22D-4703-BD39-438CC20DC541}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{823D0720-F22D-4703-BD39-438CC20DC541}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{823D0720-F22D-4703-BD39-438CC20DC541}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{823D0720-F22D-4703-BD39-438CC20DC541}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
