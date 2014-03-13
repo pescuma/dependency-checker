@@ -19,7 +19,7 @@ namespace org.pescuma.dependencychecker.presenter.output.results
 		public void Output(List<OutputEntry> entries)
 		{
 			var xdoc = new XDocument();
-			var xroot = new XElement("dotnet-dependency-checker");
+			var xroot = new XElement("DependencyChecker-Results");
 			xdoc.Add(xroot);
 
 			var xsummary = new XElement("Summary");

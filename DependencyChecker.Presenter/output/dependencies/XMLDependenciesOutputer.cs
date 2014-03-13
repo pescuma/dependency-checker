@@ -19,7 +19,7 @@ namespace org.pescuma.dependencychecker.presenter.output.dependencies
 		public void Output(DependencyGraph graph, ArchitectureGraph architecture, List<OutputEntry> warnings)
 		{
 			var xdoc = new XDocument();
-			var xroot = new XElement("Depedencies");
+			var xroot = new XElement("DependencyChecker-Depedencies");
 			xdoc.Add(xroot);
 
 			XMLHelper.ToXML(xroot, graph);

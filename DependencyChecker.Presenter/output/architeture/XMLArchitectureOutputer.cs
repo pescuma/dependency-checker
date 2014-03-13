@@ -20,7 +20,7 @@ namespace org.pescuma.dependencychecker.presenter.output.architeture
 		public void Output(ArchitectureGraph architecture, List<OutputEntry> warnings)
 		{
 			var xdoc = new XDocument();
-			var xroot = new XElement("Architecture");
+			var xroot = new XElement("DependencyChecker-Architecture");
 			xdoc.Add(xroot);
 
 			foreach (var group in architecture.Vertices.OrderBy(v => v, StringComparer.CurrentCultureIgnoreCase))
