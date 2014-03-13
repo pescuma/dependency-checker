@@ -15,7 +15,7 @@
     <ReSharperDupFinderReport>$(ReportsDir)\ReSharper-DupFinder.xml</ReSharperDupFinderReport>
     <BuildHealthHome>$(ReportsDir)\buildhealth</BuildHealthHome>
     <DependencyCheckerExecutable>$(ResultsDir)\dependency-checker-$(ProductVersion).exe</DependencyCheckerExecutable>
-    <DepedencyConsoleExecutable>$(ResultsDir)\depedency-console-$(ProductVersion).exe</DepedencyConsoleExecutable>
+    <DependencyConsoleExecutable>$(ResultsDir)\dependency-console-$(ProductVersion).exe</DependencyConsoleExecutable>
 
     <NugetPackagesDir>$(MSBuildProjectDirectory)\..\packages</NugetPackagesDir>
     <NUnitDir>$(NugetPackagesDir)\NUnit.Runners.2.6.3\tools</NUnitDir>
@@ -27,27 +27,27 @@
   <Import Project="$(SourcesDir)\.nuget\NuGet.targets" Condition="Exists('$(SourcesDir)\.nuget\NuGet.targets')" />
 
   <ItemGroup>
-    <Project Include="P1">
+    <Project Include="C">
       <Path>$(SourcesDir)\DependencyChecker.Cli\DependencyChecker.Cli.csproj</Path>
       <Result>$(SourcesDir)\DependencyChecker.Cli\bin\$(BuildType)</Result>
     </Project>
-    <Project Include="P4">
-      <Path>$(SourcesDir)\DepedencyConsole\DepedencyConsole.csproj</Path>
-      <Result>$(SourcesDir)\DepedencyConsole\bin\$(BuildType)</Result>
+    <Project Include="C">
+      <Path>$(SourcesDir)\DependencyConsole.Cli\DependencyConsole.Cli.csproj</Path>
+      <Result>$(SourcesDir)\DependencyConsole.Cli\bin\$(BuildType)</Result>
     </Project>
-    <Project Include="P2">
+    <Project Include="P">
       <Path>$(SourcesDir)\DependencyChecker.Presenter\DependencyChecker.Presenter.csproj</Path>
       <Result>$(SourcesDir)\DependencyChecker.Presenter\bin\$(BuildType)</Result>
     </Project>
-    <TestProject Include="T2">
+    <TestProject Include="T">
       <Path>$(SourcesDir)\DependencyChecker.Presenter.Test\DependencyChecker.Presenter.Test.csproj</Path>
       <Result>$(SourcesDir)\DependencyChecker.Presenter.Test\bin\$(BuildType)</Result>
     </TestProject>
-    <Project Include="P3">
+    <Project Include="P">
       <Path>$(SourcesDir)\DependencyChecker.Model\DependencyChecker.Model.csproj</Path>
       <Result>$(SourcesDir)\DependencyChecker.Model\bin\$(BuildType)</Result>
     </Project>
-    <Project Include="P4">
+    <Project Include="P">
       <Path>$(SourcesDir)\DependencyChecker.Utils\DependencyChecker.Utils.csproj</Path>
       <Result>$(SourcesDir)\DependencyChecker.Utils\bin\$(BuildType)</Result>
     </Project>
@@ -91,21 +91,21 @@
              InputAssemblies="@(DependencyCheckerAssemblies)" />
   </Target>
 
-  <Target Name="Pack-DepedencyConsole">
-    <Delete Files="$(DepedencyConsoleExecutable)" />
+  <Target Name="Pack-DependencyConsole">
+    <Delete Files="$(DependencyConsoleExecutable)" />
 
-    <CreateItem Include="$(SourcesDir)\DepedencyConsole\bin\$(BuildType)\*.exe">
-      <Output TaskParameter="Include" ItemName="DepedencyConsoleAssemblies" />
+    <CreateItem Include="$(SourcesDir)\DependencyConsole.Cli\bin\$(BuildType)\*.exe">
+      <Output TaskParameter="Include" ItemName="DependencyConsoleAssemblies" />
     </CreateItem>
-    <CreateItem Include="$(SourcesDir)\DepedencyConsole\bin\$(BuildType)\*.dll">
-      <Output TaskParameter="Include" ItemName="DepedencyConsoleAssemblies" />
+    <CreateItem Include="$(SourcesDir)\DependencyConsole.Cli\bin\$(BuildType)\*.dll">
+      <Output TaskParameter="Include" ItemName="DependencyConsoleAssemblies" />
     </CreateItem>
 
-    <ILMerge TargetKind="Exe" OutputFile="$(DepedencyConsoleExecutable)"
-             InputAssemblies="@(DepedencyConsoleAssemblies)" />
+    <ILMerge TargetKind="Exe" OutputFile="$(DependencyConsoleExecutable)"
+             InputAssemblies="@(DependencyConsoleAssemblies)" />
   </Target>
 
-  <Target Name="Pack" DependsOnTargets="Pack-DependencyChecker;Pack-DepedencyConsole">
+  <Target Name="Pack" DependsOnTargets="Pack-DependencyChecker;Pack-DependencyConsole">
   </Target>
 
   <Target Name="Test">

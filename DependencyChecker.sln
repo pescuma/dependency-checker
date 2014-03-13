@@ -10,8 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{34CB5A
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepedencyConsole", "DepedencyConsole\DepedencyConsole.csproj", "{13B966DB-836C-4E72-879F-AB4B3C4D749A}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Utils", "DependencyChecker.Utils\DependencyChecker.Utils.csproj", "{E5435DDE-1597-4B7B-BFA8-3140DFEBB587}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Model", "DependencyChecker.Model\DependencyChecker.Model.csproj", "{8CEB9917-E9C4-4104-945C-0A2EBD68613C}"
@@ -25,8 +23,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{1E1A3546-2A60-423D-B076-F646BE394116}"
 	ProjectSection(SolutionItems) = preProject
 		build\build.msbuild = build\build.msbuild
+		build\dependency-checker.cfg = build\dependency-checker.cfg
 		build\packages.config = build\packages.config
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyConsole.Cli", "DependencyConsole.Cli\DependencyConsole.Cli.csproj", "{13B966DB-836C-4E72-879F-AB4B3C4D749A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,10 +35,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E5435DDE-1597-4B7B-BFA8-3140DFEBB587}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E5435DDE-1597-4B7B-BFA8-3140DFEBB587}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5435DDE-1597-4B7B-BFA8-3140DFEBB587}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -58,6 +55,10 @@ Global
 		{823D0720-F22D-4703-BD39-438CC20DC541}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{823D0720-F22D-4703-BD39-438CC20DC541}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{823D0720-F22D-4703-BD39-438CC20DC541}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
