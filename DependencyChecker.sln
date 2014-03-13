@@ -22,6 +22,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Cli", "De
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Presenter.Test", "DependencyChecker.Presenter.Test\DependencyChecker.Presenter.Test.csproj", "{823D0720-F22D-4703-BD39-438CC20DC541}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{1E1A3546-2A60-423D-B076-F646BE394116}"
+	ProjectSection(SolutionItems) = preProject
+		build\build.msbuild = build\build.msbuild
+		build\packages.config = build\packages.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
