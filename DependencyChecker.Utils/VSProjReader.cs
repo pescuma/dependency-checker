@@ -74,7 +74,7 @@ namespace org.pescuma.dependencychecker.utils
 			get
 			{
 				return Nodes("COMReference")
-					.Select(n => new COMReference(this, n));
+					.Select(n => new COMReference(n));
 			}
 		}
 
@@ -148,12 +148,10 @@ namespace org.pescuma.dependencychecker.utils
 
 		public class COMReference
 		{
-			private readonly VSProjReader reader;
 			private readonly XElement node;
 
-			public COMReference(VSProjReader reader, XElement node)
+			public COMReference(XElement node)
 			{
-				this.reader = reader;
 				this.node = node;
 			}
 
