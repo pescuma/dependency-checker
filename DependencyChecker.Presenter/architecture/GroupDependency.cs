@@ -1,7 +1,7 @@
 using System;
 using QuickGraph;
 
-namespace org.pescuma.dependencychecker.architecture
+namespace org.pescuma.dependencychecker.presenter.architecture
 {
 	public class GroupDependency : Edge<string>
 	{

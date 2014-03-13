@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using org.pescuma.dependencychecker.config;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.output;
+using org.pescuma.dependencychecker.presenter.config;
+using org.pescuma.dependencychecker.presenter.output;
 
-namespace org.pescuma.dependencychecker.architecture
+namespace org.pescuma.dependencychecker.presenter.architecture
 {
 	public class ArchitectureLoader
 	{

@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
-using org.pescuma.dependencychecker.architecture;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.model.xml;
+using org.pescuma.dependencychecker.presenter.architecture;
 
-namespace org.pescuma.dependencychecker.output.dependencies
+namespace org.pescuma.dependencychecker.presenter.output.dependencies
 {
 	public class XMLDependenciesOutputer : DependenciesOutputer
 	{

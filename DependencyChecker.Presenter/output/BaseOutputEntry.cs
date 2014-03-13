@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.rules;
+using org.pescuma.dependencychecker.presenter.rules;
 
-namespace org.pescuma.dependencychecker.output
+namespace org.pescuma.dependencychecker.presenter.output
 {
 	public abstract class BaseOutputEntry : OutputEntry
 	{

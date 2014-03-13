@@ -6,10 +6,10 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.output;
+using org.pescuma.dependencychecker.presenter.output;
 using org.pescuma.dependencychecker.utils;
 
-namespace org.pescuma.dependencychecker.input.loaders
+namespace org.pescuma.dependencychecker.presenter.input.loaders
 {
 	public class EclipseProjectsLoader : ProjectLoader
 	{

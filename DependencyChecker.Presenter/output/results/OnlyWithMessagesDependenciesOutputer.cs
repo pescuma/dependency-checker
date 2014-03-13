@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using org.pescuma.dependencychecker.architecture;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.output.dependencies;
+using org.pescuma.dependencychecker.presenter.architecture;
+using org.pescuma.dependencychecker.presenter.output.dependencies;
 
-namespace org.pescuma.dependencychecker.output.results
+namespace org.pescuma.dependencychecker.presenter.output.results
 {
 	public class OnlyWithMessagesDependenciesOutputer : DependenciesOutputer
 	{

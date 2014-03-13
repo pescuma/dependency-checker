@@ -1,4 +1,4 @@
-﻿namespace org.pescuma.dependencychecker.rules
+﻿namespace org.pescuma.dependencychecker.presenter.rules
 {
 	public enum Severity
 	{

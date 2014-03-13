@@ -1,7 +1,7 @@
 ﻿using System;
 using org.pescuma.dependencychecker.model;
 
-namespace org.pescuma.dependencychecker.config
+namespace org.pescuma.dependencychecker.presenter.config
 {
 	[Serializable]
 	public class ConfigParserException : Exception

@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
-using org.pescuma.dependencychecker.config;
-using org.pescuma.dependencychecker.output.dependencies;
-using org.pescuma.dependencychecker.rules;
+using org.pescuma.dependencychecker.presenter.config;
+using org.pescuma.dependencychecker.presenter.output.dependencies;
+using org.pescuma.dependencychecker.presenter.rules;
 
 namespace org.pescuma.dependencychecker
 {

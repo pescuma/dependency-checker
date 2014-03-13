@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using org.pescuma.dependencychecker.config;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.output;
-using org.pescuma.dependencychecker.rules;
+using org.pescuma.dependencychecker.presenter.config;
+using org.pescuma.dependencychecker.presenter.output;
+using org.pescuma.dependencychecker.presenter.rules;
+using org.pescuma.dependencychecker.presenter.utils;
 using org.pescuma.dependencychecker.utils;
 
-namespace org.pescuma.dependencychecker.input
+namespace org.pescuma.dependencychecker.presenter.input
 {
 	public class DependencyGraphBuilder
 	{

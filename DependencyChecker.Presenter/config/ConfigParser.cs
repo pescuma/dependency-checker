@@ -4,13 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.output.architeture;
-using org.pescuma.dependencychecker.output.dependencies;
-using org.pescuma.dependencychecker.output.results;
-using org.pescuma.dependencychecker.rules;
+using org.pescuma.dependencychecker.presenter.output.architeture;
+using org.pescuma.dependencychecker.presenter.output.dependencies;
+using org.pescuma.dependencychecker.presenter.output.results;
+using org.pescuma.dependencychecker.presenter.rules;
 using org.pescuma.dependencychecker.utils;
 
-namespace org.pescuma.dependencychecker.config
+namespace org.pescuma.dependencychecker.presenter.config
 {
 	public class ConfigParser
 	{
@@ -177,6 +177,7 @@ namespace org.pescuma.dependencychecker.config
 			config.Output.Groups.Add(PathUtils.ToAbsolute(basePath, line));
 		}
 
+// ReSharper disable once UnusedParameter.Local
 		private void ParseOutputDependencies(string line, ConfigLocation location, bool onlyWithMessages)
 		{
 			var file = PathUtils.ToAbsolute(basePath, line);

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.output;
-using org.pescuma.dependencychecker.rules;
+using org.pescuma.dependencychecker.presenter.output;
+using org.pescuma.dependencychecker.presenter.rules;
 using org.pescuma.dependencychecker.utils;
 
-namespace org.pescuma.dependencychecker.input.loaders
+namespace org.pescuma.dependencychecker.presenter.input.loaders
 {
 	public class VsprojectsLoader : ProjectLoader
 	{
@@ -45,7 +45,8 @@ namespace org.pescuma.dependencychecker.input.loaders
 					else
 						language = null;
 
-					builder.AddLibraryReference(proj, null, csref.Include.Name, null, csref.HintPath, new Location(csproj.Filename, csref.LineNumber), language);
+					builder.AddLibraryReference(proj, null, csref.Include.Name, null, csref.HintPath, new Location(csproj.Filename, csref.LineNumber),
+						language);
 				}
 
 				foreach (var csref in csproj.COMReferences)

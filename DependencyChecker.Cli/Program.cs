@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using org.pescuma.dependencychecker.architecture;
-using org.pescuma.dependencychecker.config;
-using org.pescuma.dependencychecker.input;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.output;
-using org.pescuma.dependencychecker.rules;
+using org.pescuma.dependencychecker.presenter;
+using org.pescuma.dependencychecker.presenter.architecture;
+using org.pescuma.dependencychecker.presenter.config;
+using org.pescuma.dependencychecker.presenter.input;
+using org.pescuma.dependencychecker.presenter.output;
+using org.pescuma.dependencychecker.presenter.rules;
 
 namespace org.pescuma.dependencychecker.cli
 {

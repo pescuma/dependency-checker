@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using org.pescuma.dependencychecker.architecture;
+using org.pescuma.dependencychecker.presenter.architecture;
 using org.pescuma.dependencychecker.utils;
 
-namespace org.pescuma.dependencychecker.output.architeture
+namespace org.pescuma.dependencychecker.presenter.output.architeture
 {
 	public class DotArchitectureOutputer : ArchitectureOutputer
 	{

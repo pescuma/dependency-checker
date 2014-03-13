@@ -4,7 +4,7 @@ using System.Linq;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.utils;
 
-namespace org.pescuma.dependencychecker.input
+namespace org.pescuma.dependencychecker.presenter.input
 {
 	/// <summary>
 	/// Search order is: project, library, ignored project.

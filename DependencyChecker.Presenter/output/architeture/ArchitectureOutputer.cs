@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using org.pescuma.dependencychecker.architecture;
+using org.pescuma.dependencychecker.presenter.architecture;
 
-namespace org.pescuma.dependencychecker.output.architeture
+namespace org.pescuma.dependencychecker.presenter.output.architeture
 {
 	public interface ArchitectureOutputer
 	{

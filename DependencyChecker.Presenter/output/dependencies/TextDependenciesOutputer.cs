@@ -2,11 +2,11 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using org.pescuma.dependencychecker.architecture;
 using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencychecker.presenter.architecture;
 using org.pescuma.dependencychecker.utils;
 
-namespace org.pescuma.dependencychecker.output.dependencies
+namespace org.pescuma.dependencychecker.presenter.output.dependencies
 {
 	public class TextDependenciesOutputer : DependenciesOutputer
 	{

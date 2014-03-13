@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using org.pescuma.dependencychecker.config;
-using org.pescuma.dependencychecker.input.loaders;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.output;
+using org.pescuma.dependencychecker.presenter.config;
+using org.pescuma.dependencychecker.presenter.input.loaders;
+using org.pescuma.dependencychecker.presenter.output;
 using org.pescuma.dependencychecker.utils;
 
-namespace org.pescuma.dependencychecker.input
+namespace org.pescuma.dependencychecker.presenter.input
 {
 	public class ProjectsLoader
 	{

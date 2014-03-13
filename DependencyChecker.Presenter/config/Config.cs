@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.output;
-using org.pescuma.dependencychecker.output.architeture;
-using org.pescuma.dependencychecker.output.dependencies;
-using org.pescuma.dependencychecker.output.results;
-using org.pescuma.dependencychecker.rules;
+using org.pescuma.dependencychecker.presenter.output;
+using org.pescuma.dependencychecker.presenter.output.architeture;
+using org.pescuma.dependencychecker.presenter.output.dependencies;
+using org.pescuma.dependencychecker.presenter.output.results;
+using org.pescuma.dependencychecker.presenter.rules;
 
-namespace org.pescuma.dependencychecker.config
+namespace org.pescuma.dependencychecker.presenter.config
 {
 	public class Config
 	{

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using org.pescuma.dependencychecker.model;
 
-namespace org.pescuma.dependencychecker.rules
+namespace org.pescuma.dependencychecker.presenter.rules
 {
 	public class OutputMessage
 	{

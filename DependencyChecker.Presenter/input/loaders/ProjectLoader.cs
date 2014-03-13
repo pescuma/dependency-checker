@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using org.pescuma.dependencychecker.output;
+using org.pescuma.dependencychecker.presenter.output;
 
-namespace org.pescuma.dependencychecker.input.loaders
+namespace org.pescuma.dependencychecker.presenter.input.loaders
 {
 	public interface ProjectLoader
 	{

@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using org.pescuma.dependencychecker.presenter.input.loaders;
 
 namespace org.pescuma.dependencychecker.input.loaders
 {

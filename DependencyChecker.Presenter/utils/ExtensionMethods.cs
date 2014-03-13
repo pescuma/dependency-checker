@@ -1,6 +1,6 @@
 ﻿using QuickGraph;
 
-namespace org.pescuma.dependencychecker.utils
+namespace org.pescuma.dependencychecker.presenter.utils
 {
 	internal static class ExtensionMethods
 	{

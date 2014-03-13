@@ -1,7 +1,7 @@
 ﻿using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.rules;
+using org.pescuma.dependencychecker.presenter.rules;
 
-namespace org.pescuma.dependencychecker.output
+namespace org.pescuma.dependencychecker.presenter.output
 {
 	public class LoadingOutputEntry : BaseOutputEntry
 	{

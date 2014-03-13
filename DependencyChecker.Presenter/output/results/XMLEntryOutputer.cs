@@ -5,7 +5,7 @@ using System.Xml.Linq;
 using org.pescuma.dependencychecker.model.xml;
 using org.pescuma.dependencychecker.utils;
 
-namespace org.pescuma.dependencychecker.output.results
+namespace org.pescuma.dependencychecker.presenter.output.results
 {
 	public class XMLEntryOutputer : EntryOutputer
 	{

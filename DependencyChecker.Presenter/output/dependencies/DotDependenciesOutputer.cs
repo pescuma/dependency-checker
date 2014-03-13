@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using org.pescuma.dependencychecker.architecture;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.rules;
+using org.pescuma.dependencychecker.presenter.architecture;
+using org.pescuma.dependencychecker.presenter.rules;
 using org.pescuma.dependencychecker.utils;
 using QuickGraph.Algorithms;
 
-namespace org.pescuma.dependencychecker.output.dependencies
+namespace org.pescuma.dependencychecker.presenter.output.dependencies
 {
 	public class DotDependenciesOutputer : DependenciesOutputer
 	{

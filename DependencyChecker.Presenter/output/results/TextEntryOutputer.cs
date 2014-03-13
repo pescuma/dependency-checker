@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace org.pescuma.dependencychecker.output.results
+namespace org.pescuma.dependencychecker.presenter.output.results
 {
 	public class TextEntryOutputer : EntryOutputer
 	{

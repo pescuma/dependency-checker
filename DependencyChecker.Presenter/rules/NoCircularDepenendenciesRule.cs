@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using org.pescuma.dependencychecker.config;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.output;
+using org.pescuma.dependencychecker.presenter.output;
 using QuickGraph.Algorithms;
 
-namespace org.pescuma.dependencychecker.rules
+namespace org.pescuma.dependencychecker.presenter.rules
 {
 	public class NoCircularDepenendenciesRule : BaseRule
 	{
