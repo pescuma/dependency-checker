@@ -4,19 +4,18 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{144B5DFF-3DC8-4E36-A2D7-A0D6DD3F6551}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{1CF15BFD-785F-4496-8206-F5460997768F}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>org.pescuma.dependencychecker.cli</RootNamespace>
-    <AssemblyName>dependency-checker</AssemblyName>
+    <RootNamespace>org.pescuma.dependencychecker.presenter</RootNamespace>
+    <AssemblyName>DependencyChecker.Presenter</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -26,7 +25,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -59,56 +57,51 @@
     <Compile Include="architecture\ArchitectureGraph.cs" />
     <Compile Include="architecture\ArchitectureLoader.cs" />
     <Compile Include="architecture\GroupDependency.cs" />
-    <Compile Include="config\ConfigException.cs" />
     <Compile Include="config\Config.cs" />
+    <Compile Include="config\ConfigException.cs" />
     <Compile Include="config\ConfigParser.cs" />
     <Compile Include="config\ConfigParserException.cs" />
+    <Compile Include="GroupsLoader.cs" />
+    <Compile Include="input\DependencyGraphBuilder.cs" />
     <Compile Include="input\LibrariesDB.cs" />
+    <Compile Include="input\loaders\EclipseProjectsLoader.cs" />
+    <Compile Include="input\loaders\ProjectLoader.cs" />
+    <Compile Include="input\loaders\VsprojectsLoader.cs" />
+    <Compile Include="input\ProjectsLoader.cs" />
     <Compile Include="output\architeture\ArchitectureOutputer.cs" />
     <Compile Include="output\architeture\DotArchitectureOutputer.cs" />
     <Compile Include="output\architeture\TextArchitectureOutputer.cs" />
     <Compile Include="output\architeture\XMLArchitectureOutputer.cs" />
-    <Compile Include="output\RuleOutputEntry.cs" />
-    <Compile Include="output\UniqueDependencyOutputEntry.cs" />
-    <Compile Include="output\UnusedConfigOutputEntry.cs" />
-    <Compile Include="GroupsLoader.cs" />
-    <Compile Include="input\loaders\VsprojectsLoader.cs" />
-    <Compile Include="input\loaders\EclipseProjectsLoader.cs" />
-    <Compile Include="input\loaders\ProjectLoader.cs" />
-    <Compile Include="input\DependencyGraphBuilder.cs" />
     <Compile Include="output\BaseOutputEntry.cs" />
     <Compile Include="output\CircularDependencyRuleMatch.cs" />
     <Compile Include="output\dependencies\DependenciesOutputer.cs" />
     <Compile Include="output\dependencies\DotDependenciesOutputer.cs" />
     <Compile Include="output\dependencies\TextDependenciesOutputer.cs" />
     <Compile Include="output\dependencies\XMLDependenciesOutputer.cs" />
-    <Compile Include="output\results\ConsoleEntryOutputer.cs" />
+    <Compile Include="output\DependencyRuleMatch.cs" />
     <Compile Include="output\LoadingOutputEntry.cs" />
     <Compile Include="output\OutputEntry.cs" />
+    <Compile Include="output\results\ConsoleEntryOutputer.cs" />
     <Compile Include="output\results\EntryOutputer.cs" />
     <Compile Include="output\results\OnlyWithMessagesDependenciesOutputer.cs" />
     <Compile Include="output\results\TextEntryOutputer.cs" />
-    <Compile Include="output\UniqueProjectOutputEntry.cs" />
     <Compile Include="output\results\XMLEntryOutputer.cs" />
-    <Compile Include="rules\OutputMessage.cs" />
+    <Compile Include="output\RuleOutputEntry.cs" />
+    <Compile Include="output\UniqueDependencyOutputEntry.cs" />
+    <Compile Include="output\UniqueProjectOutputEntry.cs" />
+    <Compile Include="output\UnusedConfigOutputEntry.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RulesMatcher.cs" />
     <Compile Include="rules\BaseRule.cs" />
     <Compile Include="rules\DepenendencyRule.cs" />
     <Compile Include="rules\NoCircularDepenendenciesRule.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="input\ProjectsLoader.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="rules\OutputMessage.cs" />
+    <Compile Include="rules\Rule.cs" />
+    <Compile Include="rules\Severity.cs" />
     <Compile Include="rules\UniqueDependenciesRule.cs" />
     <Compile Include="rules\UniqueProjectRule.cs" />
-    <Compile Include="rules\Rule.cs" />
-    <Compile Include="output\DependencyRuleMatch.cs" />
-    <Compile Include="RulesMatcher.cs" />
-    <Compile Include="rules\Severity.cs" />
     <Compile Include="utils\ExtensionMethods.cs" />
     <Compile Include="utils\RuleUtils.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DependencyChecker.Model\DependencyChecker.Model.csproj">
@@ -119,6 +112,9 @@
       <Project>{e5435dde-1597-4b7b-bfa8-3140dfebb587}</Project>
       <Name>DependencyChecker.Utils</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

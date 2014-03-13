@@ -10,7 +10,7 @@ using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.output;
 using org.pescuma.dependencychecker.rules;
 
-namespace org.pescuma.dependencychecker
+namespace org.pescuma.dependencychecker.cli
 {
 	internal class Program
 	{
@@ -95,7 +95,7 @@ namespace org.pescuma.dependencychecker
 
 			foreach (var filename in filenames)
 			{
-// ReSharper disable once AssignNullToNotNullAttribute
+				// ReSharper disable once AssignNullToNotNullAttribute
 				Directory.CreateDirectory(Path.GetDirectoryName(filename));
 				File.WriteAllLines(filename, names);
 			}

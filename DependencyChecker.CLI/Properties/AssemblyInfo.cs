@@ -1,14 +1,15 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DependencyChecker")]
+[assembly: AssemblyTitle("DependencyChecker.Cli")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DependencyChecker")]
+[assembly: AssemblyProduct("DependencyChecker.Cli")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -19,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("9219a3c0-8c55-4d00-818c-57116f0e462d")]
+[assembly: Guid("298ef522-3f1a-47ea-8248-a33beec1ebdc")]
 
 // Version information for an assembly consists of the following four values:
 //
