@@ -3,7 +3,7 @@ using org.pescuma.dependencychecker.presenter.config;
 using org.pescuma.dependencychecker.presenter.output.dependencies;
 using org.pescuma.dependencychecker.presenter.rules;
 
-namespace org.pescuma.dependencychecker
+namespace org.pescuma.dependencychecker.presenter
 {
 	[TestFixture]
 	public class ConfigParserTest

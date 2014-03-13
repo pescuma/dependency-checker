@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dependencychecker.model;
 
-namespace org.pescuma.dependencychecker
+namespace org.pescuma.dependencychecker.presenter
 {
 	internal class TestUtils
 	{
