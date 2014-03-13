@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30110.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker", "DependencyChecker\DependencyChecker.csproj", "{144B5DFF-3DC8-4E36-A2D7-A0D6DD3F6551}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.CLI", "DependencyChecker\DependencyChecker.CLI.csproj", "{144B5DFF-3DC8-4E36-A2D7-A0D6DD3F6551}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{34CB5AA6-34E3-4E68-B2B3-DCC6F49C276A}"
 	ProjectSection(SolutionItems) = preProject
@@ -15,6 +15,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Test", "DependencyChecker.Test\DependencyChecker.Test.csproj", "{823D0720-F22D-4703-BD39-438CC20DC541}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepedencyConsole", "DepedencyConsole\DepedencyConsole.csproj", "{13B966DB-836C-4E72-879F-AB4B3C4D749A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Utils", "DependencyChecker.Utils\DependencyChecker.Utils.csproj", "{E5435DDE-1597-4B7B-BFA8-3140DFEBB587}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Model", "DependencyChecker.Model\DependencyChecker.Model.csproj", "{8CEB9917-E9C4-4104-945C-0A2EBD68613C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +38,14 @@ Global
 		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13B966DB-836C-4E72-879F-AB4B3C4D749A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5435DDE-1597-4B7B-BFA8-3140DFEBB587}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5435DDE-1597-4B7B-BFA8-3140DFEBB587}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5435DDE-1597-4B7B-BFA8-3140DFEBB587}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5435DDE-1597-4B7B-BFA8-3140DFEBB587}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CEB9917-E9C4-4104-945C-0A2EBD68613C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CEB9917-E9C4-4104-945C-0A2EBD68613C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CEB9917-E9C4-4104-945C-0A2EBD68613C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CEB9917-E9C4-4104-945C-0A2EBD68613C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

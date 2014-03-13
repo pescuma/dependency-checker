@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.output;
 using org.pescuma.dependencychecker.rules;
 using org.pescuma.dependencychecker.utils;
@@ -24,7 +25,7 @@ namespace org.pescuma.dependencychecker.input.loaders
 				new HashSet<string>(paths.SelectMany(folder => Directory.GetFiles(folder, filenamePattern, SearchOption.AllDirectories))
 					.Select(Path.GetFullPath));
 
-			var csprojs = csprojsFiles.Select(f => new CsprojReader(f))
+			var csprojs = csprojsFiles.Select(f => new VSProjReader(f))
 				.OrderBy(n => n.Filename, StringComparer.CurrentCultureIgnoreCase)
 				.ToList();
 			foreach (var csproj in csprojs)
@@ -60,7 +61,7 @@ namespace org.pescuma.dependencychecker.input.loaders
 			{
 				try
 				{
-					var csproj = new CsprojReader(externalCsprojFile);
+					var csproj = new VSProjReader(externalCsprojFile);
 					builder.AddProject(csproj.Name, csproj.AssemblyName, csproj.ProjectGuid, csproj.Filename, defaultLanguage);
 				}
 				catch (IOException)

@@ -1,4 +1,5 @@
 ﻿using org.pescuma.dependencychecker.config;
+using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.rules;
 
 namespace org.pescuma.dependencychecker.output

@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.output;
 using org.pescuma.dependencychecker.utils;
 

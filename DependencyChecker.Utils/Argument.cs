@@ -6,7 +6,7 @@ using System.Linq;
 namespace org.pescuma.dependencychecker.utils
 {
 	[DebuggerStepThrough]
-	internal class Argument
+	public class Argument
 	{
 		// TODO [pescuma] Pegar nome dos parametros para usar na ArgumentException
 

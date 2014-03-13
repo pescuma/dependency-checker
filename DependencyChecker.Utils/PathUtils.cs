@@ -2,7 +2,7 @@
 
 namespace org.pescuma.dependencychecker.utils
 {
-	internal class PathUtils
+	public class PathUtils
 	{
 		public static string ToAbsolute(string root, string path)
 		{

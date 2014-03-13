@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using org.pescuma.dependencychecker.config;
-
-namespace org.pescuma.dependencychecker.model
+﻿namespace org.pescuma.dependencychecker.model
 {
 	public class GroupElement : Library
 	{

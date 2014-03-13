@@ -1,4 +1,4 @@
-namespace org.pescuma.dependencychecker.config
+namespace org.pescuma.dependencychecker.model
 {
 	public class ConfigLocation
 	{

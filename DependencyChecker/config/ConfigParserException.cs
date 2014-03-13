@@ -1,4 +1,5 @@
 ﻿using System;
+using org.pescuma.dependencychecker.model;
 
 namespace org.pescuma.dependencychecker.config
 {

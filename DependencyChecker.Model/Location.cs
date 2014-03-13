@@ -1,4 +1,4 @@
-﻿namespace org.pescuma.dependencychecker
+﻿namespace org.pescuma.dependencychecker.model
 {
 	public class Location
 	{

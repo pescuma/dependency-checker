@@ -9,7 +9,7 @@ using System.Xml.Linq;
 namespace org.pescuma.dependencychecker.utils
 {
 	// http://stackoverflow.com/questions/4649989/reading-a-csproj-file-in-c-sharp
-	public class CsprojReader
+	public class VSProjReader
 	{
 		private readonly string folder;
 		private readonly XDocument xdoc;
@@ -19,7 +19,7 @@ namespace org.pescuma.dependencychecker.utils
 
 		private static XNamespace ns = "http://schemas.microsoft.com/developer/msbuild/2003";
 
-		public CsprojReader(string csproj)
+		public VSProjReader(string csproj)
 		{
 			folder = Path.GetDirectoryName(csproj);
 			Name = Path.GetFileNameWithoutExtension(csproj);
@@ -99,10 +99,10 @@ namespace org.pescuma.dependencychecker.utils
 
 		public class Reference
 		{
-			private readonly CsprojReader reader;
+			private readonly VSProjReader reader;
 			private readonly XElement node;
 
-			public Reference(CsprojReader reader, XElement node)
+			public Reference(VSProjReader reader, XElement node)
 			{
 				this.reader = reader;
 				this.node = node;
@@ -148,10 +148,10 @@ namespace org.pescuma.dependencychecker.utils
 
 		public class COMReference
 		{
-			private readonly CsprojReader reader;
+			private readonly VSProjReader reader;
 			private readonly XElement node;
 
-			public COMReference(CsprojReader reader, XElement node)
+			public COMReference(VSProjReader reader, XElement node)
 			{
 				this.reader = reader;
 				this.node = node;
@@ -190,10 +190,10 @@ namespace org.pescuma.dependencychecker.utils
 
 		public class ProjectReference
 		{
-			private readonly CsprojReader reader;
+			private readonly VSProjReader reader;
 			private readonly XElement node;
 
-			public ProjectReference(CsprojReader reader, XElement node)
+			public ProjectReference(VSProjReader reader, XElement node)
 			{
 				this.reader = reader;
 				this.node = node;
