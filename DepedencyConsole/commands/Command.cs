@@ -1,4 +1,6 @@
-﻿namespace org.pescuma.dependencychecker.commands
+﻿using org.pescuma.dependencychecker.model;
+
+namespace org.pescuma.dependencyconsole.commands
 {
 	internal interface Command
 	{

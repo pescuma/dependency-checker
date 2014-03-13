@@ -1,6 +1,8 @@
 ﻿using System;
+using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencychecker.utils;
 
-namespace org.pescuma.dependencychecker.commands
+namespace org.pescuma.dependencyconsole.commands
 {
 	internal class LibsCommand : Command
 	{

@@ -1,6 +1,7 @@
 ﻿using System;
+using org.pescuma.dependencychecker.model;
 
-namespace org.pescuma.dependencychecker.commands
+namespace org.pescuma.dependencyconsole.commands
 {
 	internal class QuitCommand : Command
 	{
