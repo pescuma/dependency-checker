@@ -20,7 +20,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Model", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Presenter", "DependencyChecker.Presenter\DependencyChecker.Presenter.csproj", "{1CF15BFD-785F-4496-8206-F5460997768F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Cli", "DependencyChecker.Cli\DependencyChecker.Cli.csproj", "{6F128397-0407-473B-AB13-9EB75E54BCD8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyChecker.Cli", "DependencyChecker.Cli\DependencyChecker.Cli.csproj", "{584B4234-F1AF-47C7-AE61-A666FE31C61D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,10 +48,10 @@ Global
 		{1CF15BFD-785F-4496-8206-F5460997768F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CF15BFD-785F-4496-8206-F5460997768F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CF15BFD-785F-4496-8206-F5460997768F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F128397-0407-473B-AB13-9EB75E54BCD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F128397-0407-473B-AB13-9EB75E54BCD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F128397-0407-473B-AB13-9EB75E54BCD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F128397-0407-473B-AB13-9EB75E54BCD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{584B4234-F1AF-47C7-AE61-A666FE31C61D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{584B4234-F1AF-47C7-AE61-A666FE31C61D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{584B4234-F1AF-47C7-AE61-A666FE31C61D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{584B4234-F1AF-47C7-AE61-A666FE31C61D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
