@@ -7,8 +7,8 @@
     <ProjectGuid>{823D0720-F22D-4703-BD39-438CC20DC541}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>org.pescuma.dependencychecker</RootNamespace>
-    <AssemblyName>DependencyChecker.Test</AssemblyName>
+    <RootNamespace>org.pescuma.dependencychecker.presenter</RootNamespace>
+    <AssemblyName>DependencyChecker.Presenter.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
