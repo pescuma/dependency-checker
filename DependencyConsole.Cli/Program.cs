@@ -65,7 +65,7 @@ namespace org.pescuma.dependencyconsole
 		{
 			var doc = XDocument.Load(filename);
 
-			if (doc.Root == null || doc.Root.Name != "Depedencies")
+			if (doc.Root == null || doc.Root.Name != "DependencyChecker-Depedencies")
 				throw new IOException("Invalid dependencies XML file: " + filename);
 
 			return XMLHelper.DependencyGraphFromXML(doc.Root);
