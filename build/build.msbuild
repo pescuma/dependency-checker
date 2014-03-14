@@ -13,6 +13,7 @@
     <OpenCoverReport>$(ReportsDir)\OpenCover.xml</OpenCoverReport>
     <ReSharperInspectCodeReport>$(ReportsDir)\ReSharper-InspectCode.xml</ReSharperInspectCodeReport>
     <ReSharperDupFinderReport>$(ReportsDir)\ReSharper-DupFinder.xml</ReSharperDupFinderReport>
+    <DependenciesCheckerReportDir>$(ReportsDir)\DependenciesChecker</DependenciesCheckerReportDir>
     <BuildHealthHome>$(ReportsDir)\buildhealth</BuildHealthHome>
     <DependencyCheckerExecutable>$(ResultsDir)\dependency-checker-$(ProductVersion).exe</DependencyCheckerExecutable>
     <DependencyConsoleExecutable>$(ResultsDir)\dependency-console-$(ProductVersion).exe</DependencyConsoleExecutable>
@@ -146,7 +147,18 @@
     </Exec>
   </Target>
 
-  <Target Name="StaticAnalysis" DependsOnTargets="ReSharper-InspectCode;ReSharper-DupFinder">
+  <Target Name="DependencyCheckerOnDependencyChecker" Condition="Exists('$(DependencyCheckerExecutable)')">
+    <MakeDir Directories="$(ResultsDir)\Reports" />
+    <Delete Files="$(DependenciesCheckerReportDir)" />
+
+    <Exec Command="$(DependencyCheckerExecutable) &quot;$(MSBuildProjectDirectory)\dependency-checker.cfg&quot;"
+          ContinueOnError="true">
+      <Output TaskParameter="ExitCode" ItemName="ExecOutputs" />
+    </Exec>
+  </Target>
+
+  <Target Name="StaticAnalysis"
+          DependsOnTargets="ReSharper-InspectCode;ReSharper-DupFinder;DependencyCheckerOnDependencyChecker">
   </Target>
 
   <Target Name="Report">
@@ -155,6 +167,7 @@
     <Exec Command="$(BuildHealthCmd) add resharper-inspectcode &quot;$(ReSharperInspectCodeReport)&quot;" />
     <Exec Command="$(BuildHealthCmd) add resharper-dupfinder &quot;$(ReSharperDupFinderReport)&quot;" />
     <Exec Command="$(BuildHealthCmd) add opencover &quot;$(OpenCoverReport)&quot;" />
+    <Exec Command="$(BuildHealthCmd) add dependency-checker &quot;$(DependenciesCheckerReportDir)\errors.xml&quot;" />
     <Exec
       Command="$(BuildHealthCmd) compute loc &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
     <Exec
@@ -162,6 +175,7 @@
     <Exec
       Command="$(BuildHealthCmd) projects from-vsproj &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
     <Exec Command="$(BuildHealthCmd) add diskusage &quot;$(ResultsDir)&quot; --exclude &quot;$(ReportsDir)&quot;" />
+    <Exec Command="$(BuildHealthCmd) config set staticanalysis &quot;*&quot; &quot;Dependency Checker&quot; warn = 1" />
     <Exec Command="$(BuildHealthCmd) notify" />
     <Exec Command="$(BuildHealthCmd) report" />
   </Target>
