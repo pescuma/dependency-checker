@@ -8,7 +8,7 @@ namespace org.pescuma.dependencychecker.utils
 	[DebuggerStepThrough]
 	public class Argument
 	{
-		// TODO [pescuma] Pegar nome dos parametros para usar na ArgumentException
+		// TODO User field names in ArgumentException
 
 		public static void ThrowIfNull<T>(T param) where T : class
 		{

@@ -7,7 +7,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 {
 	public class DepenendencyRule : BaseRule
 	{
-		// HACK [pescuma] Fields are public for tests
+		// HACK Fields are public for tests
 		public readonly Func<Library, bool> Source;
 		public readonly Func<Library, bool> Target;
 		public readonly bool Allow;
