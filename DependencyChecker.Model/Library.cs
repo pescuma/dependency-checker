@@ -33,6 +33,7 @@ namespace org.pescuma.dependencychecker.model
 		public readonly HashSet<string> Names = new HashSet<string>();
 		public readonly HashSet<string> LibraryNames = new HashSet<string>();
 		public readonly HashSet<string> Languages = new HashSet<string>();
+		public bool IsLocal;
 
 		public Library(string libraryName, IEnumerable<string> languages)
 		{

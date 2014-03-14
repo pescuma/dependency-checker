@@ -48,6 +48,7 @@ namespace org.pescuma.dependencychecker.model.xml
 					library.GroupElement.Location.LineText));
 			}
 
+			result.Add(new XAttribute("Local", library.IsLocal));
 			library.SortedNames.ForEach(p => result.Add(new XElement("Name", p)));
 			library.Languages.ForEach(p => result.Add(new XElement("Language", p)));
 			library.Paths.ForEach(p => result.Add(new XElement("Path", p)));
@@ -117,6 +118,7 @@ namespace org.pescuma.dependencychecker.model.xml
 				result.GroupElement = new GroupElement(group, new ConfigLocation(configLine, configText), result);
 			}
 
+			result.IsLocal = bool.Parse(Attr(el, "Local"));
 			result.Names.AddRange(el.Descendants("Name")
 				.Select(e => e.Value));
 			result.Languages.AddRange(el.Descendants("Language")

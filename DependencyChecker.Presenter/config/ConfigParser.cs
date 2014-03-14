@@ -51,7 +51,6 @@ namespace org.pescuma.dependencychecker.presenter.config
 				{ "output results:", ParseOutputResults },
 				{ "rule:", ParseRule },
 				{ "ignore:", ParseIgnore },
-				{ "ignore all references not in inputs", ParseIgnoreAllNonLocalProjects },
 				{ "in output:", ParseInOutput },
 			};
 
@@ -119,10 +118,37 @@ namespace org.pescuma.dependencychecker.presenter.config
 				{ "regex:", (line, loc) => result = ParseRE(line) },
 				{ "path:", (line, loc) => result = ParsePath(line) },
 				{ "lang:", (line, loc) => result = ParseLanguage(line) },
+				{ "local:", (line, loc) => result = ParsePlaceAndType(line, loc, true, null) },
+				{ "non local:", (line, loc) => result = ParsePlaceAndType(line, loc, false, null) },
+				{ "project:", (line, loc) => result = ParsePlaceAndType(line, loc, null, true) },
+				{ "local project:", (line, loc) => result = ParsePlaceAndType(line, loc, true, true) },
+				{ "non local project:", (line, loc) => result = ParsePlaceAndType(line, loc, false, true) },
+				{ "lib:", (line, loc) => result = ParsePlaceAndType(line, loc, null, false) },
+				{ "local lib:", (line, loc) => result = ParsePlaceAndType(line, loc, true, false) },
+				{ "non local lib:", (line, loc) => result = ParsePlaceAndType(line, loc, true, null) },
 				{ "", (line, loc) => result = ParseSimpleMatch(line) },
 			};
 
 			ParseLine(lineTypes, matchLine, location);
+
+			return result;
+		}
+
+		private Func<Library, bool> ParsePlaceAndType(string line, ConfigLocation loc, bool? local, bool? project)
+		{
+			var result = ParseMatcher(line, loc);
+
+			if (local != null)
+			{
+				var inner = result;
+				result = l => l.IsLocal == local && inner(l);
+			}
+
+			if (project != null)
+			{
+				var inner = result;
+				result = l => (l is Project) == project && inner(l);
+			}
 
 			return result;
 		}
@@ -145,21 +171,12 @@ namespace org.pescuma.dependencychecker.presenter.config
 		{
 			var path = PathUtils.ToAbsolute(basePath, line);
 
-			return proj => proj.Paths.Any(pp => PathMatches(pp, path));
+			return proj => proj.Paths.Any(pp => PathUtils.PathMatches(pp, path));
 		}
 
 		private Func<Library, bool> ParseLanguage(string line)
 		{
 			return proj => proj.Languages.Any(l => l.Equals(line, StringComparison.CurrentCultureIgnoreCase));
-		}
-
-		private static bool PathMatches(string fullPath, string beginPath)
-		{
-			if (fullPath == null)
-				return false;
-
-			return fullPath.Equals(beginPath, StringComparison.CurrentCultureIgnoreCase)
-			       || fullPath.StartsWith(beginPath + "\\", StringComparison.CurrentCultureIgnoreCase);
 		}
 
 		private Func<Library, bool> ParseSimpleMatch(string line)
@@ -317,15 +334,6 @@ namespace org.pescuma.dependencychecker.presenter.config
 			var matcher = ParseMatcher(line, location);
 
 			config.Ignores.Add(new Config.Ignore(matcher, location));
-		}
-
-		private void ParseIgnoreAllNonLocalProjects(string line, ConfigLocation location)
-		{
-			if (line != "")
-				throw new ConfigParserException(location, "The line has more text than it should");
-
-			config.Ignores.Add(
-				new Config.Ignore(el => !(el is Project) || !config.Inputs.Any(input => PathMatches(((Project) el).ProjectPath, input)), location));
 		}
 
 		private void ParseInOutput(string line, ConfigLocation location)

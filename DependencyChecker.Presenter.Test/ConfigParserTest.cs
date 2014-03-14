@@ -297,24 +297,12 @@ output projects: c:\b.out");
 		public void TestIgnoreAllNonLocalProjects()
 		{
 			var config = Parse("input: c:\\a\n" + //
-			                   "ignore all references not in inputs");
+			                   "ignore: non local: regex: .*");
 
 			Assert.AreEqual(1, config.Ignores.Count);
 			var ignore = config.Ignores[0];
-			Assert.AreEqual(false, ignore.Matches(TestUtils.ProjWithPath(@"c:\a\p.csproj")));
-			Assert.AreEqual(true, ignore.Matches(TestUtils.ProjWithPath(@"c:\b\p.csproj")));
-		}
-
-		[Test]
-		public void TestIgnoreAllNonLocalProjectsCaseInsensitive()
-		{
-			var config = Parse("input: C:\\A\n" + //
-			                   "ignore all references not in inputs");
-
-			Assert.AreEqual(1, config.Ignores.Count);
-			var ignore = config.Ignores[0];
-			Assert.AreEqual(false, ignore.Matches(TestUtils.ProjWithPath(@"c:\a\p.csproj")));
-			Assert.AreEqual(true, ignore.Matches(TestUtils.ProjWithPath(@"c:\b\p.csproj")));
+			Assert.AreEqual(false, ignore.Matches(TestUtils.LocalProj()));
+			Assert.AreEqual(true, ignore.Matches(TestUtils.NonLocalProj()));
 		}
 
 		[Test]

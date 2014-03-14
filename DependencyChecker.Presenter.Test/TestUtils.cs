@@ -23,6 +23,16 @@ namespace org.pescuma.dependencychecker.presenter
 			return new Project("NO NAME", "NO LIB NAME", new Guid(), path, null);
 		}
 
+		public static Project LocalProj()
+		{
+			return new Project("NO NAME", "NO LIB NAME", new Guid(), "PROJ.PATH", null) { IsLocal = true };
+		}
+
+		public static Project NonLocalProj()
+		{
+			return new Project("NO NAME", "NO LIB NAME", new Guid(), "PROJ.PATH", null) { IsLocal = false };
+		}
+
 		public static Dependency Dependency(Project p1, Project p2)
 		{
 			return model.Dependency.WithProject(p1, p2, new Location("F", 1));
