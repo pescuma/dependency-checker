@@ -20,17 +20,7 @@ namespace org.pescuma.dependencychecker.presenter.input
 
 			var graph = builder.Build();
 
-			graph.Vertices.ForEach(p => p.IsLocal = IsLocal(config, p));
-
 			return graph;
-		}
-
-		private static bool IsLocal(Config config, Library lib)
-		{
-			if (lib is Project)
-				return config.Inputs.Any(input => PathUtils.PathMatches(((Project) lib).ProjectPath, input));
-			else
-				return config.Inputs.Any(input => lib.Paths.Any(p => PathUtils.PathMatches(p, input)));
 		}
 	}
 }

@@ -125,7 +125,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 				{ "non local project:", (line, loc) => result = ParsePlaceAndType(line, loc, false, true) },
 				{ "lib:", (line, loc) => result = ParsePlaceAndType(line, loc, null, false) },
 				{ "local lib:", (line, loc) => result = ParsePlaceAndType(line, loc, true, false) },
-				{ "non local lib:", (line, loc) => result = ParsePlaceAndType(line, loc, true, null) },
+				{ "non local lib:", (line, loc) => result = ParsePlaceAndType(line, loc, false, false) },
 				{ "", (line, loc) => result = ParseSimpleMatch(line) },
 			};
 

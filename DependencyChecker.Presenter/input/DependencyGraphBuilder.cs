@@ -89,6 +89,8 @@ namespace org.pescuma.dependencychecker.presenter.input
 			libraries.Where(l => !l.Languages.Any())
 				.ForEach(l => l.Languages.Add("Unknown"));
 
+			libraries.ForEach(UpdateIsLocal);
+
 			libraries.Sort(Library.NaturalOrdering);
 			dependencies.Sort(Dependency.NaturalOrdering);
 
@@ -102,6 +104,8 @@ namespace org.pescuma.dependencychecker.presenter.input
 
 		private bool Ignore(Library library)
 		{
+			UpdateIsLocal(library);
+
 			foreach (var ignore in config.Ignores)
 			{
 				if (ignore.Matches(library))
@@ -245,6 +249,9 @@ namespace org.pescuma.dependencychecker.presenter.input
 				if (found == null)
 				{
 					var lib = new Library(projRef.ReferenceLibraryName ?? projRef.ReferenceName, projRef.ReferenceLanguages.EmptyIfNull());
+					if (projRef.ReferenceFilename != null)
+						lib.Paths.Add(projRef.ReferenceFilename);
+
 					if (!Ignore(lib))
 					{
 						AddLibrary(lib);
@@ -408,6 +415,19 @@ namespace org.pescuma.dependencychecker.presenter.input
 			AddLibrary(result);
 
 			return result;
+		}
+
+		private void UpdateIsLocal(Library lib)
+		{
+			lib.IsLocal = IsLocal(config, lib);
+		}
+
+		private static bool IsLocal(Config config, Library lib)
+		{
+			if (lib is Project)
+				return config.Inputs.Any(input => PathUtils.PathMatches(((Project) lib).ProjectPath, input));
+			else
+				return config.Inputs.Any(input => lib.Paths.Any(p => PathUtils.PathMatches(p, input)));
 		}
 
 		private class TempProject
