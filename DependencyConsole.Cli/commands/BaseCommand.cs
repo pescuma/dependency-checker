@@ -66,7 +66,7 @@ namespace org.pescuma.dependencyconsole.commands
 
 		protected string GetName(Library l)
 		{
-			return string.Join(" or ", l.Names);
+			return string.Join(" or ", l.SortedNames);
 		}
 	}
 }

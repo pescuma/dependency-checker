@@ -24,6 +24,7 @@ namespace org.pescuma.dependencyconsole.commands
 				.GroupBy(c => c.Group)
 				.Where(g => g.Count() > 1);
 
+			bool found = false;
 			foreach (var g in circularDependencies)
 			{
 				var libs = g.Select(i => i.Proj)
@@ -34,6 +35,8 @@ namespace org.pescuma.dependencyconsole.commands
 				if (!projsSet.Intersect(projctsFiltered)
 					.Any())
 					continue;
+
+				found = true;
 
 				libs.Sort(Library.NaturalOrdering);
 
@@ -48,6 +51,9 @@ namespace org.pescuma.dependencyconsole.commands
 						Console.WriteLine(PREFIX + GetName(lib));
 				}
 			}
+
+			if (!found)
+				Console.WriteLine("No circular dependency found");
 		}
 	}
 }
