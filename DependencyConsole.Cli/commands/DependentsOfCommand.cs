@@ -3,11 +3,11 @@ using org.pescuma.dependencychecker.model;
 
 namespace org.pescuma.dependencyconsole.commands
 {
-	internal class DependenciesOfCommand : BaseReferencesCommand
+	internal class DependentsOfCommand : BaseReferencesCommand
 	{
 		public override string Name
 		{
-			get { return "dependencies of"; }
+			get { return "dependents of"; }
 		}
 
 		protected override void InternalHandle(string args, DependencyGraph graph)

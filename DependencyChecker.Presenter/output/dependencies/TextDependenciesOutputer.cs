@@ -30,11 +30,11 @@ namespace org.pescuma.dependencychecker.presenter.output.dependencies
 			var projs = graph.Vertices.ToList();
 			projs.Sort(Library.NaturalOrdering);
 
-			foreach (var library in projs)
+			foreach (var lib in projs)
 			{
-				if (library is Project)
+				if (lib is Project)
 				{
-					var proj = (Project) library;
+					var proj = (Project) lib;
 					result.Append("Project ")
 						.Append(proj.ProjectName)
 						.Append("\n");
@@ -47,17 +47,17 @@ namespace org.pescuma.dependencychecker.presenter.output.dependencies
 				else
 				{
 					result.Append("Library ")
-						.Append(library.LibraryName)
+						.Append(lib.LibraryName)
 						.Append("\n");
 				}
 
-				if (library.GroupElement != null)
-					AppendProperty(result, "Group", library.GroupElement.Name);
+				if (lib.GroupElement != null)
+					AppendProperty(result, "Group", lib.GroupElement.Name);
 
-				library.Languages.ForEach(p => AppendProperty(result, "Language", p));
+				lib.Languages.ForEach(p => AppendProperty(result, "Language", p));
 
-				var projectPath = (library is Project ? ((Project) library).ProjectPath : null);
-				library.Paths.Where(p => p != projectPath)
+				var projectPath = (lib is Project ? ((Project) lib).ProjectPath : null);
+				lib.Paths.Where(p => p != projectPath)
 					.ForEach(p => AppendProperty(result, "Path", p));
 
 				result.Append("\n");

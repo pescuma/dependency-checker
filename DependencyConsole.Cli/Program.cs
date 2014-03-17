@@ -23,7 +23,14 @@ namespace org.pescuma.dependencyconsole
 
 			Console.WriteLine("Graph loaded.");
 
-			var commands = new Command[] { new LibsCommand(), new DependenciesOfCommand(), new ReferencedByCommand(), new QuitCommand() };
+			var commands = new Command[]
+			{
+				new LibsCommand(),
+				new InfoCommand(),
+				new DependenciesOfCommand(),
+				new ReferencedByCommand(),
+				new QuitCommand()
+			};
 
 			try
 			{
