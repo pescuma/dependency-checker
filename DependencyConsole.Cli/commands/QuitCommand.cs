@@ -1,5 +1,6 @@
 ﻿using System;
 using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencyconsole.utils;
 
 namespace org.pescuma.dependencyconsole.commands
 {
@@ -10,7 +11,7 @@ namespace org.pescuma.dependencyconsole.commands
 			get { return "quit"; }
 		}
 
-		protected override void InternalHandle(string args, DependencyGraph graph)
+		protected override void InternalHandle(Output result, string args, DependencyGraph graph)
 		{
 			throw new QuitException();
 		}

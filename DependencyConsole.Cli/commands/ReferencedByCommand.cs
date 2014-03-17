@@ -1,4 +1,5 @@
 ﻿using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencyconsole.utils;
 
 namespace org.pescuma.dependencyconsole.commands
 {
@@ -9,9 +10,9 @@ namespace org.pescuma.dependencyconsole.commands
 			get { return "referenced by"; }
 		}
 
-		protected override void InternalHandle(string args, DependencyGraph graph)
+		protected override void InternalHandle(Output result, string args, DependencyGraph graph)
 		{
-			OutputReferences(args, graph, "references");
+			OutputReferences(result, args, graph, "references");
 		}
 	}
 }

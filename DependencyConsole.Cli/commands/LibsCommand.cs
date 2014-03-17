@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.utils;
+using org.pescuma.dependencyconsole.utils;
 
 namespace org.pescuma.dependencyconsole.commands
 {
@@ -12,15 +12,15 @@ namespace org.pescuma.dependencyconsole.commands
 			get { return "libs"; }
 		}
 
-		protected override void InternalHandle(string args, DependencyGraph graph)
+		protected override void InternalHandle(Output result, string args, DependencyGraph graph)
 		{
 			var libs = FilterLibs(graph, args);
 
 			if (!libs.Any())
-				Console.WriteLine("No libraries found");
+				result.AppendLine("No libraries found");
 			else
 				libs.SortBy(Library.NaturalOrdering)
-					.ForEach(l => Console.WriteLine(GetName(l)));
+					.ForEach(l => result.AppendLine(GetName(l)));
 		}
 	}
 }

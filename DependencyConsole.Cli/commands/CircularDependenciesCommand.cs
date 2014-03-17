@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencyconsole.utils;
 using QuickGraph.Algorithms;
 
 namespace org.pescuma.dependencyconsole.commands
@@ -13,7 +13,7 @@ namespace org.pescuma.dependencyconsole.commands
 			get { return "circular dependencies"; }
 		}
 
-		protected override void InternalHandle(string args, DependencyGraph graph)
+		protected override void InternalHandle(Output result, string args, DependencyGraph graph)
 		{
 			var projctsFiltered = FilterLibs(graph, args);
 
@@ -40,20 +40,24 @@ namespace org.pescuma.dependencyconsole.commands
 
 				libs.Sort(Library.NaturalOrdering);
 
-				Console.WriteLine("Circular dependency:");
+				result.AppendLine("Circular dependency:");
+				result.IncreaseIndent();
 
 				foreach (var lib in libs)
 				{
 					var proj = lib as Project;
 					if (proj != null)
-						Console.WriteLine(PREFIX + "{0} (project path: {1})", GetName(proj), proj.ProjectPath);
+						result.AppendLine("{0} (project path: {1})", GetName(proj), proj.ProjectPath);
 					else
-						Console.WriteLine(PREFIX + GetName(lib));
+						result.AppendLine(GetName(lib));
 				}
+
+				result.DecreaseIndent();
+				result.AppendLine();
 			}
 
 			if (!found)
-				Console.WriteLine("No circular dependency found");
+				result.AppendLine("No circular dependency found");
 		}
 	}
 }

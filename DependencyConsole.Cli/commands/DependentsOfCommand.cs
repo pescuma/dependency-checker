@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencyconsole.utils;
 
 namespace org.pescuma.dependencyconsole.commands
 {
@@ -10,11 +11,11 @@ namespace org.pescuma.dependencyconsole.commands
 			get { return "dependents of"; }
 		}
 
-		protected override void InternalHandle(string args, DependencyGraph graph)
+		protected override void InternalHandle(Output result, string args, DependencyGraph graph)
 		{
 			var inverted = InvertGraph(graph);
 
-			OutputReferences(args, inverted, "dependents");
+			OutputReferences(result, args, inverted, "dependents");
 		}
 
 		private DependencyGraph InvertGraph(DependencyGraph graph)

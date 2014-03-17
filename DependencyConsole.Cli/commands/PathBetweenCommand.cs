@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Linq;
 using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencyconsole.utils;
 using QuickGraph.Algorithms;
 
 namespace org.pescuma.dependencyconsole.commands
@@ -13,45 +13,66 @@ namespace org.pescuma.dependencyconsole.commands
 			get { return "path between"; }
 		}
 
-		protected override void InternalHandle(string args, DependencyGraph graph)
+		protected override void InternalHandle(Output result, string args, DependencyGraph graph)
 		{
 			var argsArr = args.Split(' ');
 			if (argsArr.Length != 2)
 			{
-				Console.WriteLine("Wrong arguments.");
-				Console.WriteLine("You must pass 2 projects, separated by space.");
+				result.AppendLine("Wrong arguments.");
+				result.AppendLine("You must pass 2 projects, separated by space.");
 				return;
 			}
 
-			foreach (var source in FilterLibs(graph, argsArr[0]))
+			var libs0 = FilterLibs(graph, argsArr[0]);
+			var libs1 = FilterLibs(graph, argsArr[1]);
+
+			if (!libs0.Any() || !libs1.Any())
 			{
-				foreach (var target in FilterLibs(graph, argsArr[1]))
+				if (!libs0.Any())
+					result.AppendLine("No projects found matching {0}", argsArr[0]);
+				if (!libs1.Any())
+					result.AppendLine("No projects found matching {0}", argsArr[1]);
+				return;
+			}
+
+			foreach (var source in libs0)
+			{
+				foreach (var target in libs1)
 				{
-					OutputPath(graph, source, target);
-					OutputPath(graph, target, source);
+					OutputPath(result, graph, source, target);
+					OutputPath(result, graph, target, source);
 				}
 			}
 		}
 
-		private void OutputPath(DependencyGraph graph, Library source, Library target)
+		private void OutputPath(Output result, DependencyGraph graph, Library source, Library target)
 		{
-			Console.WriteLine("Path(s) between {0} and {1}:", GetName(source), GetName(target));
-
-			var tryGetPaths = graph.ShortestPathsDijkstra(e => 1, source);
-			IEnumerable<Dependency> path;
-			if (!tryGetPaths(target, out path))
+			result.AppendLine("Path(s) between {0} and {1}:", GetName(source), GetName(target));
+			result.IncreaseIndent();
+			try
 			{
-				Console.WriteLine(PREFIX + "No path found");
-				return;
+				var tryGetPaths = graph.ShortestPathsDijkstra(e => 1, source);
+				IEnumerable<Dependency> path;
+				if (!tryGetPaths(target, out path))
+				{
+					result.AppendLine("No path found");
+					return;
+				}
+
+				var line = result.StartLine();
+
+				line.Append(GetName(source));
+				foreach (var edge in path)
+					line.Append(" -> ")
+						.Append(GetName(edge.Target));
+
+				line.EndLine();
 			}
-
-			var result = new StringBuilder();
-			result.Append(GetName(source));
-			foreach (var edge in path)
-				result.Append(" -> ")
-					.Append(GetName(edge.Target));
-
-			Console.WriteLine(PREFIX + result);
+			finally
+			{
+				result.DecreaseIndent();
+				result.AppendLine();
+			}
 		}
 	}
 }

@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.utils;
+using org.pescuma.dependencyconsole.utils;
 
 namespace org.pescuma.dependencyconsole.commands
 {
@@ -12,49 +12,53 @@ namespace org.pescuma.dependencyconsole.commands
 			get { return "info"; }
 		}
 
-		protected override void InternalHandle(string args, DependencyGraph graph)
+		protected override void InternalHandle(Output result, string args, DependencyGraph graph)
 		{
 			var libs = FilterLibs(graph, args);
 
 			if (!libs.Any())
-				Console.WriteLine("No libraries found");
+				result.AppendLine("No libraries found");
 			else
 				libs.SortBy(Library.NaturalOrdering)
-					.ForEach(OutputInfo);
+					.ForEach(l => OutputInfo(result, l));
 		}
 
-		private void OutputInfo(Library lib)
+		private void OutputInfo(Output result, Library lib)
 		{
-			Console.WriteLine(GetName(lib) + ":");
+			result.AppendLine(GetName(lib) + ":");
+			result.IncreaseIndent();
 
 			var proj = lib as Project;
 			if (proj != null)
 			{
-				WriteProperty("Type", "Project");
-				WriteProperty("Project name", proj.ProjectName);
-				WriteProperty("Library name", proj.LibraryName);
-				WriteProperty("Project path", proj.ProjectPath);
-				WriteProperty("GUID", proj.Guid != null ? proj.Guid.ToString() : "missing");
+				WriteProperty(result, "Type", "Project");
+				WriteProperty(result, "Project name", proj.ProjectName);
+				WriteProperty(result, "Library name", proj.LibraryName);
+				WriteProperty(result, "Project path", proj.ProjectPath);
+				WriteProperty(result, "GUID", proj.Guid != null ? proj.Guid.ToString() : "missing");
 			}
 			else
 			{
-				WriteProperty("Type", "Library");
-				WriteProperty("Library name", lib.LibraryName);
+				WriteProperty(result, "Type", "Library");
+				WriteProperty(result, "Library name", lib.LibraryName);
 			}
 
 			if (lib.GroupElement != null)
-				WriteProperty("Group", lib.GroupElement.Name);
+				WriteProperty(result, "Group", lib.GroupElement.Name);
 
-			lib.Languages.ForEach(p => WriteProperty("Language", p));
+			lib.Languages.ForEach(p => WriteProperty(result, "Language", p));
 
 			var projectPath = (lib is Project ? ((Project) lib).ProjectPath : null);
 			lib.Paths.Where(p => p != projectPath)
-				.ForEach(p => WriteProperty("Path", p));
+				.ForEach(p => WriteProperty(result, "Path", p));
+
+			result.DecreaseIndent();
+			result.AppendLine();
 		}
 
-		private void WriteProperty(string name, string value)
+		private void WriteProperty(Output result, string name, string value)
 		{
-			Console.WriteLine(PREFIX + name + ": " + value);
+			result.AppendLine(name + ": " + value);
 		}
 	}
 }

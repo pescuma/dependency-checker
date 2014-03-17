@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencyconsole.utils;
 
 namespace org.pescuma.dependencyconsole.commands
 {
@@ -17,11 +18,16 @@ namespace org.pescuma.dependencyconsole.commands
 				return false;
 
 			var args = RemoveCommand(line, Name);
-			InternalHandle(args, graph);
+
+			var result = new Output();
+			InternalHandle(result, args, graph);
+
+			result.ToConsole();
+
 			return true;
 		}
 
-		protected abstract void InternalHandle(string args, DependencyGraph graph);
+		protected abstract void InternalHandle(Output result, string args, DependencyGraph graph);
 
 		private bool IsCommandOrShortcut(string line, string name)
 		{

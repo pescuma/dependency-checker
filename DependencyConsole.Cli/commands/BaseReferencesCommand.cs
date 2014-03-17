@@ -1,58 +1,70 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.utils;
+using org.pescuma.dependencyconsole.utils;
 using QuickGraph.Algorithms.Search;
 
 namespace org.pescuma.dependencyconsole.commands
 {
 	internal abstract class BaseReferencesCommand : BaseCommand
 	{
-		protected void OutputReferences(string args, DependencyGraph graph, string type)
+		protected void OutputReferences(Output result, string args, DependencyGraph graph, string type)
 		{
 			var libs = FilterLibs(graph, args);
 
 			if (!libs.Any())
-				Console.WriteLine("No libraries found");
+				result.AppendLine("No libraries found");
 			else
 				libs.SortBy(Library.NaturalOrdering)
-					.ForEach(l => OutputReferences(graph, l, type));
+					.ForEach(l => OutputReferences(result, graph, l, type));
 		}
 
-		private void OutputReferences(DependencyGraph graph, Library lib, string type)
+		private void OutputReferences(Output result, DependencyGraph graph, Library lib, string type)
 		{
-			Console.WriteLine(GetName(lib) + ":");
+			result.AppendLine(GetName(lib) + ":");
 
 			var directDeps = new HashSet<Library>(graph.OutEdges(lib)
 				.Select(d => d.Target));
 
-			Console.WriteLine(PREFIX + "Direct " + type + ":");
+			result.IncreaseIndent();
+			result.AppendLine("Direct " + type + ":");
 
-			Output(directDeps);
+			result.IncreaseIndent();
+			Output(result, directDeps);
+			result.DecreaseIndent();
 
-			if (!directDeps.Any())
-				return;
+			result.DecreaseIndent();
 
-			Console.WriteLine(PREFIX + "Indirect " + type + ":");
-
-			var indirectDeps = ComputeIndirectDeps(graph, lib)
-				.Where(d => !directDeps.Contains(d))
+			if (directDeps.Any())
+			{
+				var indirectDeps = ComputeIndirectDeps(graph, lib)
+					.Where(d => !directDeps.Contains(d))
 // ReSharper disable once PossibleUnintendedReferenceComparison
-				.Where(d => d != lib);
+					.Where(d => d != lib);
 
-			Output(indirectDeps);
+				result.IncreaseIndent();
+				result.AppendLine("Indirect " + type + ":");
+
+				result.IncreaseIndent();
+				Output(result, indirectDeps);
+				result.DecreaseIndent();
+
+				result.DecreaseIndent();
+			}
+
+			result.AppendLine();
 		}
 
-		private void Output(IEnumerable<Library> depsList)
+		private void Output(Output result, IEnumerable<Library> depsList)
 		{
 			var deps = depsList as IList<Library> ?? depsList.ToList();
 
 			if (!deps.Any())
-				Console.WriteLine(PREFIX + PREFIX + "none found");
+				result.AppendLine("none found");
 			else
 				deps.SortBy(Library.NaturalOrdering)
-					.ForEach(l => Console.WriteLine(PREFIX + PREFIX + GetName(l)));
+					.ForEach(l => result.AppendLine(GetName(l)));
 		}
 
 		private static List<Library> ComputeIndirectDeps(DependencyGraph graph, Library lib)
