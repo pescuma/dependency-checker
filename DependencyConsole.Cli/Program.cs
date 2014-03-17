@@ -30,6 +30,7 @@ namespace org.pescuma.dependencyconsole
 				new DependentsOfCommand(),
 				new ReferencedByCommand(),
 				new CircularDependenciesCommand(),
+				new PathBetweenCommand(),
 				new QuitCommand()
 			};
 

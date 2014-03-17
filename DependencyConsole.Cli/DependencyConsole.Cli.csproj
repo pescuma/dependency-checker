@@ -63,6 +63,7 @@
     <Compile Include="commands\DependentsOfCommand.cs" />
     <Compile Include="commands\InfoCommand.cs" />
     <Compile Include="commands\LibsCommand.cs" />
+    <Compile Include="commands\PathBetweenCommand.cs" />
     <Compile Include="commands\QuitCommand.cs" />
     <Compile Include="commands\ReferencedByCommand.cs" />
     <Compile Include="Program.cs" />
