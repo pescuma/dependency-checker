@@ -58,8 +58,9 @@
   <ItemGroup>
     <Compile Include="commands\BaseCommand.cs" />
     <Compile Include="commands\BaseReferencesCommand.cs" />
+    <Compile Include="commands\CircularDependenciesCommand.cs" />
     <Compile Include="commands\Command.cs" />
-    <Compile Include="commands\DependenciesOfCommand.cs" />
+    <Compile Include="commands\DependentsOfCommand.cs" />
     <Compile Include="commands\InfoCommand.cs" />
     <Compile Include="commands\LibsCommand.cs" />
     <Compile Include="commands\QuitCommand.cs" />
