@@ -21,8 +21,7 @@ namespace org.pescuma.dependencyconsole.commands
 				.ToList();
 			if (args.Count != 2)
 			{
-				result.AppendLine("Wrong arguments.");
-				result.AppendLine("You must pass 2 projects, separated by ->");
+				result.AppendLine("You must specify 2 libraries, separated by ->");
 				return;
 			}
 

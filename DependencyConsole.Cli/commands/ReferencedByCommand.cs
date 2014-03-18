@@ -12,6 +12,12 @@ namespace org.pescuma.dependencyconsole.commands
 
 		protected override void InternalHandle(Output result, string args, DependencyGraph graph)
 		{
+			if (args == "")
+			{
+				result.AppendLine("You need to specify a filter for the libraries");
+				return;
+			}
+
 			OutputReferences(result, args, graph, "references");
 		}
 	}
