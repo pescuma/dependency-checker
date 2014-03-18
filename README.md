@@ -107,7 +107,29 @@ Also note that a project can have more than 1 name: one for the project itself a
 
 ### Matching projects and library names
 
-In some of the lines you need to specify a library name (this include projects names too). There are multiple ways to specify a library name:
+In some of the lines you need to specify a library name (this include projects names too). There are multiple ways to specify a library name: (all matching is case insensitive)
+
+###### By name
+Just any of the project or library names. For ex: `Project.Name`.
+
+###### Using `*`
+Similar to filename matching. For ex: `*.Name` matches all libraries/projects with name ending in `.Name`.
+
+###### Using regular expressions - `regex:`
+Any regular expression can be used. Prefix the regex with `regex:`. For ex: `regex: .*\.Name` matches all libraries/projects with name ending in `.Name`.
+
+###### Match by path - `path:`
+Can be the full path of a folder name. When using a folder name all sub-folders match too. For ex: `path: C:\` will match all libraries/projects in the `C` drive.
+
+###### Match by language - `lang:`
+Matches all libraries/projects that are in the language. Please note that, for libraries, not always the language can ge guessed. For ex: `lang: java` matches all java libraries/projects
+
+###### Match by type - `project:` or `lib:`
+
+###### Match only local or not local - `local:` or `non local:`
+Local libraries/projects are the ones inside one of the inputs. Non local are the ones that are outside the input folders. If a project references a librarie or a project outside the input paths, those are also read.
+
+###### Match by type and local or not local - `local project:` or `non local project:` or `local lib:` or `lnon local lib:`
 
 
 
