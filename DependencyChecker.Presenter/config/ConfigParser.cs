@@ -176,7 +176,9 @@ namespace org.pescuma.dependencychecker.presenter.config
 
 		private Func<Library, bool> ParseLanguage(string line)
 		{
-			return proj => proj.Languages.Any(l => l.Equals(line, StringComparison.CurrentCultureIgnoreCase));
+			var m = CreateStringMatcher(line);
+
+			return proj => proj.Languages.Any(m);
 		}
 
 		private Func<Library, bool> ParseSimpleMatch(string line, ConfigLocation location)
@@ -184,16 +186,23 @@ namespace org.pescuma.dependencychecker.presenter.config
 			if (line.IndexOf(':') >= 0 || line.IndexOf('>') >= 0)
 				throw new ConfigParserException(location, "Invalid expression");
 
+			var m = CreateStringMatcher(line);
+
+			return proj => proj.Names.Any(m);
+		}
+
+		private Func<string, bool> CreateStringMatcher(string line)
+		{
 			if (line.IndexOf('*') >= 0)
 			{
 				var pattern = new Regex("^" + line.Replace(".", "\\.")
 					.Replace("*", ".*") + "$", RegexOptions.IgnoreCase);
 
-				return proj => proj.Names.Any(pattern.IsMatch);
+				return pattern.IsMatch;
 			}
 			else
 			{
-				return proj => proj.Names.Any(n => line.Equals(n, StringComparison.CurrentCultureIgnoreCase));
+				return n => line.Equals(n, StringComparison.CurrentCultureIgnoreCase);
 			}
 		}
 
