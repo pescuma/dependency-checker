@@ -108,7 +108,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 			config.Groups.Add(new Config.Group(name, matcher, location));
 		}
 
-		private Func<Library, bool> ParseMatcher(string matchLine, ConfigLocation location)
+		public Func<Library, bool> ParseMatcher(string matchLine, ConfigLocation location)
 		{
 			Func<Library, bool> result = null;
 
@@ -126,7 +126,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 				{ "lib:", (line, loc) => result = ParsePlaceAndType(line, loc, null, false) },
 				{ "local lib:", (line, loc) => result = ParsePlaceAndType(line, loc, true, false) },
 				{ "non local lib:", (line, loc) => result = ParsePlaceAndType(line, loc, false, false) },
-				{ "", (line, loc) => result = ParseSimpleMatch(line) },
+				{ "", (line, loc) => result = ParseSimpleMatch(line, loc) },
 			};
 
 			ParseLine(lineTypes, matchLine, location);
@@ -179,14 +179,17 @@ namespace org.pescuma.dependencychecker.presenter.config
 			return proj => proj.Languages.Any(l => l.Equals(line, StringComparison.CurrentCultureIgnoreCase));
 		}
 
-		private Func<Library, bool> ParseSimpleMatch(string line)
+		private Func<Library, bool> ParseSimpleMatch(string line, ConfigLocation location)
 		{
+			if (line.IndexOf(':') >= 0 || line.IndexOf('>') >= 0)
+				throw new ConfigParserException(location, "Invalid expression");
+
 			if (line.IndexOf('*') >= 0)
 			{
 				var pattern = new Regex("^" + line.Replace(".", "\\.")
 					.Replace("*", ".*") + "$", RegexOptions.IgnoreCase);
 
-				return proj => proj.Names.Any(n => line.Equals(n, StringComparison.CurrentCultureIgnoreCase));
+				return proj => proj.Names.Any(pattern.IsMatch);
 			}
 			else
 			{

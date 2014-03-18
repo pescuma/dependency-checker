@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencychecker.presenter.config;
 using org.pescuma.dependencyconsole.utils;
 
 namespace org.pescuma.dependencyconsole.commands
@@ -61,10 +61,9 @@ namespace org.pescuma.dependencyconsole.commands
 
 			if (search != "")
 			{
-				var pattern = new Regex("^" + search.Replace(".", "\\.")
-					.Replace("*", ".*") + "$", RegexOptions.IgnoreCase);
+				var matcher = new ConfigParser().ParseMatcher(search, null);
 
-				libs = libs.Where(l => l.Names.Any(pattern.IsMatch));
+				libs = libs.Where(matcher);
 			}
 
 			return libs.ToList();

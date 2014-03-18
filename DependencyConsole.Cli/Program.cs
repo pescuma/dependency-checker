@@ -4,12 +4,24 @@ using System.Linq;
 using System.Xml.Linq;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.model.xml;
+using org.pescuma.dependencychecker.presenter.config;
 using org.pescuma.dependencyconsole.commands;
 
 namespace org.pescuma.dependencyconsole
 {
 	internal class Program
 	{
+		private static Command[] commands =
+		{
+			new LibsCommand(),
+			new InfoCommand(),
+			new DependentsOfCommand(),
+			new ReferencedByCommand(),
+			new CircularDependenciesCommand(),
+			new PathBetweenCommand(),
+			new QuitCommand()
+		};
+
 		private static int Main(string[] args)
 		{
 			if (args.Length != 1)
@@ -22,17 +34,6 @@ namespace org.pescuma.dependencyconsole
 			var graph = LoadGraph(args[0]);
 
 			Console.WriteLine("Graph loaded.");
-
-			var commands = new Command[]
-			{
-				new LibsCommand(),
-				new InfoCommand(),
-				new DependentsOfCommand(),
-				new ReferencedByCommand(),
-				new CircularDependenciesCommand(),
-				new PathBetweenCommand(),
-				new QuitCommand()
-			};
 
 			try
 			{
@@ -48,19 +49,7 @@ namespace org.pescuma.dependencyconsole
 					if (string.IsNullOrEmpty(line))
 						continue;
 
-					if (line == "help" || line == "?")
-					{
-						Console.WriteLine("Commands: " + string.Join(", ", commands.Select(c => c.Name)));
-						Console.WriteLine("(you can also use only the first letter of the command)");
-						continue;
-					}
-
-					var handled = commands.Any(c => c.Handle(line, graph));
-					if (!handled)
-					{
-						Console.WriteLine("Unknown command: " + line);
-						Console.WriteLine("Type ? for help");
-					}
+					RunCommand(line, graph);
 				}
 			}
 			catch (QuitException)
@@ -68,6 +57,32 @@ namespace org.pescuma.dependencyconsole
 			}
 
 			return 0;
+		}
+
+		private static void RunCommand(string line, DependencyGraph graph)
+		{
+			if (line == "help" || line == "?")
+			{
+				Console.WriteLine("Commands: " + string.Join(", ", commands.Select(c => c.Name)));
+				Console.WriteLine("(you can also use only the first letter of the command)");
+				return;
+			}
+
+			try
+			{
+				var handled = commands.Any(c => c.Handle(line, graph));
+
+				if (!handled)
+				{
+					Console.WriteLine("Unknown command: " + line);
+					Console.WriteLine("Type ? for help");
+				}
+			}
+			catch (ConfigParserException e)
+			{
+				Console.WriteLine(e.Message + ": " + line);
+				Console.WriteLine("Type ? for help");
+			}
 		}
 
 		private static DependencyGraph LoadGraph(string filename)

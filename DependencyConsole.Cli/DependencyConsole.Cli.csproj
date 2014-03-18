@@ -79,6 +79,10 @@
       <Project>{8ceb9917-e9c4-4104-945c-0a2ebd68613c}</Project>
       <Name>DependencyChecker.Model</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DependencyChecker.Presenter\DependencyChecker.Presenter.csproj">
+      <Project>{1cf15bfd-785f-4496-8206-f5460997768f}</Project>
+      <Name>DependencyChecker.Presenter</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DependencyChecker.Utils\DependencyChecker.Utils.csproj">
       <Project>{e5435dde-1597-4b7b-bfa8-3140dfebb587}</Project>
       <Name>DependencyChecker.Utils</Name>

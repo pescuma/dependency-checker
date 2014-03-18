@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencyconsole.utils;
@@ -13,25 +14,27 @@ namespace org.pescuma.dependencyconsole.commands
 			get { return "path between"; }
 		}
 
-		protected override void InternalHandle(Output result, string args, DependencyGraph graph)
+		protected override void InternalHandle(Output result, string anArgs, DependencyGraph graph)
 		{
-			var argsArr = args.Split(' ');
-			if (argsArr.Length != 2)
+			var args = anArgs.Split(new[] { "->" }, StringSplitOptions.None)
+				.Select(e => e.Trim())
+				.ToList();
+			if (args.Count != 2)
 			{
 				result.AppendLine("Wrong arguments.");
-				result.AppendLine("You must pass 2 projects, separated by space.");
+				result.AppendLine("You must pass 2 projects, separated by ->");
 				return;
 			}
 
-			var libs0 = FilterLibs(graph, argsArr[0]);
-			var libs1 = FilterLibs(graph, argsArr[1]);
+			var libs0 = FilterLibs(graph, args[0]);
+			var libs1 = FilterLibs(graph, args[1]);
 
 			if (!libs0.Any() || !libs1.Any())
 			{
 				if (!libs0.Any())
-					result.AppendLine("No projects found matching {0}", argsArr[0]);
+					result.AppendLine("No projects found matching {0}", args[0]);
 				if (!libs1.Any())
-					result.AppendLine("No projects found matching {0}", argsArr[1]);
+					result.AppendLine("No projects found matching {0}", args[1]);
 				return;
 			}
 
