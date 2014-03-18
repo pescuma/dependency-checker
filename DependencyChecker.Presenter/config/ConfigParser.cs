@@ -181,7 +181,17 @@ namespace org.pescuma.dependencychecker.presenter.config
 
 		private Func<Library, bool> ParseSimpleMatch(string line)
 		{
-			return proj => proj.Names.Any(n => line.Equals(n, StringComparison.CurrentCultureIgnoreCase));
+			if (line.IndexOf('*') >= 0)
+			{
+				var pattern = new Regex("^" + line.Replace(".", "\\.")
+					.Replace("*", ".*") + "$", RegexOptions.IgnoreCase);
+
+				return proj => proj.Names.Any(n => line.Equals(n, StringComparison.CurrentCultureIgnoreCase));
+			}
+			else
+			{
+				return proj => proj.Names.Any(n => line.Equals(n, StringComparison.CurrentCultureIgnoreCase));
+			}
 		}
 
 		private void ParseOutputProjects(string line, ConfigLocation location)
