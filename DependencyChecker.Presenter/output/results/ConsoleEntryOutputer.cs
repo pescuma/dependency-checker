@@ -30,10 +30,13 @@ namespace org.pescuma.dependencychecker.presenter.output.results
 		{
 			var result = new StringBuilder();
 
-			result.Append("[")
-				.Append(entry.Severity.ToString()
-					.ToUpper())
-				.Append("] ");
+			result.Append("[");
+			if (entry is DependencyRuleMatch && ((DependencyRuleMatch) entry).Allowed)
+				result.Append("ALLOWED");
+			else
+				result.Append(entry.Severity.ToString()
+					.ToUpper());
+			result.Append("] ");
 			result.Append(ToConsole(entry.Messsage));
 
 			if (verbose)

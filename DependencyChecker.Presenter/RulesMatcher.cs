@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencychecker.presenter.config;
 using org.pescuma.dependencychecker.presenter.output;
 using org.pescuma.dependencychecker.presenter.rules;
 
@@ -9,11 +8,11 @@ namespace org.pescuma.dependencychecker.presenter
 {
 	public class RulesMatcher
 	{
-		public static List<OutputEntry> Match(DependencyGraph graph, Config config)
+		public static List<OutputEntry> Match(DependencyGraph graph, List<Rule> rules)
 		{
 			var result = new List<OutputEntry>();
 
-			foreach (var rule in config.Rules)
+			foreach (var rule in rules)
 			{
 				var matches = rule.Process(graph);
 				if (matches != null)
@@ -25,7 +24,7 @@ namespace org.pescuma.dependencychecker.presenter
 
 			foreach (var proj in projs)
 			{
-				foreach (var rule in config.Rules)
+				foreach (var rule in rules)
 				{
 					var matches = rule.Process(graph, proj);
 					if (matches != null)
@@ -38,7 +37,7 @@ namespace org.pescuma.dependencychecker.presenter
 
 			foreach (var dep in deps)
 			{
-				var match = FindMatch(config.Rules, dep);
+				var match = FindMatch(rules, dep);
 
 				if (match != null)
 					result.Add(match);

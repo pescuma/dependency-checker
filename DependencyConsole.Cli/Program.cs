@@ -19,6 +19,7 @@ namespace org.pescuma.dependencyconsole
 			new ReferencedByCommand(),
 			new CircularDependenciesCommand(),
 			new PathBetweenCommand(),
+			new RuleCommand(),
 			new QuitCommand()
 		};
 
@@ -80,7 +81,7 @@ namespace org.pescuma.dependencyconsole
 			}
 			catch (ConfigParserException e)
 			{
-				Console.WriteLine(e.Message + ": " + line);
+				Console.WriteLine(e.Message);
 				Console.WriteLine("Type ? for help");
 			}
 		}

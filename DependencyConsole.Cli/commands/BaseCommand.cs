@@ -8,8 +8,6 @@ namespace org.pescuma.dependencyconsole.commands
 {
 	internal abstract class BaseCommand : Command
 	{
-		protected const string PREFIX = "    ";
-
 		public abstract string Name { get; }
 
 		public bool Handle(string line, DependencyGraph graph)
@@ -61,7 +59,7 @@ namespace org.pescuma.dependencyconsole.commands
 
 			if (search != "")
 			{
-				var matcher = new ConfigParser().ParseMatcher(search, null);
+				var matcher = new ConfigParser().ParseMatcher(search, new ConfigLocation(1, search));
 
 				libs = libs.Where(matcher);
 			}

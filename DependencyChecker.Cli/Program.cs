@@ -36,7 +36,7 @@ namespace org.pescuma.dependencychecker.cli
 
 				var architecture = ArchitectureLoader.Load(config, graph);
 
-				warnings.AddRange(RulesMatcher.Match(graph, config));
+				warnings.AddRange(RulesMatcher.Match(graph, config.Rules));
 
 				warnings = warnings.Where(e => !(e is DependencyRuleMatch) || !((DependencyRuleMatch) e).Allowed)
 					.Where(w => !config.InOutput.Ignore.Any(f => f(w)))
