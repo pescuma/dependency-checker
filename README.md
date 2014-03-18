@@ -29,19 +29,19 @@ input: ..
 ignore: System
 
 # Ignore all libraries or projects that are not inside the input folders.
-ignore: non local: regex: .*
+ignore: non local: *
 
 # Ignore all libraries that are not projects.
-ignore: lib: regex: .*
+ignore: lib: *
 
 # Both previous could be written as
-#ignore: not: local project: regex: .*
+#ignore: not: local project: *
 
 
 # An assembly can be in only one group.
 # The first line that matches will be used.
-group: Command line += regex: .*\.Cli
-group: Tests += regex: .*\.Test
+group: Command line += *.Cli
+group: Tests += *.Test
 
 
 # These rules always run
