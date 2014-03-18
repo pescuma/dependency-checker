@@ -1,24 +1,21 @@
 ﻿using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencychecker.presenter.output;
 using org.pescuma.dependencychecker.presenter.utils;
 
 namespace org.pescuma.dependencyconsole.commands
 {
-	internal class ReferencedByCommand : BaseReferencesCommand
+	internal class GroupsCommand : BaseCommand
 	{
 		public override string Name
 		{
-			get { return "referenced by"; }
+			get { return "groups"; }
 		}
 
 		protected override void InternalHandle(Output result, string args, DependencyGraph graph)
 		{
-			if (args == "")
-			{
-				result.AppendLine("You need to specify a filter for the libraries");
-				return;
-			}
+			var libs = FilterLibs(graph, args);
 
-			OutputReferences(result, args, graph, "references");
+			ConsoleOutputer.GroupsToConsole(result, libs);
 		}
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using org.pescuma.dependencychecker.model;
-using org.pescuma.dependencyconsole.utils;
+using org.pescuma.dependencychecker.presenter.utils;
 
 namespace org.pescuma.dependencyconsole.commands
 {

@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencychecker.presenter.utils;
 using org.pescuma.dependencychecker.utils;
-using org.pescuma.dependencyconsole.utils;
 
 namespace org.pescuma.dependencyconsole.commands
 {

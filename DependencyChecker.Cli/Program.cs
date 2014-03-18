@@ -10,6 +10,7 @@ using org.pescuma.dependencychecker.presenter.config;
 using org.pescuma.dependencychecker.presenter.input;
 using org.pescuma.dependencychecker.presenter.output;
 using org.pescuma.dependencychecker.presenter.rules;
+using org.pescuma.dependencychecker.presenter.utils;
 
 namespace org.pescuma.dependencychecker.cli
 {
@@ -107,40 +108,8 @@ namespace org.pescuma.dependencychecker.cli
 			if (!filenames.Any())
 				return;
 
-			var groups = projects.GroupBy(p => p.GroupElement)
-				.ToList();
-
-			groups.Sort((e1, e2) =>
-			{
-				var g1 = e1.Key;
-				var g2 = e2.Key;
-
-				if (Equals(g1, g2))
-					return 0;
-
-				if (g1 == null)
-					return 1;
-
-				if (g2 == null)
-					return -1;
-
-				return string.Compare(g1.Name, g2.Name, StringComparison.CurrentCultureIgnoreCase);
-			});
-
-			var result = new StringBuilder();
-			groups.ForEach(g =>
-			{
-				result.Append(g.Key != null ? g.Key.Name : "Without a group")
-					.Append(":\n");
-
-				var projs = g.ToList();
-				projs.Sort(Library.NaturalOrdering);
-				projs.ForEach(p => result.Append("  - ")
-					.Append(string.Join(" or ", p.SortedNames))
-					.Append("\n"));
-
-				result.Append("\n");
-			});
+			var result = new Output("  - ");
+			ConsoleOutputer.GroupsToConsole(result, projects);
 			var text = result.ToString();
 
 			foreach (var filename in filenames)

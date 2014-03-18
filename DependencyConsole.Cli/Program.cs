@@ -15,6 +15,7 @@ namespace org.pescuma.dependencyconsole
 		{
 			new LibsCommand(),
 			new InfoCommand(),
+			new GroupsCommand(),
 			new DependentsOfCommand(),
 			new ReferencedByCommand(),
 			new CircularDependenciesCommand(),

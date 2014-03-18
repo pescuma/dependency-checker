@@ -1,24 +1,28 @@
 ﻿using System;
 using System.Text;
 
-namespace org.pescuma.dependencyconsole.utils
+namespace org.pescuma.dependencychecker.presenter.utils
 {
-	internal class Output
+	public class Output
 	{
-		private const string PREFIX = "    ";
-
+		private string prefix;
 		private readonly StringBuilder text = new StringBuilder();
 		private string indent = "";
 
+		public Output(string prefix)
+		{
+			this.prefix = prefix;
+		}
+
 		public Output IncreaseIndent()
 		{
-			indent += PREFIX;
+			indent += prefix;
 			return this;
 		}
 
 		public Output DecreaseIndent()
 		{
-			indent = indent.Substring(0, indent.Length - PREFIX.Length);
+			indent = indent.Substring(0, indent.Length - prefix.Length);
 			return this;
 		}
 
@@ -68,13 +72,18 @@ namespace org.pescuma.dependencyconsole.utils
 			return new LineOutput(text);
 		}
 
+		public override string ToString()
+		{
+			return text.ToString();
+		}
+
 		public void ToConsole()
 		{
-			Console.WriteLine(text.ToString()
+			Console.WriteLine(ToString()
 				.TrimEnd());
 		}
 
-		internal class LineOutput
+		public class LineOutput
 		{
 			private readonly StringBuilder text;
 

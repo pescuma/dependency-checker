@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dependencychecker.model;
+using org.pescuma.dependencychecker.presenter.utils;
 using org.pescuma.dependencychecker.utils;
-using org.pescuma.dependencyconsole.utils;
 using QuickGraph.Algorithms.Search;
 
 namespace org.pescuma.dependencyconsole.commands
