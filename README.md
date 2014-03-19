@@ -153,9 +153,6 @@ rule:  * -X-> Tests
 This will make the dependency of `WrongProject` with `Tests` to generate a warning but it won't affect the exit code.
 
 
-
-
-
 ### Matching projects and library names
 
 In some of the lines you need to specify a library name (this include projects names too). There are multiple ways to specify a library name: (all matching is case insensitive)
@@ -188,3 +185,14 @@ Inverts the test that cames after it. For ex: `not: lang: C#` matches all projec
 Please note that `not: local project: *` is different from `non local project: *`. The first one includes all the libraries too.
 
 
+### Ignoring configuration infos - `in output:`
+
+Some informational entries will be created to list commom problems in configuration files. If you want you can suppress those from the output. Those are:
+
+  - `in output: ignore loading infos`: do not output information about problems during reading projects
+  - `in output: ignore config infos`: do not output information about problems in configuration file
+
+
+### Writing the results
+
+The main output is the list of results, but a few other ones can be created too. Those can be used to debug the processing, as input to other tools or just for fum :)
