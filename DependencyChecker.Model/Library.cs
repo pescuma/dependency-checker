@@ -8,7 +8,8 @@ namespace org.pescuma.dependencychecker.model
 {
 	public class Library
 	{
-		public static Comparison<Library> NaturalOrdering = (p1, p2) =>
+// ReSharper disable once InconsistentNaming
+		public static readonly Comparison<Library> NaturalOrdering = (p1, p2) =>
 		{
 			var cmp = String.Compare(p1.Name, p2.Name, StringComparison.CurrentCultureIgnoreCase);
 			if (cmp != 0)

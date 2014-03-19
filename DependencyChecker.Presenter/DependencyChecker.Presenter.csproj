@@ -98,7 +98,6 @@
     <Compile Include="rules\Severity.cs" />
     <Compile Include="rules\UniqueDependenciesRule.cs" />
     <Compile Include="rules\UniqueProjectRule.cs" />
-    <Compile Include="utils\ExtensionMethods.cs" />
     <Compile Include="utils\Output.cs" />
     <Compile Include="utils\RuleUtils.cs" />
   </ItemGroup>

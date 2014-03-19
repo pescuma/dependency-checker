@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.presenter;
 using org.pescuma.dependencychecker.presenter.architecture;
@@ -62,6 +61,12 @@ namespace org.pescuma.dependencychecker.cli
 			catch (ConfigException e)
 			{
 				Console.WriteLine("Error: " + e.Message);
+				Console.WriteLine();
+				return -1;
+			}
+			catch (Exception e)
+			{
+				Console.WriteLine(e);
 				Console.WriteLine();
 				return -1;
 			}

@@ -48,7 +48,13 @@ namespace org.pescuma.dependencychecker.utils
 		public static void ThrowIfFalse(bool param)
 		{
 			if (!param)
-				throw new ArgumentOutOfRangeException();
+				throw new ArgumentException();
+		}
+
+		public static void ThrowIfFalse(bool param, string message)
+		{
+			if (!param)
+				throw new ArgumentException(message);
 		}
 
 		public static void ThrowIfOutOfRange(int param, int min, int max)
