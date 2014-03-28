@@ -22,7 +22,7 @@
     <NUnitDir>$(NugetPackagesDir)\NUnit.Runners.2.6.3\tools</NUnitDir>
     <OpenCoverDir>$(NugetPackagesDir)\OpenCover.4.5.2506</OpenCoverDir>
     <ReSharperDir>$(MSBuildProjectDirectory)\tools\resharper-commandline</ReSharperDir>
-    <BuildHealthCmd>java -jar "$(MSBuildProjectDirectory)\tools\buildhealth-0.2.jar" --home "$(BuildHealthHome)"</BuildHealthCmd>
+    <BuildHealthCmd>java -jar "$(MSBuildProjectDirectory)\tools\buildhealth.jar" --home "$(BuildHealthHome)"</BuildHealthCmd>
   </PropertyGroup>
 
   <Import Project="$(SourcesDir)\.nuget\NuGet.targets" Condition="Exists('$(SourcesDir)\.nuget\NuGet.targets')" />
