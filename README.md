@@ -2,7 +2,7 @@
 
 The objective of this project is to allow to fail a build when an incorrect depepdency is created.
 
-To do that, it identifies the projects and libraries being used and allows you to specify the rules that must be followed.
+To do that, it identifies the projects and libraries being used and allows you to specify the rules that must be followed. Currently it can load Visual Studio and Eclipse project files.
 
 There is also a second command line utility called `dependency-console` that can be used to interactively query the dependency data.
 
@@ -195,4 +195,30 @@ Some informational entries will be created to list commom problems in configurat
 
 ### Writing the results
 
-The main output is the list of results, but a few other ones can be created too. Those can be used to debug the processing, as input to other tools or just for fum :)
+The main output is the list of results, but a few other ones can be created too. Those can be used to debug the processing, as input to other tools or just for fun :)
+
+Those are:
+
+  - `output projects:` - outputs a list of all projects and libraries that were found
+  - `output groups:` - outputs a list of all groups and which projects/libraries are inside them
+  - `output dependencies:` - outputs all dependencies found. The format depends on the file extension: `.txt` for a humam readable file, `.xml` for a XML file and `.dot` for a Graphviz dot file. Please note that this file can be quite big.
+  - `output dependencies with errors:` - outputs a list of dependencies that were flaged by any of the rules. The format depends on the file extension: `.txt` for a humam readable file, `.xml` for a XML file and `.dot` for a Graphviz dot file.
+  - `output architecture:` - output the extrapolated "architeture" of the projects. The architecture is created based on the groups and a match of all the projects/libraries of one group againt all the dependency rules (if a project/library is not inside one group it is ignored)
+  - `output results:` - output the results of the rules. This is the "main" output of the program. The format depends on the file extension: `.txt` for a humam readable file, `.xml` for a XML file, `.dot` for a Graphviz dot file and `console` to write to the console.
+
+
+# dependency-console
+
+This is a utility command that takes as input a `dependencies.xml` output of `dependency-checker` and allows you to query the data via command line. 
+
+It has the following commands: (all accept a filter as detailed in Matching projects and library names)
+   - `libs` - list all the projects and libraries
+   - `info` - show details of a project or library
+   - `groups` - show the groups and the projects/libraries inside them
+   - `dependents of` - show the direct and indirect dependants of a project/library
+   - `referenced by` - show all the projects/libraries that are referenced directly or indirectly by a project/library
+   - `circular dependencies` - show all circular dependencies between projects/libraries
+   - `path between` - show the dependency path between 2 projects/libraries
+   - `rule:` - see the results of a rule
+   - `quit` - quit the program
+
