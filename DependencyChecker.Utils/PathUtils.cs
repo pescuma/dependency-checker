@@ -21,5 +21,19 @@ namespace org.pescuma.dependencychecker.utils
 			return fullPath.Equals(beginPath, StringComparison.CurrentCultureIgnoreCase)
 			       || fullPath.StartsWith(beginPath + "\\", StringComparison.CurrentCultureIgnoreCase);
 		}
+
+		public static string RemoveSeparatorAtEnd(string absolute)
+		{
+			var last = absolute.Length-1;
+
+			if (last < 0)
+				return absolute;
+
+			else if (absolute[last] == Path.DirectorySeparatorChar)
+				return absolute.Substring(0, last);
+
+			else
+				return absolute;
+		}
 	}
 }

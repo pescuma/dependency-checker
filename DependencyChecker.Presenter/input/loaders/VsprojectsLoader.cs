@@ -60,6 +60,14 @@ namespace org.pescuma.dependencychecker.presenter.input.loaders
 				.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase);
 			foreach (var externalCsprojFile in externalCsprojFiles)
 			{
+				if (paths.Any(p => externalCsprojFile.StartsWith(p + Path.DirectorySeparatorChar)))
+				{
+					var msg = new OutputMessage().Append("Failed to load a referenced project: ")
+						.Append(externalCsprojFile);
+					warnings.Add(new LoadingOutputEntry("Referenced project not found", msg));
+					continue;
+				}
+
 				try
 				{
 					var csproj = new VSProjReader(externalCsprojFile);

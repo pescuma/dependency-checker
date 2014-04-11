@@ -86,7 +86,8 @@ namespace org.pescuma.dependencychecker.presenter.config
 
 		private void ParseInput(string line, ConfigLocation configLocation)
 		{
-			config.Inputs.Add(PathUtils.ToAbsolute(basePath, line));
+			var absolute = PathUtils.ToAbsolute(basePath, line);
+			config.Inputs.Add(PathUtils.RemoveSeparatorAtEnd(absolute));
 		}
 
 		private void ParseGroup(string line, ConfigLocation location)
