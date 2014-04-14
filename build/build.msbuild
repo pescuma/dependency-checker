@@ -173,7 +173,7 @@
     <Exec
       Command="$(BuildHealthCmd) compute tasks &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
     <Exec
-      Command="$(BuildHealthCmd) projects from-vsproj &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
+      Command="$(BuildHealthCmd) projects from-vs &quot;$(SourcesDir)&quot; --exclude &quot;$(MSBuildProjectDirectory)&quot; --exclude &quot;$(NugetPackagesDir)&quot;" />
     <Exec Command="$(BuildHealthCmd) add diskusage &quot;$(ResultsDir)&quot; --exclude &quot;$(ReportsDir)&quot;" />
     <Exec Command="$(BuildHealthCmd) config set staticanalysis &quot;*&quot; &quot;Dependency Checker&quot; warn = 1" />
     <Exec Command="$(BuildHealthCmd) notify" />
