@@ -54,15 +54,17 @@ namespace org.pescuma.dependencychecker.presenter.config
 				{ "in output:", ParseInOutput },
 			};
 
+			var re = new Regex(@"(?<![a-zA-Z0-9])" + COMMENT, RegexOptions.IgnoreCase);
+
 			foreach (var item in lines.Indexed())
 			{
 				// Line number starts in 1
 				var location = new ConfigLocation(item.Index + 1, item.Item);
 				var line = item.Item.Trim();
 
-				var pos = line.IndexOf(COMMENT, StringComparison.Ordinal);
-				if (pos >= 0)
-					line = line.Substring(0, pos)
+				var m = re.Match(line);
+				if (m.Success)
+					line = line.Substring(0, m.Index)
 						.Trim();
 
 				if (string.IsNullOrWhiteSpace(line))
@@ -118,6 +120,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 				{ "not:", (line, loc) => result = ParseNot(line, loc) },
 				{ "regex:", (line, loc) => result = ParseRE(line) },
 				{ "path:", (line, loc) => result = ParsePath(line) },
+				{ "path regex:", (line, loc) => result = ParsePathRE(line) },
 				{ "lang:", (line, loc) => result = ParseLanguage(line) },
 				{ "local:", (line, loc) => result = ParsePlaceAndType(line, loc, true, null) },
 				{ "non local:", (line, loc) => result = ParsePlaceAndType(line, loc, false, null) },
@@ -173,6 +176,13 @@ namespace org.pescuma.dependencychecker.presenter.config
 			var path = PathUtils.ToAbsolute(basePath, line);
 
 			return proj => proj.Paths.Any(pp => PathUtils.PathMatches(pp, path));
+		}
+
+		private Func<Library, bool> ParsePathRE(string line)
+		{
+			var re = new Regex("^" + line + "$", RegexOptions.IgnoreCase);
+
+			return proj => proj.Paths.Any(re.IsMatch);
 		}
 
 		private Func<Library, bool> ParseLanguage(string line)
