@@ -169,6 +169,9 @@ Any regular expression can be used. Prefix the regex with `regex:`. For ex: `reg
 ###### Match by path - `path:`
 Can be the full path of a folder name. When using a folder name all sub-folders match too. For ex: `path: C:\` will match all libraries/projects in the `C` drive.
 
+###### Using regular expressions in path - `path regex:`
+Matches agains the full path. For ex: `path regex: .*\Backup\.*` will match all libraries/projects that have a Backup folder in one of its paths.
+
 ###### Match by language - `lang:`
 Matches all libraries/projects that are in the language. Please note that, for libraries, not always the language can ge guessed. For ex: `lang: java` matches all java libraries/projects
 
