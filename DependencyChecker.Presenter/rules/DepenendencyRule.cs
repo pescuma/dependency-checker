@@ -26,7 +26,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				return null;
 
 			var messsage = new OutputMessage();
-			messsage.Append("Dependence between ")
+			messsage.Append("Dependency between ")
 				.Append(dep.Source, OutputMessage.ProjInfo.NameAndGroup)
 				.Append(" and ")
 				.Append(dep.Target, OutputMessage.ProjInfo.NameAndGroup)
