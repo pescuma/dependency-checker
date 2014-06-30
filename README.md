@@ -46,6 +46,7 @@ group: Tests += *.Test
 
 # These rules always run
 rule: don't allow circular dependencies
+rule: don't allow self dependencies
 rule: no two projects with same name
 rule: no two projects with same GUID
 rule: no two projects with same name and GUID
@@ -221,7 +222,14 @@ It has the following commands: (all accept a filter as detailed in Matching proj
    - `dependents of` - show the direct and indirect dependants of a project/library
    - `referenced by` - show all the projects/libraries that are referenced directly or indirectly by a project/library
    - `circular dependencies` - show all circular dependencies between projects/libraries
+   - `self dependencies` - show all projects/libraries that depend on itself
    - `path between` - show the dependency path between 2 projects/libraries
    - `rule:` - see the results of a rule
    - `quit` - quit the program
 
+
+# Building
+
+```
+msbuild build\build.msbuild
+```

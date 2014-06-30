@@ -293,6 +293,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 			new Dictionary<string, Func<Severity, ConfigLocation, Rule>>
 			{
 				{ "don't allow circular dependencies", (s, l) => new NoCircularDepenendenciesRule(s, l) },
+				{ "don't allow self dependencies", (s, l) => new NoSelfDependenciesRule(s, l) },
 				{ "no two projects with same name", NewUniqueNameProjectRule },
 				{ "no two projects with same guid", NewUniqueGuidProjectRule },
 				{ "no two projects with same name and guid", NewUniqueNameAndGuidProjectRule },

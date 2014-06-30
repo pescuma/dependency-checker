@@ -70,6 +70,7 @@
     <Compile Include="output\architeture\TextArchitectureOutputer.cs" />
     <Compile Include="output\architeture\XMLArchitectureOutputer.cs" />
     <Compile Include="output\BaseOutputEntry.cs" />
+    <Compile Include="output\SelfDependencyRuleMatch.cs" />
     <Compile Include="output\CircularDependencyRuleMatch.cs" />
     <Compile Include="output\ConsoleOutputer.cs" />
     <Compile Include="output\dependencies\DependenciesOutputer.cs" />
@@ -92,6 +93,7 @@
     <Compile Include="RulesMatcher.cs" />
     <Compile Include="rules\BaseRule.cs" />
     <Compile Include="rules\DepenendencyRule.cs" />
+    <Compile Include="rules\NoSelfDependenciesRule.cs" />
     <Compile Include="rules\NoCircularDepenendenciesRule.cs" />
     <Compile Include="rules\OutputMessage.cs" />
     <Compile Include="rules\Rule.cs" />

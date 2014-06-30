@@ -61,6 +61,7 @@
   <ItemGroup>
     <Compile Include="commands\BaseCommand.cs" />
     <Compile Include="commands\BaseReferencesCommand.cs" />
+    <Compile Include="commands\SelfDependenciesCommand.cs" />
     <Compile Include="commands\CircularDependenciesCommand.cs" />
     <Compile Include="commands\GroupsCommand.cs" />
     <Compile Include="commands\Command.cs" />

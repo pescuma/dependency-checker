@@ -19,6 +19,7 @@ namespace org.pescuma.dependencyconsole
 			new DependentsOfCommand(),
 			new ReferencedByCommand(),
 			new CircularDependenciesCommand(),
+			new SelfDependenciesCommand(),
 			new PathBetweenCommand(),
 			new RuleCommand(),
 			new QuitCommand()
@@ -35,7 +36,8 @@ namespace org.pescuma.dependencyconsole
 
 			var graph = LoadGraph(args[0]);
 
-			Console.WriteLine("Graph loaded.");
+			Console.WriteLine("Graph loaded");
+			Console.WriteLine("Type ? for help");
 
 			try
 			{
