@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.presenter.output;
 using org.pescuma.dependencychecker.utils;
@@ -24,10 +25,15 @@ namespace org.pescuma.dependencychecker.presenter.rules
 
 		public override OutputEntry Process(Dependency dep)
 		{
-			if (!Dependency(dep, Matchers.NullReporter))
+			var fields = new List<ProcessedField>();
+
+			if (!Dependency(dep, (f, v, m) => fields.Add(new ProcessedField("Dependency " + f, v, m))))
 				return null;
 
-			if (!Matches(Source, dep.Source) || !Matches(Target, dep.Target))
+			if (!Matches(Source, dep.Source, (f, v, m) => fields.Add(new ProcessedField("Source " + f, v, m))))
+				return null;
+
+			if (!Matches(Target, dep.Target, (f, v, m) => fields.Add(new ProcessedField("Target " + f, v, m))))
 				return null;
 
 			var messsage = new OutputMessage();
@@ -38,15 +44,15 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				.Append(Allow ? "" : " not")
 				.Append(" allowed");
 
-			return new DependencyRuleMatch(Allow, "Dependency", Severity, messsage, this, dep.AsList());
+			return new DependencyRuleMatch(Allow, "Dependency", Severity, messsage, this, dep.AsList(), fields);
 		}
 
-		private bool Matches(LibraryMatcher test, Library proj)
+		private bool Matches(LibraryMatcher test, Library proj, Matchers.Reporter reporter)
 		{
-			if (test(proj, Matchers.NullReporter))
+			if (test(proj, (f, v, m) => reporter("Library " + f, v, m)))
 				return true;
 
-			if (proj.GroupElement != null && test(proj.GroupElement, Matchers.NullReporter))
+			if (proj.GroupElement != null && test(proj.GroupElement, (f, v, m) => reporter("Group " + f, v, m)))
 				return true;
 
 			return false;

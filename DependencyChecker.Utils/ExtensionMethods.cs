@@ -20,6 +20,14 @@ namespace org.pescuma.dependencychecker.utils
 				set.Add(e);
 		}
 
+		public static string NullIfEmpty(this string obj)
+		{
+			if (string.IsNullOrEmpty(obj))
+				return null;
+			else
+				return obj;
+		}
+
 		public static string EmptyIfNull(this string obj)
 		{
 			return obj ?? "";

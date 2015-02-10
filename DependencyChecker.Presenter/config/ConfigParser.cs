@@ -92,6 +92,10 @@ namespace org.pescuma.dependencychecker.presenter.config
 			{
 				type.Value(remaining, location);
 			}
+			catch (ConfigParserException e)
+			{
+				throw;
+			}
 			catch (Exception e)
 			{
 				throw new ConfigParserException(location, e.Message);

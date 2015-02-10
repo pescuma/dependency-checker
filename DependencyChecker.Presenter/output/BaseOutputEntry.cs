@@ -12,9 +12,10 @@ namespace org.pescuma.dependencychecker.presenter.output
 		public OutputMessage Messsage { get; private set; }
 		public List<Library> Projects { get; private set; }
 		public List<Dependency> Dependencies { get; private set; }
+		public List<ProcessedField> ProcessedFields { get; private set; }
 
-		protected BaseOutputEntry(string type, Severity severity, OutputMessage messsage, IEnumerable<Library> projects,
-			IEnumerable<Dependency> dependencies)
+		protected BaseOutputEntry(string type, Severity severity, OutputMessage messsage, IEnumerable<Library> projects = null,
+			IEnumerable<Dependency> dependencies = null, IEnumerable<ProcessedField> processedFields = null)
 		{
 			Type = type;
 			Severity = severity;
@@ -37,15 +38,12 @@ namespace org.pescuma.dependencychecker.presenter.output
 
 			Projects = projects.ToList();
 			Projects.Sort(Library.NaturalOrdering);
+
+			ProcessedFields = processedFields != null ? processedFields.ToList() : new List<ProcessedField>();
 		}
 
 		protected BaseOutputEntry(string type, Severity severity, OutputMessage messsage, IEnumerable<Dependency> dependencies)
 			: this(type, severity, messsage, null, dependencies)
-		{
-		}
-
-		protected BaseOutputEntry(string type, Severity severity, OutputMessage messsage)
-			: this(type, severity, messsage, null, null)
 		{
 		}
 	}

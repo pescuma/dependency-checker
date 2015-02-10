@@ -9,8 +9,9 @@ namespace org.pescuma.dependencychecker.presenter.output
 	{
 		public readonly bool Allowed;
 
-		public DependencyRuleMatch(bool allowed, string type, Severity severity, OutputMessage messsage, Rule rule, IEnumerable<Dependency> deps)
-			: base(type, severity, messsage, rule, deps.ToList())
+		public DependencyRuleMatch(bool allowed, string type, Severity severity, OutputMessage messsage, Rule rule, IEnumerable<Dependency> deps,
+			IEnumerable<ProcessedField> processedFields)
+			: base(type, severity, messsage, rule, null, deps.ToList(), processedFields)
 		{
 			Allowed = allowed;
 		}

@@ -21,6 +21,9 @@ namespace org.pescuma.dependencychecker.presenter.rules
 		{
 			public static LibraryMatcher Name(string names)
 			{
+				if (names == "*")
+					return (p, r) => true;
+
 				var candidates = CreateStringMatchers(names);
 
 				return (proj, reporter) => proj.Names.Any(n =>
@@ -35,6 +38,9 @@ namespace org.pescuma.dependencychecker.presenter.rules
 
 			public static LibraryMatcher NameRE(string nameRE)
 			{
+				if (nameRE == ".*")
+					return (p, r) => true;
+
 				var re = new Regex("^" + nameRE + "$", RegexOptions.IgnoreCase);
 
 				return (proj, reporter) => proj.Names.Any(n =>
@@ -71,6 +77,9 @@ namespace org.pescuma.dependencychecker.presenter.rules
 
 			public static LibraryMatcher PathRE(string pathRE)
 			{
+				if (pathRE == ".*")
+					return (p, r) => true;
+
 				var re = new Regex("^" + pathRE + "$", RegexOptions.IgnoreCase);
 
 				return (proj, reporter) =>
@@ -153,23 +162,60 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				else
 					throw new ArgumentException("Invalid dependency type: " + type);
 
-				return (d, reporter) => (d.Type == Dependency.Types.LibraryReference) == library;
+				return (dependency, reporter) =>
+				{
+					var result = (dependency.Type == Dependency.Types.LibraryReference) == library;
+
+					reporter("Type", dependency.Type == Dependency.Types.LibraryReference ? "Library reference" : "Project reference", result);
+
+					return result;
+				};
 			}
 
 			public static DependencyMatcher Path(string basePath, string paths)
 			{
-				var candidates = paths.Split('|')
+				var pathsArray = paths.Split('|');
+
+				var matchEmpty = pathsArray.Contains("") || pathsArray.Contains("<empty>");
+
+				var candidates = pathsArray.Where(p => p != "" && p != "<empty>")
 					.Select(p => PathUtils.ToAbsolute(basePath, p))
 					.ToList();
 
-				return (d, reporter) => d.ReferencedPath != null && candidates.Any(c => PathUtils.PathMatches(d.ReferencedPath, c));
+				return (d, reporter) =>
+				{
+					if (d.ReferencedPath == "")
+					{
+						reporter("Path", "<empty>", matchEmpty);
+
+						return matchEmpty;
+					}
+					else
+					{
+						var result = candidates.Any(c => PathUtils.PathMatches(d.ReferencedPath, c));
+
+						reporter("Path", d.ReferencedPath, result);
+
+						return result;
+					}
+				};
 			}
 
 			public static DependencyMatcher PathRE(string pathRE)
 			{
+				if (pathRE == ".*")
+					return (d, r) => true;
+
 				var re = new Regex("^" + pathRE + "$", RegexOptions.IgnoreCase);
 
-				return (d, reporter) => d.ReferencedPath != null && re.IsMatch(d.ReferencedPath);
+				return (d, reporter) =>
+				{
+					var result = re.IsMatch(d.ReferencedPath);
+
+					reporter("Path", d.ReferencedPath.NullIfEmpty() ?? "<empty>", result);
+
+					return result;
+				};
 			}
 		}
 

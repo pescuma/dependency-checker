@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.presenter.rules;
+using org.pescuma.dependencychecker.utils;
 
 namespace org.pescuma.dependencychecker.presenter.output.results
 {
@@ -46,6 +47,17 @@ namespace org.pescuma.dependencychecker.presenter.output.results
 					.Append("   ")
 					.Append(Simplify(((RuleOutputEntry) entry).Rule.Location.LineText));
 			}
+
+			entry.ProcessedFields.Where(f => f.Matched)
+				.ForEach(f =>
+				{
+					result.AppendLine()
+						.AppendPrefix(entry)
+						.Append("   ")
+						.Append(f.Field)
+						.Append(": ")
+						.Append(f.Value);
+				});
 
 			if (verbose)
 			{
