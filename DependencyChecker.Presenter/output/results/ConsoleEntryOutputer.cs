@@ -44,6 +44,7 @@ namespace org.pescuma.dependencychecker.presenter.output.results
 			{
 				entry.ProcessedFields.Where(f => f.Matched)
 					.Where(f => !f.Field.EndsWith("Library Name"))
+					.OrderBy(f => GetProcessedFieldSortPrefix(f) + f.Field)
 					.ForEach(f =>
 					{
 						result.AppendLine()
@@ -65,6 +66,7 @@ namespace org.pescuma.dependencychecker.presenter.output.results
 				}
 
 				entry.ProcessedFields.Where(f => f.Matched)
+					.OrderBy(f => GetProcessedFieldSortPrefix(f) + f.Field)
 					.ForEach(f =>
 					{
 						result.AppendLine()
@@ -99,6 +101,18 @@ namespace org.pescuma.dependencychecker.presenter.output.results
 			}
 
 			return result.ToString();
+		}
+
+		private static string GetProcessedFieldSortPrefix(ProcessedField f)
+		{
+			if (f.Field.StartsWith("Source"))
+				return "1";
+			else if (f.Field.StartsWith("Target"))
+				return "2";
+			else if (f.Field.StartsWith("Dependency"))
+				return "3";
+			else
+				return "4";
 		}
 
 		public static string ToConsole(OutputMessage messsage)

@@ -92,7 +92,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 			{
 				type.Value(remaining, location);
 			}
-			catch (ConfigParserException e)
+			catch (ConfigParserException)
 			{
 				throw;
 			}
@@ -122,33 +122,45 @@ namespace org.pescuma.dependencychecker.presenter.config
 			var matchLine = line.Substring(pos + DEPENDS.Length)
 				.Trim();
 
-			var matcher = ParseProjectMatcher(matchLine, location);
+			var matcher = ParseLibraryMatcher(matchLine, location);
 
 			config.Groups.Add(new Config.Group(name, matcher, location));
 		}
 
-		public LibraryMatcher ParseProjectMatcher(string matchLine, ConfigLocation location)
+		public LibraryMatcher ParseLibraryMatcher(string matchLine, ConfigLocation location)
 		{
-			LibraryMatcher result = null;
+			return ParseInternediaryLibraryMatcher(matchLine, location)
+				.Finalize();
+		}
+
+		private InternediaryLibraryMatcher ParseInternediaryLibraryMatcher(string matchLine, ConfigLocation location)
+		{
+			InternediaryLibraryMatcher result = null;
 
 			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
-				{ "not:", (line, loc) => result = ParseProjectNotMatcher(line, loc) },
+				{
+					"not:", (line, loc) =>
+					{
+						var matcher = ParseInternediaryLibraryMatcher(line, loc);
+						result = (library, reporter) => !matcher(library, (f, v, m) => reporter(f, v, !m));
+					}
+				},
 				{
 					"local:", (line, loc) => result = Matchers.Projects.Place(true)
-						.And(ParseProjectMatcher(line, loc))
+						.And(ParseInternediaryLibraryMatcher(line, loc))
 				},
 				{
 					"non local:", (line, loc) => result = Matchers.Projects.Place(false)
-						.And(ParseProjectMatcher(line, loc))
+						.And(ParseInternediaryLibraryMatcher(line, loc))
 				},
 				{
 					"project:", (line, loc) => result = Matchers.Projects.Type(true)
-						.And(ParseProjectMatcher(line, loc))
+						.And(ParseInternediaryLibraryMatcher(line, loc))
 				},
 				{
 					"lib:", (line, loc) => result = Matchers.Projects.Type(false)
-						.And(ParseProjectMatcher(line, loc))
+						.And(ParseInternediaryLibraryMatcher(line, loc))
 				},
 				{ "regex:", (line, loc) => result = Matchers.Projects.NameRE(line) },
 				{ "path:", (line, loc) => result = Matchers.Projects.Path(basePath, line) },
@@ -162,20 +174,25 @@ namespace org.pescuma.dependencychecker.presenter.config
 			return result;
 		}
 
-		private LibraryMatcher ParseProjectNotMatcher(string line, ConfigLocation loc)
-		{
-			var matcher = ParseProjectMatcher(line, loc);
-
-			return (library, reporter) => !matcher(library, (f, v, m) => reporter(f, v, !m));
-		}
-
 		private DependencyMatcher ParseDependencyMatcher(string detail, ConfigLocation location)
 		{
-			DependencyMatcher result = null;
+			return ParseInternediaryDependencyMatcher(detail, location)
+				.Finalize();
+		}
+
+		private InternediaryDependencyMatcher ParseInternediaryDependencyMatcher(string detail, ConfigLocation location)
+		{
+			InternediaryDependencyMatcher result = null;
 
 			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
-				{ "not:", (line, loc) => result = ParseDependencyNotMatcher(line, loc) },
+				{
+					"not:", (line, loc) =>
+					{
+						var matcher = ParseInternediaryDependencyMatcher(line, loc);
+						result = (library, reporter) => !matcher(library, (f, v, m) => reporter(f, v, !m));
+					}
+				},
 				{ "dep:", (line, loc) => result = Matchers.Dependencies.Type(line) },
 				{ "dep path:", (line, loc) => result = Matchers.Dependencies.Path(basePath, line) },
 				{ "dep path regex:", (line, loc) => result = Matchers.Dependencies.PathRE(line) },
@@ -184,13 +201,6 @@ namespace org.pescuma.dependencychecker.presenter.config
 			ParseLine(lineTypes, detail, location);
 
 			return result;
-		}
-
-		private DependencyMatcher ParseDependencyNotMatcher(string line, ConfigLocation loc)
-		{
-			var matcher = ParseDependencyMatcher(line, loc);
-
-			return (library, reporter) => !matcher(library, (f, v, m) => reporter(f, v, !m));
 		}
 
 		private void ParseOutputProjects(string line, ConfigLocation location)
@@ -354,9 +364,9 @@ namespace org.pescuma.dependencychecker.presenter.config
 			if (pos < 0)
 				return false;
 
-			var left = ParseProjectMatcher(line.Substring(0, pos)
+			var left = ParseLibraryMatcher(line.Substring(0, pos)
 				.Trim(), location);
-			var right = ParseProjectMatcher(line.Substring(pos + separator.Length)
+			var right = ParseLibraryMatcher(line.Substring(pos + separator.Length)
 				.Trim(), location);
 
 			config.Rules.Add(new DepenendencyRule(severity, left, right, dependencyFilter, separator == DEPENDS, location));
@@ -366,7 +376,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 
 		private void ParseIgnore(string line, ConfigLocation location)
 		{
-			var matcher = ParseProjectMatcher(line, location);
+			var matcher = ParseLibraryMatcher(line, location);
 
 			config.Ignores.Add(new Config.Ignore(matcher, location));
 		}

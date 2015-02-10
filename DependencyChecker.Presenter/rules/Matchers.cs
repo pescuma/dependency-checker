@@ -9,7 +9,13 @@ namespace org.pescuma.dependencychecker.presenter.rules
 {
 	public delegate bool LibraryMatcher(Library library, Matchers.Reporter reporter);
 
+	/// <returns>null means that doesn't apply to this library</returns>
+	public delegate bool? InternediaryLibraryMatcher(Library library, Matchers.Reporter reporter);
+
 	public delegate bool DependencyMatcher(Dependency library, Matchers.Reporter reporter);
+
+	/// <returns>null means that doesn't apply to this depednency</returns>
+	public delegate bool? InternediaryDependencyMatcher(Dependency library, Matchers.Reporter reporter);
 
 	public static class Matchers
 	{
@@ -19,7 +25,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 
 		internal static class Projects
 		{
-			public static LibraryMatcher Name(string names)
+			public static InternediaryLibraryMatcher Name(string names)
 			{
 				if (names == "*")
 					return (p, r) => true;
@@ -36,7 +42,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				});
 			}
 
-			public static LibraryMatcher NameRE(string nameRE)
+			public static InternediaryLibraryMatcher NameRE(string nameRE)
 			{
 				if (nameRE == ".*")
 					return (p, r) => true;
@@ -53,7 +59,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				});
 			}
 
-			public static LibraryMatcher Path(string basePath, string paths)
+			public static InternediaryLibraryMatcher Path(string basePath, string paths)
 			{
 				var candidates = paths.Split('|')
 					.Select(p => PathUtils.ToAbsolute(basePath, p))
@@ -62,7 +68,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				return (proj, reporter) =>
 				{
 					if (proj is GroupElement)
-						return false;
+						return null;
 
 					return proj.Paths.Any(p =>
 					{
@@ -75,7 +81,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				};
 			}
 
-			public static LibraryMatcher PathRE(string pathRE)
+			public static InternediaryLibraryMatcher PathRE(string pathRE)
 			{
 				if (pathRE == ".*")
 					return (p, r) => true;
@@ -85,7 +91,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				return (proj, reporter) =>
 				{
 					if (proj is GroupElement)
-						return false;
+						return null;
 
 					return proj.Paths.Any(p =>
 					{
@@ -98,14 +104,14 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				};
 			}
 
-			public static LibraryMatcher Language(string languages)
+			public static InternediaryLibraryMatcher Language(string languages)
 			{
 				var candidates = CreateStringMatchers(languages);
 
 				return (proj, reporter) =>
 				{
 					if (proj is GroupElement)
-						return false;
+						return null;
 
 					return proj.Languages.Any(l =>
 					{
@@ -118,12 +124,12 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				};
 			}
 
-			public static LibraryMatcher Place(bool local)
+			public static InternediaryLibraryMatcher Place(bool local)
 			{
 				return (proj, reporter) =>
 				{
 					if (proj is GroupElement)
-						return false;
+						return null;
 
 					var result = proj.IsLocal == local;
 
@@ -133,12 +139,12 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				};
 			}
 
-			public static LibraryMatcher Type(bool project)
+			public static InternediaryLibraryMatcher Type(bool project)
 			{
 				return (proj, reporter) =>
 				{
 					if (proj is GroupElement)
-						return false;
+						return null;
 
 					var result = (proj is Project) == project;
 
@@ -151,7 +157,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 
 		internal static class Dependencies
 		{
-			public static DependencyMatcher Type(string type)
+			public static InternediaryDependencyMatcher Type(string type)
 			{
 				bool library;
 
@@ -172,7 +178,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				};
 			}
 
-			public static DependencyMatcher Path(string basePath, string paths)
+			public static InternediaryDependencyMatcher Path(string basePath, string paths)
 			{
 				var pathsArray = paths.Split('|');
 
@@ -184,6 +190,9 @@ namespace org.pescuma.dependencychecker.presenter.rules
 
 				return (d, reporter) =>
 				{
+					if (d.Type == Dependency.Types.ProjectReference)
+						return null;
+
 					if (d.ReferencedPath == "")
 					{
 						reporter("Path", "<empty>", matchEmpty);
@@ -201,7 +210,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				};
 			}
 
-			public static DependencyMatcher PathRE(string pathRE)
+			public static InternediaryDependencyMatcher PathRE(string pathRE)
 			{
 				if (pathRE == ".*")
 					return (d, r) => true;
@@ -210,6 +219,9 @@ namespace org.pescuma.dependencychecker.presenter.rules
 
 				return (d, reporter) =>
 				{
+					if (d.Type == Dependency.Types.ProjectReference)
+						return null;
+
 					var result = re.IsMatch(d.ReferencedPath);
 
 					reporter("Path", d.ReferencedPath.NullIfEmpty() ?? "<empty>", result);
@@ -244,7 +256,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 
 	internal static class MatchersExtensions
 	{
-		public static LibraryMatcher And(this LibraryMatcher p1, LibraryMatcher p2)
+		public static InternediaryLibraryMatcher And(this InternediaryLibraryMatcher p1, InternediaryLibraryMatcher p2)
 		{
 			if (p1 == null)
 				return p2;
@@ -252,18 +264,18 @@ namespace org.pescuma.dependencychecker.presenter.rules
 			if (p2 == null)
 				return p1;
 
-			return (a1, a2) => p1(a1, a2) && p2(a1, a2);
-		}
+			return (a1, a2) =>
+			{
+				var r1 = p1(a1, a2);
+				if (r1 == null)
+					return null;
 
-		public static LibraryMatcher Or(this LibraryMatcher p1, LibraryMatcher p2)
-		{
-			if (p1 == null)
-				return p2;
+				var r2 = p2(a1, a2);
+				if (r2 == null)
+					return null;
 
-			if (p2 == null)
-				return p1;
-
-			return (a1, a2) => p1(a1, a2) || p2(a1, a2);
+				return r1.Value && r2.Value;
+			};
 		}
 
 		public static DependencyMatcher And(this DependencyMatcher p1, DependencyMatcher p2)
@@ -277,15 +289,14 @@ namespace org.pescuma.dependencychecker.presenter.rules
 			return (a1, a2) => p1(a1, a2) && p2(a1, a2);
 		}
 
-		public static DependencyMatcher Or(this DependencyMatcher p1, DependencyMatcher p2)
+		public static LibraryMatcher Finalize(this InternediaryLibraryMatcher m)
 		{
-			if (p1 == null)
-				return p2;
+			return (l, r) => m(l, r) ?? false;
+		}
 
-			if (p2 == null)
-				return p1;
-
-			return (a1, a2) => p1(a1, a2) || p2(a1, a2);
+		public static DependencyMatcher Finalize(this InternediaryDependencyMatcher m)
+		{
+			return (d, r) => m(d, r) ?? false;
 		}
 	}
 }
