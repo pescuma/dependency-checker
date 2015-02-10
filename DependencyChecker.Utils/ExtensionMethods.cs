@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace org.pescuma.dependencychecker.utils
@@ -34,33 +33,6 @@ namespace org.pescuma.dependencychecker.utils
 		public static List<T> EmptyIfNull<T>(this List<T> obj)
 		{
 			return obj ?? new List<T>();
-		}
-
-		public static Func<T, bool> And<T>(this Func<T, bool> p1, Func<T, bool> p2)
-		{
-			if (p1 == null)
-				return p2;
-
-			if (p2 == null)
-				return p1;
-
-			return t => p1(t) && p2(t);
-		}
-
-		public static Func<T, bool> Or<T>(this Func<T, bool> p1, Func<T, bool> p2)
-		{
-			if (p1 == null)
-				return p2;
-
-			if (p2 == null)
-				return p1;
-
-			return t => p1(t) || p2(t);
-		}
-
-		public static Func<T, bool> Not<T>(this Func<T, bool> p1)
-		{
-			return t => !p1(t);
 		}
 	}
 }

@@ -123,16 +123,13 @@ namespace org.pescuma.dependencychecker.presenter.config
 			config.Groups.Add(new Config.Group(name, matcher, location));
 		}
 
-		public Func<Library, bool> ParseProjectMatcher(string matchLine, ConfigLocation location)
+		public LibraryMatcher ParseProjectMatcher(string matchLine, ConfigLocation location)
 		{
-			Func<Library, bool> result = null;
+			LibraryMatcher result = null;
 
 			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
-				{
-					"not:", (line, loc) => result = ParseProjectMatcher(line, loc)
-						.Not()
-				},
+				{ "not:", (line, loc) => result = ParseProjectNotMatcher(line, loc) },
 				{
 					"local:", (line, loc) => result = Matchers.Projects.Place(true)
 						.And(ParseProjectMatcher(line, loc))
@@ -161,16 +158,20 @@ namespace org.pescuma.dependencychecker.presenter.config
 			return result;
 		}
 
-		private Func<Dependency, bool> ParseDependencyMatcher(string detail, ConfigLocation location)
+		private LibraryMatcher ParseProjectNotMatcher(string line, ConfigLocation loc)
 		{
-			Func<Dependency, bool> result = null;
+			var matcher = ParseProjectMatcher(line, loc);
+
+			return (library, reporter) => !matcher(library, (f, v, m) => reporter(f, v, !m));
+		}
+
+		private DependencyMatcher ParseDependencyMatcher(string detail, ConfigLocation location)
+		{
+			DependencyMatcher result = null;
 
 			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
-				{
-					"not:", (line, loc) => result = ParseDependencyMatcher(line, loc)
-						.Not()
-				},
+				{ "not:", (line, loc) => result = ParseDependencyNotMatcher(line, loc) },
 				{ "dep:", (line, loc) => result = Matchers.Dependencies.Type(line) },
 				{ "dep path:", (line, loc) => result = Matchers.Dependencies.Path(basePath, line) },
 				{ "dep path regex:", (line, loc) => result = Matchers.Dependencies.PathRE(line) },
@@ -179,6 +180,13 @@ namespace org.pescuma.dependencychecker.presenter.config
 			ParseLine(lineTypes, detail, location);
 
 			return result;
+		}
+
+		private DependencyMatcher ParseDependencyNotMatcher(string line, ConfigLocation loc)
+		{
+			var matcher = ParseDependencyMatcher(line, loc);
+
+			return (library, reporter) => !matcher(library, (f, v, m) => reporter(f, v, !m));
 		}
 
 		private void ParseOutputProjects(string line, ConfigLocation location)
@@ -253,8 +261,8 @@ namespace org.pescuma.dependencychecker.presenter.config
 			{ "error", Severity.Error },
 		};
 
-		private readonly Dictionary<string, Func<ConfigLocation, Severity, Func<Dependency, bool>, Rule>> customRules =
-			new Dictionary<string, Func<ConfigLocation, Severity, Func<Dependency, bool>, Rule>>
+		private readonly Dictionary<string, Func<ConfigLocation, Severity, DependencyMatcher, Rule>> customRules =
+			new Dictionary<string, Func<ConfigLocation, Severity, DependencyMatcher, Rule>>
 			{
 				{ "don't allow circular dependencies", NewNoCircularDepenendenciesRule },
 				{ "don't allow self dependencies", (l, s, d) => new NoSelfDependenciesRule(s, d, l) },
@@ -264,7 +272,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 				{ "avoid same dependency twice", (l, s, d) => new UniqueDependenciesRule(s, d, l) },
 			};
 
-		private static NoCircularDepenendenciesRule NewNoCircularDepenendenciesRule(ConfigLocation l, Severity s, Func<Dependency, bool> d)
+		private static NoCircularDepenendenciesRule NewNoCircularDepenendenciesRule(ConfigLocation l, Severity s, DependencyMatcher d)
 		{
 			if (d != null)
 				throw new ConfigParserException(l, "No dependency details are possible in project rules");
@@ -272,7 +280,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 			return new NoCircularDepenendenciesRule(s, l);
 		}
 
-		private static UniqueProjectRule NewUniqueNameAndGuidProjectRule(ConfigLocation l, Severity s, Func<Dependency, bool> d)
+		private static UniqueProjectRule NewUniqueNameAndGuidProjectRule(ConfigLocation l, Severity s, DependencyMatcher d)
 		{
 			if (d != null)
 				throw new ConfigParserException(l, "No dependency details are possible in project rules");
@@ -281,7 +289,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 				p => "named " + p.Name + " and with GUID " + p.Guid, s, l);
 		}
 
-		private static UniqueProjectRule NewUniqueGuidProjectRule(ConfigLocation l, Severity s, Func<Dependency, bool> d)
+		private static UniqueProjectRule NewUniqueGuidProjectRule(ConfigLocation l, Severity s, DependencyMatcher d)
 		{
 			if (d != null)
 				throw new ConfigParserException(l, "No dependency details are possible in project rules");
@@ -289,7 +297,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 			return new UniqueProjectRule(p => p.Guid != null, p => p.Guid.ToString(), p => "with GUID " + p.Guid, s, l);
 		}
 
-		private static UniqueProjectRule NewUniqueNameProjectRule(ConfigLocation l, Severity s, Func<Dependency, bool> d)
+		private static UniqueProjectRule NewUniqueNameProjectRule(ConfigLocation l, Severity s, DependencyMatcher d)
 		{
 			if (d != null)
 				throw new ConfigParserException(l, "No dependency details are possible in project rules");
@@ -300,7 +308,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 		private void ParseRule(string line, ConfigLocation location)
 		{
 			var severity = Severity.Error;
-			Func<Dependency, bool> dependencyFilter = null;
+			DependencyMatcher dependencyFilter = null;
 
 			if (line.EndsWith("]"))
 			{
@@ -336,7 +344,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 			throw new ConfigParserException(location, "Invalid rule");
 		}
 
-		private bool ParseRule(string line, ConfigLocation location, string separator, Severity severity, Func<Dependency, bool> dependencyFilter)
+		private bool ParseRule(string line, ConfigLocation location, string separator, Severity severity, DependencyMatcher dependencyFilter)
 		{
 			var pos = line.IndexOf(separator, StringComparison.Ordinal);
 			if (pos < 0)

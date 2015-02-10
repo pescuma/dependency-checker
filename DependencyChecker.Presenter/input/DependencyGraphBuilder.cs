@@ -108,7 +108,7 @@ namespace org.pescuma.dependencychecker.presenter.input
 
 			foreach (var ignore in config.Ignores)
 			{
-				if (ignore.Matches(library))
+				if (ignore.Matches(library, Matchers.NullReporter))
 				{
 					usedIgnores.Add(ignore.Location);
 					return true;

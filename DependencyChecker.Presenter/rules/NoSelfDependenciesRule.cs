@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dependencychecker.model;
@@ -9,19 +8,19 @@ namespace org.pescuma.dependencychecker.presenter.rules
 {
 	public class NoSelfDependenciesRule : BaseRule
 	{
-		private readonly Func<Dependency, bool> filter;
+		private readonly DependencyMatcher filter;
 
-		public NoSelfDependenciesRule(Severity severity, Func<Dependency, bool> filter, ConfigLocation location)
+		public NoSelfDependenciesRule(Severity severity, DependencyMatcher filter, ConfigLocation location)
 			: base(severity, location)
 		{
-			this.filter = filter ?? (d => true);
+			this.filter = filter ?? ((d, r) => true);
 		}
 
 		public override List<OutputEntry> Process(DependencyGraph graph)
 		{
 			var result = new List<OutputEntry>();
 
-			graph.Edges.Where(d => filter(d))
+			graph.Edges.Where(d => filter(d, Matchers.NullReporter))
 				.Where(e => e.Source.Equals(e.Target))
 				.GroupBy(e => e.Source)
 				.ForEach(deps =>

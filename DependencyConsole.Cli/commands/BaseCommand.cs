@@ -2,6 +2,7 @@
 using System.Linq;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.presenter.config;
+using org.pescuma.dependencychecker.presenter.rules;
 using org.pescuma.dependencychecker.presenter.utils;
 
 namespace org.pescuma.dependencyconsole.commands
@@ -61,7 +62,7 @@ namespace org.pescuma.dependencyconsole.commands
 			{
 				var matcher = new ConfigParser().ParseProjectMatcher(search, new ConfigLocation(1, search));
 
-				libs = libs.Where(matcher);
+				libs = libs.Where(l => matcher(l, Matchers.NullReporter));
 			}
 
 			return libs.ToList();

@@ -22,9 +22,9 @@ namespace org.pescuma.dependencychecker.presenter.config
 		{
 			public readonly string Name;
 			public readonly ConfigLocation Location;
-			public readonly Func<Library, bool> Matches;
+			public readonly LibraryMatcher Matches;
 
-			public Group(string name, Func<Library, bool> matches, ConfigLocation location)
+			public Group(string name, LibraryMatcher matches, ConfigLocation location)
 			{
 				Name = name;
 				Matches = matches;
@@ -39,10 +39,10 @@ namespace org.pescuma.dependencychecker.presenter.config
 
 		public class Ignore
 		{
-			public readonly Func<Library, bool> Matches;
+			public readonly LibraryMatcher Matches;
 			public readonly ConfigLocation Location;
 
-			public Ignore(Func<Library, bool> matches, ConfigLocation location)
+			public Ignore(LibraryMatcher matches, ConfigLocation location)
 			{
 				Matches = matches;
 				Location = location;

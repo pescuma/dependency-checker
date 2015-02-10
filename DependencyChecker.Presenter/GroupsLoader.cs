@@ -3,6 +3,7 @@ using System.Linq;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.presenter.config;
 using org.pescuma.dependencychecker.presenter.output;
+using org.pescuma.dependencychecker.presenter.rules;
 using org.pescuma.dependencychecker.presenter.utils;
 using org.pescuma.dependencychecker.utils;
 
@@ -32,7 +33,7 @@ namespace org.pescuma.dependencychecker.presenter
 
 		private GroupElement FindGroupElement(Library proj)
 		{
-			var configGroup = config.Groups.FirstOrDefault(g => g.Matches(proj));
+			var configGroup = config.Groups.FirstOrDefault(g => g.Matches(proj, Matchers.NullReporter));
 			if (configGroup == null)
 				return null;
 

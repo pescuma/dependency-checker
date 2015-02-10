@@ -7,86 +7,169 @@ using org.pescuma.dependencychecker.utils;
 
 namespace org.pescuma.dependencychecker.presenter.rules
 {
-	internal static class Matchers
+	public delegate bool LibraryMatcher(Library library, Matchers.Reporter reporter);
+
+	public delegate bool DependencyMatcher(Dependency library, Matchers.Reporter reporter);
+
+	public static class Matchers
 	{
+		public delegate void Reporter(string field, string value, bool matched);
+
+		public static Reporter NullReporter = (a, b, c) => { };
+
 		internal static class Projects
 		{
-			public static Func<Library, bool> Name(string names)
+			public static LibraryMatcher Name(string names)
 			{
 				var candidates = CreateStringMatchers(names);
 
-				return proj => proj.Names.Any(n => candidates.Any(c => c(n)));
+				return (proj, reporter) => proj.Names.Any(n =>
+				{
+					var result = candidates.Any(c => c(n));
+
+					reporter("Name", n, result);
+
+					return result;
+				});
 			}
 
-			public static Func<Library, bool> NameRE(string nameRE)
+			public static LibraryMatcher NameRE(string nameRE)
 			{
 				var re = new Regex("^" + nameRE + "$", RegexOptions.IgnoreCase);
 
-				return proj => proj.Names.Any(re.IsMatch);
+				return (proj, reporter) => proj.Names.Any(n =>
+				{
+					var result = re.IsMatch(n);
+
+					reporter("Name", n, result);
+
+					return result;
+				});
 			}
 
-			public static Func<Library, bool> Path(string basePath, string paths)
+			public static LibraryMatcher Path(string basePath, string paths)
 			{
 				var candidates = paths.Split('|')
 					.Select(p => PathUtils.ToAbsolute(basePath, p))
 					.ToList();
 
-				return proj => !(proj is GroupElement) && proj.Paths.Any(pp => candidates.Any(c => PathUtils.PathMatches(pp, c)));
+				return (proj, reporter) =>
+				{
+					if (proj is GroupElement)
+						return false;
+
+					return proj.Paths.Any(p =>
+					{
+						var result = candidates.Any(c => PathUtils.PathMatches(p, c));
+
+						reporter("Path", p, result);
+
+						return result;
+					});
+				};
 			}
 
-			public static Func<Library, bool> PathRE(string pathRE)
+			public static LibraryMatcher PathRE(string pathRE)
 			{
 				var re = new Regex("^" + pathRE + "$", RegexOptions.IgnoreCase);
 
-				return proj => !(proj is GroupElement) && proj.Paths.Any(re.IsMatch);
+				return (proj, reporter) =>
+				{
+					if (proj is GroupElement)
+						return false;
+
+					return proj.Paths.Any(p =>
+					{
+						var result = re.IsMatch(p);
+
+						reporter("Path", p, result);
+
+						return result;
+					});
+				};
 			}
 
-			public static Func<Library, bool> Language(string languages)
+			public static LibraryMatcher Language(string languages)
 			{
 				var candidates = CreateStringMatchers(languages);
 
-				return proj => !(proj is GroupElement) && proj.Languages.Any(l => candidates.Any(c => c(l)));
+				return (proj, reporter) =>
+				{
+					if (proj is GroupElement)
+						return false;
+
+					return proj.Languages.Any(l =>
+					{
+						var result = candidates.Any(c => c(l));
+
+						reporter("Language", l, result);
+
+						return result;
+					});
+				};
 			}
 
-			public static Func<Library, bool> Place(bool local)
+			public static LibraryMatcher Place(bool local)
 			{
-				return proj => !(proj is GroupElement) && proj.IsLocal == local;
+				return (proj, reporter) =>
+				{
+					if (proj is GroupElement)
+						return false;
+
+					var result = proj.IsLocal == local;
+
+					reporter("Place", proj.IsLocal ? "Local" : "Non Local", result);
+
+					return result;
+				};
 			}
 
-			public static Func<Library, bool> Type(bool project)
+			public static LibraryMatcher Type(bool project)
 			{
-				return proj => !(proj is GroupElement) && (proj is Project) == project;
+				return (proj, reporter) =>
+				{
+					if (proj is GroupElement)
+						return false;
+
+					var result = (proj is Project) == project;
+
+					reporter("Type", proj is Project ? "Project" : "Library", result);
+
+					return result;
+				};
 			}
 		}
 
 		internal static class Dependencies
 		{
-			public static Func<Dependency, bool> Type(string type)
+			public static DependencyMatcher Type(string type)
 			{
+				bool library;
+
 				if ("library".Equals(type, StringComparison.InvariantCultureIgnoreCase))
-					return d => d.Type == Dependency.Types.LibraryReference;
-
+					library = true;
 				else if ("project".Equals(type, StringComparison.InvariantCultureIgnoreCase))
-					return d => d.Type == Dependency.Types.ProjectReference;
-
+					library = false;
 				else
 					throw new ArgumentException("Invalid dependency type: " + type);
+
+				return (d, reporter) => (d.Type == Dependency.Types.LibraryReference) == library;
 			}
 
-			public static Func<Dependency, bool> Path(string basePath, string paths)
+			public static DependencyMatcher Path(string basePath, string paths)
 			{
 				var candidates = paths.Split('|')
 					.Select(p => PathUtils.ToAbsolute(basePath, p))
 					.ToList();
 
-				return d => d.ReferencedPath != null && candidates.Any(c => PathUtils.PathMatches(d.ReferencedPath, c));
+				return (d, reporter) => d.ReferencedPath != null && candidates.Any(c => PathUtils.PathMatches(d.ReferencedPath, c));
 			}
 
-			public static Func<Dependency, bool> PathRE(string pathRE)
+			public static DependencyMatcher PathRE(string pathRE)
 			{
 				var re = new Regex("^" + pathRE + "$", RegexOptions.IgnoreCase);
 
-				return d => d.ReferencedPath != null && re.IsMatch(d.ReferencedPath);
+				return (d, reporter) => d.ReferencedPath != null && re.IsMatch(d.ReferencedPath);
 			}
 		}
 
@@ -110,6 +193,53 @@ namespace org.pescuma.dependencychecker.presenter.rules
 			{
 				return n => line.Equals(n, StringComparison.CurrentCultureIgnoreCase);
 			}
+		}
+	}
+
+	internal static class MatchersExtensions
+	{
+		public static LibraryMatcher And(this LibraryMatcher p1, LibraryMatcher p2)
+		{
+			if (p1 == null)
+				return p2;
+
+			if (p2 == null)
+				return p1;
+
+			return (a1, a2) => p1(a1, a2) && p2(a1, a2);
+		}
+
+		public static LibraryMatcher Or(this LibraryMatcher p1, LibraryMatcher p2)
+		{
+			if (p1 == null)
+				return p2;
+
+			if (p2 == null)
+				return p1;
+
+			return (a1, a2) => p1(a1, a2) || p2(a1, a2);
+		}
+
+		public static DependencyMatcher And(this DependencyMatcher p1, DependencyMatcher p2)
+		{
+			if (p1 == null)
+				return p2;
+
+			if (p2 == null)
+				return p1;
+
+			return (a1, a2) => p1(a1, a2) && p2(a1, a2);
+		}
+
+		public static DependencyMatcher Or(this DependencyMatcher p1, DependencyMatcher p2)
+		{
+			if (p1 == null)
+				return p2;
+
+			if (p2 == null)
+				return p1;
+
+			return (a1, a2) => p1(a1, a2) || p2(a1, a2);
 		}
 	}
 }

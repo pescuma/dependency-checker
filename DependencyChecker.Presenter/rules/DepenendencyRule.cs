@@ -1,4 +1,3 @@
-using System;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.presenter.output;
 using org.pescuma.dependencychecker.utils;
@@ -8,24 +7,24 @@ namespace org.pescuma.dependencychecker.presenter.rules
 	public class DepenendencyRule : BaseRule
 	{
 		// HACK Fields are public for tests
-		public readonly Func<Library, bool> Source;
-		public readonly Func<Library, bool> Target;
-		public readonly Func<Dependency, bool> Dependency;
+		public readonly LibraryMatcher Source;
+		public readonly LibraryMatcher Target;
+		public readonly DependencyMatcher Dependency;
 		public readonly bool Allow;
 
-		public DepenendencyRule(Severity severity, Func<Library, bool> source, Func<Library, bool> target, Func<Dependency, bool> dependency,
-			bool allow, ConfigLocation location)
+		public DepenendencyRule(Severity severity, LibraryMatcher source, LibraryMatcher target, DependencyMatcher dependency, bool allow,
+			ConfigLocation location)
 			: base(severity, location)
 		{
-			Source = source ?? (p => true);
-			Target = target ?? (p => true);
-			Dependency = dependency ?? (d => true);
+			Source = source ?? ((l, r) => true);
+			Target = target ?? ((l, r) => true);
+			Dependency = dependency ?? ((d, r) => true);
 			Allow = allow;
 		}
 
 		public override OutputEntry Process(Dependency dep)
 		{
-			if (!Dependency(dep))
+			if (!Dependency(dep, Matchers.NullReporter))
 				return null;
 
 			if (!Matches(Source, dep.Source) || !Matches(Target, dep.Target))
@@ -42,12 +41,12 @@ namespace org.pescuma.dependencychecker.presenter.rules
 			return new DependencyRuleMatch(Allow, "Dependency", Severity, messsage, this, dep.AsList());
 		}
 
-		private bool Matches(Func<Library, bool> test, Library proj)
+		private bool Matches(LibraryMatcher test, Library proj)
 		{
-			if (test(proj))
+			if (test(proj, Matchers.NullReporter))
 				return true;
 
-			if (proj.GroupElement != null && test(proj.GroupElement))
+			if (proj.GroupElement != null && test(proj.GroupElement, Matchers.NullReporter))
 				return true;
 
 			return false;
