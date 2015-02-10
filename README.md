@@ -184,8 +184,6 @@ Local libraries/projects are the ones inside one of the inputs. Non local are th
 ###### Inverting a test - `not:`
 Inverts the test that cames after it. For ex: `not: lang: C#` matches all projects that are not in C#. 
 
-Please note that `not: local project: *` is different from `non local project: *`. The first one includes all the libraries too.
-
 
 ### Ignoring configuration infos - `in output:`
 
