@@ -193,7 +193,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 					if (d.Type == Dependency.Types.ProjectReference)
 						return null;
 
-					if (d.ReferencedPath == "")
+					if (d.ReferencedPath == null)
 					{
 						reporter("Path", "<empty>", matchEmpty);
 
@@ -222,9 +222,9 @@ namespace org.pescuma.dependencychecker.presenter.rules
 					if (d.Type == Dependency.Types.ProjectReference)
 						return null;
 
-					var result = re.IsMatch(d.ReferencedPath);
+					var result = re.IsMatch(d.ReferencedPath ?? "");
 
-					reporter("Path", d.ReferencedPath.NullIfEmpty() ?? "<empty>", result);
+					reporter("Path", d.ReferencedPath ?? "<empty>", result);
 
 					return result;
 				};

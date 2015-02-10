@@ -47,7 +47,7 @@ namespace org.pescuma.dependencychecker.model
 
 			Type = type;
 			Location = location;
-			ReferencedPath = referencedPath ?? "";
+			ReferencedPath = referencedPath.NullIfEmpty();
 		}
 
 		public Dependency WithTarget(Library otherTarget)
