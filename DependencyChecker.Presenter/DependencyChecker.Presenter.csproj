@@ -93,6 +93,7 @@
     <Compile Include="RulesMatcher.cs" />
     <Compile Include="rules\BaseRule.cs" />
     <Compile Include="rules\DepenendencyRule.cs" />
+    <Compile Include="rules\Matchers.cs" />
     <Compile Include="rules\NoSelfDependenciesRule.cs" />
     <Compile Include="rules\NoCircularDepenendenciesRule.cs" />
     <Compile Include="rules\OutputMessage.cs" />

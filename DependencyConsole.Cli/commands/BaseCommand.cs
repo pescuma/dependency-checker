@@ -59,7 +59,7 @@ namespace org.pescuma.dependencyconsole.commands
 
 			if (search != "")
 			{
-				var matcher = new ConfigParser().ParseMatcher(search, new ConfigLocation(1, search));
+				var matcher = new ConfigParser().ParseProjectMatcher(search, new ConfigLocation(1, search));
 
 				libs = libs.Where(matcher);
 			}

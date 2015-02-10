@@ -181,8 +181,6 @@ Matches all libraries/projects that are in the language. Please note that, for l
 ###### Match only local or not local - `local:` or `non local:`
 Local libraries/projects are the ones inside one of the inputs. Non local are the ones that are outside the input folders. If a project references a librarie or a project outside the input paths, those are also read.
 
-###### Match by type and local or not local - `local project:` or `non local project:` or `local lib:` or `lnon local lib:`
-
 ###### Inverting a test - `not:`
 Inverts the test that cames after it. For ex: `not: lang: C#` matches all projects that are not in C#. 
 

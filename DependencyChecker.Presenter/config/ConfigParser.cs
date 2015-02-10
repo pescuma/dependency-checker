@@ -84,7 +84,18 @@ namespace org.pescuma.dependencychecker.presenter.config
 
 			var remaining = line.Substring(type.Key.Length)
 				.Trim();
-			type.Value(remaining, location);
+
+			if (type.Key == "" && remaining.IndexOf(':') >= 0)
+				throw new ConfigParserException(location, "Invalid expression");
+
+			try
+			{
+				type.Value(remaining, location);
+			}
+			catch (Exception e)
+			{
+				throw new ConfigParserException(location, e.Message);
+			}
 		}
 
 		private void ParseInput(string line, ConfigLocation configLocation)
@@ -107,31 +118,42 @@ namespace org.pescuma.dependencychecker.presenter.config
 			var matchLine = line.Substring(pos + DEPENDS.Length)
 				.Trim();
 
-			var matcher = ParseMatcher(matchLine, location);
+			var matcher = ParseProjectMatcher(matchLine, location);
 
 			config.Groups.Add(new Config.Group(name, matcher, location));
 		}
 
-		public Func<Library, bool> ParseMatcher(string matchLine, ConfigLocation location)
+		public Func<Library, bool> ParseProjectMatcher(string matchLine, ConfigLocation location)
 		{
 			Func<Library, bool> result = null;
 
 			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
-				{ "not:", (line, loc) => result = ParseNot(line, loc) },
-				{ "regex:", (line, loc) => result = ParseProjetNameRE(line) },
-				{ "path:", (line, loc) => result = ParsePath(line) },
-				{ "path regex:", (line, loc) => result = ParsePathRE(line) },
-				{ "lang:", (line, loc) => result = ParseLanguage(line) },
-				{ "local:", (line, loc) => result = ParsePlaceAndType(line, loc, true, null) },
-				{ "non local:", (line, loc) => result = ParsePlaceAndType(line, loc, false, null) },
-				{ "project:", (line, loc) => result = ParsePlaceAndType(line, loc, null, true) },
-				{ "local project:", (line, loc) => result = ParsePlaceAndType(line, loc, true, true) },
-				{ "non local project:", (line, loc) => result = ParsePlaceAndType(line, loc, false, true) },
-				{ "lib:", (line, loc) => result = ParsePlaceAndType(line, loc, null, false) },
-				{ "local lib:", (line, loc) => result = ParsePlaceAndType(line, loc, true, false) },
-				{ "non local lib:", (line, loc) => result = ParsePlaceAndType(line, loc, false, false) },
-				{ "", (line, loc) => result = ParseProjetName(line, loc) },
+				{
+					"not:", (line, loc) => result = ParseProjectMatcher(line, loc)
+						.Not()
+				},
+				{
+					"local:", (line, loc) => result = Matchers.Projects.Place(true)
+						.And(ParseProjectMatcher(line, loc))
+				},
+				{
+					"non local:", (line, loc) => result = Matchers.Projects.Place(false)
+						.And(ParseProjectMatcher(line, loc))
+				},
+				{
+					"project:", (line, loc) => result = Matchers.Projects.Type(true)
+						.And(ParseProjectMatcher(line, loc))
+				},
+				{
+					"lib:", (line, loc) => result = Matchers.Projects.Type(false)
+						.And(ParseProjectMatcher(line, loc))
+				},
+				{ "regex:", (line, loc) => result = Matchers.Projects.NameRE(line) },
+				{ "path:", (line, loc) => result = Matchers.Projects.Path(basePath, line) },
+				{ "path regex:", (line, loc) => result = Matchers.Projects.PathRE(line) },
+				{ "lang:", (line, loc) => result = Matchers.Projects.Language(line) },
+				{ "", (line, loc) => result = Matchers.Projects.Name(line) },
 			};
 
 			ParseLine(lineTypes, matchLine, location);
@@ -139,87 +161,24 @@ namespace org.pescuma.dependencychecker.presenter.config
 			return result;
 		}
 
-		private Func<Library, bool> ParsePlaceAndType(string line, ConfigLocation loc, bool? local, bool? project)
+		private Func<Dependency, bool> ParseDependencyMatcher(string detail, ConfigLocation location)
 		{
-			var result = ParseMatcher(line, loc);
+			Func<Dependency, bool> result = null;
 
-			if (local != null)
+			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
-				var inner = result;
-				result = l => l.IsLocal == local && inner(l);
-			}
+				{
+					"not:", (line, loc) => result = ParseDependencyMatcher(line, loc)
+						.Not()
+				},
+				{ "dep:", (line, loc) => result = Matchers.Dependencies.Type(line) },
+				{ "dep path:", (line, loc) => result = Matchers.Dependencies.Path(basePath, line) },
+				{ "dep path regex:", (line, loc) => result = Matchers.Dependencies.PathRE(line) },
+			};
 
-			if (project != null)
-			{
-				var inner = result;
-				result = l => (l is Project) == project && inner(l);
-			}
+			ParseLine(lineTypes, detail, location);
 
-			return l => !(l is GroupElement) && result(l);
-		}
-
-		private Func<Library, bool> ParseNot(string line, ConfigLocation loc)
-		{
-			var inner = ParseMatcher(line, loc);
-
-			return lib => !inner(lib);
-		}
-
-		private Func<Library, bool> ParseProjetName(string line, ConfigLocation location)
-		{
-			if (line.IndexOf(':') >= 0 || line.IndexOf('>') >= 0)
-				throw new ConfigParserException(location, "Invalid expression");
-
-			var candidates = line.Split('|')
-				.Select(CreateStringMatcher)
-				.ToList();
-
-			return proj => proj.Names.Any(n => candidates.Any(c => c(n)));
-		}
-
-		private Func<Library, bool> ParseProjetNameRE(string line)
-		{
-			var re = new Regex("^" + line + "$", RegexOptions.IgnoreCase);
-
-			return proj => proj.Names.Any(re.IsMatch);
-		}
-
-		private Func<Library, bool> ParsePath(string line)
-		{
-			var candidates = line.Split('|')
-				.Select(p => PathUtils.ToAbsolute(basePath, p))
-				.ToList();
-
-			return proj => proj.Paths.Any(pp => candidates.Any(c => PathUtils.PathMatches(pp, c)));
-		}
-
-		private Func<Library, bool> ParsePathRE(string line)
-		{
-			var re = new Regex("^" + line + "$", RegexOptions.IgnoreCase);
-
-			return proj => proj.Paths.Any(re.IsMatch);
-		}
-
-		private Func<Library, bool> ParseLanguage(string line)
-		{
-			var m = CreateStringMatcher(line);
-
-			return proj => proj.Languages.Any(m);
-		}
-
-		private Func<string, bool> CreateStringMatcher(string line)
-		{
-			if (line.IndexOf('*') >= 0)
-			{
-				var pattern = new Regex("^" + line.Replace(".", "\\.")
-					.Replace("*", ".*") + "$", RegexOptions.IgnoreCase);
-
-				return pattern.IsMatch;
-			}
-			else
-			{
-				return n => line.Equals(n, StringComparison.CurrentCultureIgnoreCase);
-			}
+			return result;
 		}
 
 		private void ParseOutputProjects(string line, ConfigLocation location)
@@ -377,67 +336,15 @@ namespace org.pescuma.dependencychecker.presenter.config
 			throw new ConfigParserException(location, "Invalid rule");
 		}
 
-		private Func<Dependency, bool> ParseDependencyMatcher(string detail, ConfigLocation location)
-		{
-			Func<Dependency, bool> result = null;
-
-			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
-			{
-				{ "not:", (line, loc) => result = ParseDependencyNot(line, loc) },
-				{ "dep path:", (line, loc) => result = ParseDependencyPath(line) },
-				{ "dep path regex:", (line, loc) => result = ParseDependencyPathRE(line) },
-				{ "dep:", (line, loc) => result = ParseDependencyType(line, loc) },
-			};
-
-			ParseLine(lineTypes, detail, location);
-
-			return result;
-		}
-
-		private Func<Dependency, bool> ParseDependencyType(string line, ConfigLocation loc)
-		{
-			if ("library".Equals(line, StringComparison.InvariantCultureIgnoreCase))
-				return d => d.Type == Dependency.Types.LibraryReference;
-
-			else if ("project".Equals(line, StringComparison.InvariantCultureIgnoreCase))
-				return d => d.Type == Dependency.Types.ProjectReference;
-
-			else
-				throw new ConfigParserException(loc, "Invalid dependency type: " + line);
-		}
-
-		private Func<Dependency, bool> ParseDependencyNot(string line, ConfigLocation loc)
-		{
-			var inner = ParseDependencyMatcher(line, loc);
-
-			return lib => !inner(lib);
-		}
-
-		private Func<Dependency, bool> ParseDependencyPath(string line)
-		{
-			var candidates = line.Split('|')
-				.Select(p => PathUtils.ToAbsolute(basePath, p))
-				.ToList();
-
-			return d => d.ReferencedPath != null && candidates.Any(c => PathUtils.PathMatches(d.ReferencedPath, c));
-		}
-
-		private Func<Dependency, bool> ParseDependencyPathRE(string line)
-		{
-			var re = new Regex("^" + line + "$", RegexOptions.IgnoreCase);
-
-			return d => d.ReferencedPath != null && re.IsMatch(d.ReferencedPath);
-		}
-
 		private bool ParseRule(string line, ConfigLocation location, string separator, Severity severity, Func<Dependency, bool> dependencyFilter)
 		{
 			var pos = line.IndexOf(separator, StringComparison.Ordinal);
 			if (pos < 0)
 				return false;
 
-			var left = ParseMatcher(line.Substring(0, pos)
+			var left = ParseProjectMatcher(line.Substring(0, pos)
 				.Trim(), location);
-			var right = ParseMatcher(line.Substring(pos + separator.Length)
+			var right = ParseProjectMatcher(line.Substring(pos + separator.Length)
 				.Trim(), location);
 
 			config.Rules.Add(new DepenendencyRule(severity, left, right, dependencyFilter, separator == DEPENDS, location));
@@ -447,7 +354,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 
 		private void ParseIgnore(string line, ConfigLocation location)
 		{
-			var matcher = ParseMatcher(line, location);
+			var matcher = ParseProjectMatcher(line, location);
 
 			config.Ignores.Add(new Config.Ignore(matcher, location));
 		}

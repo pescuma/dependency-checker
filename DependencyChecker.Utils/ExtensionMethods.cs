@@ -57,5 +57,10 @@ namespace org.pescuma.dependencychecker.utils
 
 			return t => p1(t) || p2(t);
 		}
+
+		public static Func<T, bool> Not<T>(this Func<T, bool> p1)
+		{
+			return t => !p1(t);
+		}
 	}
 }

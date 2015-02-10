@@ -306,6 +306,18 @@ output projects: c:\b.out");
 		}
 
 		[Test]
+		public void TestIgnoreAllLocalProjects()
+		{
+			var config = Parse("input: c:\\a\n" + //
+			                   "ignore: local: regex: .*");
+
+			Assert.AreEqual(1, config.Ignores.Count);
+			var ignore = config.Ignores[0];
+			Assert.AreEqual(true, ignore.Matches(TestUtils.LocalProj()));
+			Assert.AreEqual(false, ignore.Matches(TestUtils.NonLocalProj()));
+		}
+
+		[Test]
 		public void TestRuleLocation_FirstLine()
 		{
 			var config = Parse("rule: a -> B");
