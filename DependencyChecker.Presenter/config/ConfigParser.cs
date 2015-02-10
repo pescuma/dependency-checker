@@ -82,8 +82,9 @@ namespace org.pescuma.dependencychecker.presenter.config
 			if (type.Value == null)
 				throw new ConfigParserException(location, "Unknown line");
 
-			type.Value(line.Substring(type.Key.Length)
-				.Trim(), location);
+			var remaining = line.Substring(type.Key.Length)
+				.Trim();
+			type.Value(remaining, location);
 		}
 
 		private void ParseInput(string line, ConfigLocation configLocation)
@@ -118,7 +119,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
 			{
 				{ "not:", (line, loc) => result = ParseNot(line, loc) },
-				{ "regex:", (line, loc) => result = ParseRE(line) },
+				{ "regex:", (line, loc) => result = ParseProjetNameRE(line) },
 				{ "path:", (line, loc) => result = ParsePath(line) },
 				{ "path regex:", (line, loc) => result = ParsePathRE(line) },
 				{ "lang:", (line, loc) => result = ParseLanguage(line) },
@@ -130,7 +131,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 				{ "lib:", (line, loc) => result = ParsePlaceAndType(line, loc, null, false) },
 				{ "local lib:", (line, loc) => result = ParsePlaceAndType(line, loc, true, false) },
 				{ "non local lib:", (line, loc) => result = ParsePlaceAndType(line, loc, false, false) },
-				{ "", (line, loc) => result = ParseSimpleMatch(line, loc) },
+				{ "", (line, loc) => result = ParseProjetName(line, loc) },
 			};
 
 			ParseLine(lineTypes, matchLine, location);
@@ -154,7 +155,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 				result = l => (l is Project) == project && inner(l);
 			}
 
-			return result;
+			return l => !(l is GroupElement) && result(l);
 		}
 
 		private Func<Library, bool> ParseNot(string line, ConfigLocation loc)
@@ -164,7 +165,19 @@ namespace org.pescuma.dependencychecker.presenter.config
 			return lib => !inner(lib);
 		}
 
-		private Func<Library, bool> ParseRE(string line)
+		private Func<Library, bool> ParseProjetName(string line, ConfigLocation location)
+		{
+			if (line.IndexOf(':') >= 0 || line.IndexOf('>') >= 0)
+				throw new ConfigParserException(location, "Invalid expression");
+
+			var candidates = line.Split('|')
+				.Select(CreateStringMatcher)
+				.ToList();
+
+			return proj => proj.Names.Any(n => candidates.Any(c => c(n)));
+		}
+
+		private Func<Library, bool> ParseProjetNameRE(string line)
 		{
 			var re = new Regex("^" + line + "$", RegexOptions.IgnoreCase);
 
@@ -173,9 +186,11 @@ namespace org.pescuma.dependencychecker.presenter.config
 
 		private Func<Library, bool> ParsePath(string line)
 		{
-			var path = PathUtils.ToAbsolute(basePath, line);
+			var candidates = line.Split('|')
+				.Select(p => PathUtils.ToAbsolute(basePath, p))
+				.ToList();
 
-			return proj => proj.Paths.Any(pp => PathUtils.PathMatches(pp, path));
+			return proj => proj.Paths.Any(pp => candidates.Any(c => PathUtils.PathMatches(pp, c)));
 		}
 
 		private Func<Library, bool> ParsePathRE(string line)
@@ -190,16 +205,6 @@ namespace org.pescuma.dependencychecker.presenter.config
 			var m = CreateStringMatcher(line);
 
 			return proj => proj.Languages.Any(m);
-		}
-
-		private Func<Library, bool> ParseSimpleMatch(string line, ConfigLocation location)
-		{
-			if (line.IndexOf(':') >= 0 || line.IndexOf('>') >= 0)
-				throw new ConfigParserException(location, "Invalid expression");
-
-			var m = CreateStringMatcher(line);
-
-			return proj => proj.Names.Any(m);
 		}
 
 		private Func<string, bool> CreateStringMatcher(string line)
@@ -289,65 +294,142 @@ namespace org.pescuma.dependencychecker.presenter.config
 			{ "error", Severity.Error },
 		};
 
-		private readonly Dictionary<string, Func<Severity, ConfigLocation, Rule>> customRules =
-			new Dictionary<string, Func<Severity, ConfigLocation, Rule>>
+		private readonly Dictionary<string, Func<ConfigLocation, Severity, Func<Dependency, bool>, Rule>> customRules =
+			new Dictionary<string, Func<ConfigLocation, Severity, Func<Dependency, bool>, Rule>>
 			{
-				{ "don't allow circular dependencies", (s, l) => new NoCircularDepenendenciesRule(s, l) },
-				{ "don't allow self dependencies", (s, l) => new NoSelfDependenciesRule(s, l) },
+				{ "don't allow circular dependencies", NewNoCircularDepenendenciesRule },
+				{ "don't allow self dependencies", (l, s, d) => new NoSelfDependenciesRule(s, d, l) },
 				{ "no two projects with same name", NewUniqueNameProjectRule },
 				{ "no two projects with same guid", NewUniqueGuidProjectRule },
 				{ "no two projects with same name and guid", NewUniqueNameAndGuidProjectRule },
-				{ "avoid same dependency twice", (s, l) => new UniqueDependenciesRule(s, l) },
+				{ "avoid same dependency twice", (l, s, d) => new UniqueDependenciesRule(s, d, l) },
 			};
 
-		private static UniqueProjectRule NewUniqueNameAndGuidProjectRule(Severity s, ConfigLocation l)
+		private static NoCircularDepenendenciesRule NewNoCircularDepenendenciesRule(ConfigLocation l, Severity s, Func<Dependency, bool> d)
 		{
+			if (d != null)
+				throw new ConfigParserException(l, "No dependency details are possible in project rules");
+
+			return new NoCircularDepenendenciesRule(s, l);
+		}
+
+		private static UniqueProjectRule NewUniqueNameAndGuidProjectRule(ConfigLocation l, Severity s, Func<Dependency, bool> d)
+		{
+			if (d != null)
+				throw new ConfigParserException(l, "No dependency details are possible in project rules");
+
 			return new UniqueProjectRule(p => p.ProjectName != null && p.Guid != null, p => p.Name + "\n" + p.Guid,
 				p => "named " + p.Name + " and with GUID " + p.Guid, s, l);
 		}
 
-		private static UniqueProjectRule NewUniqueGuidProjectRule(Severity s, ConfigLocation l)
+		private static UniqueProjectRule NewUniqueGuidProjectRule(ConfigLocation l, Severity s, Func<Dependency, bool> d)
 		{
+			if (d != null)
+				throw new ConfigParserException(l, "No dependency details are possible in project rules");
+
 			return new UniqueProjectRule(p => p.Guid != null, p => p.Guid.ToString(), p => "with GUID " + p.Guid, s, l);
 		}
 
-		private static UniqueProjectRule NewUniqueNameProjectRule(Severity s, ConfigLocation l)
+		private static UniqueProjectRule NewUniqueNameProjectRule(ConfigLocation l, Severity s, Func<Dependency, bool> d)
 		{
+			if (d != null)
+				throw new ConfigParserException(l, "No dependency details are possible in project rules");
+
 			return new UniqueProjectRule(p => p.ProjectName != null, p => p.Name, p => "named " + p.Name, s, l);
 		}
 
 		private void ParseRule(string line, ConfigLocation location)
 		{
 			var severity = Severity.Error;
-			foreach (var s in severities)
+			Func<Dependency, bool> dependencyFilter = null;
+
+			if (line.EndsWith("]"))
 			{
-				var suffix = "[" + s.Key + "]";
-				if (line.EndsWith(suffix, StringComparison.CurrentCultureIgnoreCase))
+				var start = line.LastIndexOf("[", StringComparison.InvariantCulture);
+				var details = line.Substring(start + 1, line.Length - start - 2);
+				line = line.Substring(0, start)
+					.Trim();
+
+				foreach (var detail in details.Split(',')
+					.Select(d => d.Trim()))
 				{
-					severity = s.Value;
-					line = line.Substring(0, line.Length - suffix.Length)
-						.Trim();
-					break;
+					Severity tmp;
+					if (severities.TryGetValue(detail.ToLower(), out tmp))
+						severity = tmp;
+					else
+						dependencyFilter = dependencyFilter.And(ParseDependencyMatcher(detail, location));
 				}
 			}
 
-			Func<Severity, ConfigLocation, Rule> factory;
-			if (customRules.TryGetValue(line.ToLower(), out factory))
+			var factory = customRules.Get(line.ToLower());
+			if (factory != null)
 			{
-				config.Rules.Add(factory(severity, location));
+				config.Rules.Add(factory(location, severity, dependencyFilter));
 				return;
 			}
 
-			if (ParseRule(line, location, NOT_DEPENDS, severity))
+			if (ParseRule(line, location, NOT_DEPENDS, severity, dependencyFilter))
 				return;
 
-			if (ParseRule(line, location, DEPENDS, severity))
+			if (ParseRule(line, location, DEPENDS, severity, dependencyFilter))
 				return;
 
 			throw new ConfigParserException(location, "Invalid rule");
 		}
 
-		private bool ParseRule(string line, ConfigLocation location, string separator, Severity severity)
+		private Func<Dependency, bool> ParseDependencyMatcher(string detail, ConfigLocation location)
+		{
+			Func<Dependency, bool> result = null;
+
+			var lineTypes = new Dictionary<string, Action<string, ConfigLocation>>
+			{
+				{ "not:", (line, loc) => result = ParseDependencyNot(line, loc) },
+				{ "dep path:", (line, loc) => result = ParseDependencyPath(line) },
+				{ "dep path regex:", (line, loc) => result = ParseDependencyPathRE(line) },
+				{ "dep:", (line, loc) => result = ParseDependencyType(line, loc) },
+			};
+
+			ParseLine(lineTypes, detail, location);
+
+			return result;
+		}
+
+		private Func<Dependency, bool> ParseDependencyType(string line, ConfigLocation loc)
+		{
+			if ("library".Equals(line, StringComparison.InvariantCultureIgnoreCase))
+				return d => d.Type == Dependency.Types.LibraryReference;
+
+			else if ("project".Equals(line, StringComparison.InvariantCultureIgnoreCase))
+				return d => d.Type == Dependency.Types.ProjectReference;
+
+			else
+				throw new ConfigParserException(loc, "Invalid dependency type: " + line);
+		}
+
+		private Func<Dependency, bool> ParseDependencyNot(string line, ConfigLocation loc)
+		{
+			var inner = ParseDependencyMatcher(line, loc);
+
+			return lib => !inner(lib);
+		}
+
+		private Func<Dependency, bool> ParseDependencyPath(string line)
+		{
+			var candidates = line.Split('|')
+				.Select(p => PathUtils.ToAbsolute(basePath, p))
+				.ToList();
+
+			return d => d.ReferencedPath != null && candidates.Any(c => PathUtils.PathMatches(d.ReferencedPath, c));
+		}
+
+		private Func<Dependency, bool> ParseDependencyPathRE(string line)
+		{
+			var re = new Regex("^" + line + "$", RegexOptions.IgnoreCase);
+
+			return d => d.ReferencedPath != null && re.IsMatch(d.ReferencedPath);
+		}
+
+		private bool ParseRule(string line, ConfigLocation location, string separator, Severity severity, Func<Dependency, bool> dependencyFilter)
 		{
 			var pos = line.IndexOf(separator, StringComparison.Ordinal);
 			if (pos < 0)
@@ -358,7 +440,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 			var right = ParseMatcher(line.Substring(pos + separator.Length)
 				.Trim(), location);
 
-			config.Rules.Add(new DepenendencyRule(severity, left, right, separator == DEPENDS, location));
+			config.Rules.Add(new DepenendencyRule(severity, left, right, dependencyFilter, separator == DEPENDS, location));
 
 			return true;
 		}

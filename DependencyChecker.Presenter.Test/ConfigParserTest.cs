@@ -408,5 +408,96 @@ output projects: c:\b.out");
 			var rule = (NoCircularDepenendenciesRule) config.Rules[0];
 			Assert.AreEqual(Severity.Info, rule.Severity);
 		}
+
+		[Test]
+		public void TestRuleDependencyType_Library()
+		{
+			var config = Parse("rule: a -> b[dep: library]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Error, rule.Severity);
+			Assert.AreEqual(true, rule.Dependency(TestUtils.LibraryDependency("a", "b", "c:")));
+			Assert.AreEqual(false, rule.Dependency(TestUtils.ProjectDependency("a", "b")));
+		}
+
+		[Test]
+		public void TestRuleDependency_Type_Project()
+		{
+			var config = Parse("rule: a -> b[dep: project]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Error, rule.Severity);
+			Assert.AreEqual(false, rule.Dependency(TestUtils.LibraryDependency("a", "b", "c:")));
+			Assert.AreEqual(true, rule.Dependency(TestUtils.ProjectDependency("a", "b")));
+		}
+
+		[Test]
+		public void TestRuleDependency_Type_Library_CaseInsensitive()
+		{
+			var config = Parse("rule: a -> b[dep: LiBrAry]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Error, rule.Severity);
+			Assert.AreEqual(true, rule.Dependency(TestUtils.LibraryDependency("a", "b", "c:")));
+			Assert.AreEqual(false, rule.Dependency(TestUtils.ProjectDependency("a", "b")));
+		}
+
+		[Test]
+		public void TestRuleDependency_Type_Project_CaseInsensitive()
+		{
+			var config = Parse("rule: a -> b[dep: pRoJeCt]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Error, rule.Severity);
+			Assert.AreEqual(false, rule.Dependency(TestUtils.LibraryDependency("a", "b", "c:")));
+			Assert.AreEqual(true, rule.Dependency(TestUtils.ProjectDependency("a", "b")));
+		}
+
+		[Test]
+		public void TestRuleDependency_Type_Library_WithTabs()
+		{
+			var config = Parse("rule: a -> b[dep:\t\tlibrary]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Error, rule.Severity);
+			Assert.AreEqual(true, rule.Dependency(TestUtils.LibraryDependency("a", "b", "c:")));
+			Assert.AreEqual(false, rule.Dependency(TestUtils.ProjectDependency("a", "b")));
+		}
+
+		[Test]
+		public void TestRuleDependency_Path()
+		{
+			var config = Parse(@"rule: a -> b[dep path: c:\x]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Error, rule.Severity);
+			Assert.AreEqual(true, rule.Dependency(TestUtils.LibraryDependency("a", "b", @"c:\x\y.dll")));
+			Assert.AreEqual(false, rule.Dependency(TestUtils.LibraryDependency("a", "b", @"c:\y\y.dll")));
+			Assert.AreEqual(false, rule.Dependency(TestUtils.ProjectDependency("a", "b")));
+		}
+
+		[Test]
+		public void TestRuleDependency_PathRE()
+		{
+			var config = Parse(@"rule: a -> b[dep path regex: .*\\x.*]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Error, rule.Severity);
+			Assert.AreEqual(true, rule.Dependency(TestUtils.LibraryDependency("a", "b", @"c:\x\y.dll")));
+			Assert.AreEqual(true, rule.Dependency(TestUtils.LibraryDependency("a", "b", @"c:\y\x.dll")));
+			Assert.AreEqual(false, rule.Dependency(TestUtils.LibraryDependency("a", "b", @"c:\y\y.dll")));
+			Assert.AreEqual(false, rule.Dependency(TestUtils.ProjectDependency("a", "b")));
+		}
+
+		[Test]
+		public void TestRuleDependencyType_Not()
+		{
+			var config = Parse("rule: a -> b[not: dep: library]");
+
+			var rule = (DepenendencyRule) config.Rules[0];
+			Assert.AreEqual(Severity.Error, rule.Severity);
+			Assert.AreEqual(false, rule.Dependency(TestUtils.LibraryDependency("a", "b", "c:")));
+			Assert.AreEqual(true, rule.Dependency(TestUtils.ProjectDependency("a", "b")));
+		}
 	}
 }

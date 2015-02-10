@@ -29,11 +29,11 @@ namespace org.pescuma.dependencychecker.model
 		};
 
 		public readonly string LibraryName;
-		public readonly HashSet<string> Paths = new HashSet<string>();
+		public readonly ISet<string> Paths = new HashSet<string>();
 		public GroupElement GroupElement;
-		public readonly HashSet<string> Names = new HashSet<string>();
-		public readonly HashSet<string> LibraryNames = new HashSet<string>();
-		public readonly HashSet<string> Languages = new HashSet<string>();
+		public readonly ISet<string> Names = new HashSet<string>();
+		public readonly ISet<string> LibraryNames = new HashSet<string>();
+		public readonly ISet<string> Languages = new HashSet<string>();
 		public bool IsLocal;
 
 		public Library(string libraryName, IEnumerable<string> languages)

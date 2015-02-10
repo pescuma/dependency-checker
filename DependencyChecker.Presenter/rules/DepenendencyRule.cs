@@ -10,18 +10,24 @@ namespace org.pescuma.dependencychecker.presenter.rules
 		// HACK Fields are public for tests
 		public readonly Func<Library, bool> Source;
 		public readonly Func<Library, bool> Target;
+		public readonly Func<Dependency, bool> Dependency;
 		public readonly bool Allow;
 
-		public DepenendencyRule(Severity severity, Func<Library, bool> source, Func<Library, bool> target, bool allow, ConfigLocation location)
+		public DepenendencyRule(Severity severity, Func<Library, bool> source, Func<Library, bool> target, Func<Dependency, bool> dependency,
+			bool allow, ConfigLocation location)
 			: base(severity, location)
 		{
-			Source = source;
-			Target = target;
+			Source = source ?? (p => true);
+			Target = target ?? (p => true);
+			Dependency = dependency ?? (d => true);
 			Allow = allow;
 		}
 
 		public override OutputEntry Process(Dependency dep)
 		{
+			if (!Dependency(dep))
+				return null;
+
 			if (!Matches(Source, dep.Source) || !Matches(Target, dep.Target))
 				return null;
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.presenter.rules;
 
@@ -26,32 +27,47 @@ namespace org.pescuma.dependencychecker.presenter.output.results
 			});
 		}
 
+		private static string Simplify(string text)
+		{
+			return Regex.Replace(text, @"\s+", " ");
+		}
+
 		public static string ToConsole(OutputEntry entry, bool verbose)
 		{
 			var result = new StringBuilder();
 
-			result.Append("[");
-			if (entry is DependencyRuleMatch && ((DependencyRuleMatch) entry).Allowed)
-				result.Append("ALLOWED");
-			else
-				result.Append(entry.Severity.ToString()
-					.ToUpper());
-			result.Append("] ");
-			result.Append(ToConsole(entry.Messsage));
+			result.AppendPrefix(entry)
+				.Append(ToConsole(entry.Messsage));
+
+			if (entry is RuleOutputEntry)
+			{
+				result.AppendLine()
+					.AppendPrefix(entry)
+					.Append("   ")
+					.Append(Simplify(((RuleOutputEntry) entry).Rule.Location.LineText));
+			}
 
 			if (verbose)
 			{
 				if (entry.Projects.Any())
 				{
-					result.Append("\nProjects affected:");
-					entry.Projects.ForEach(p => result.Append("\n  - ")
+					result.AppendLine()
+						.AppendPrefix(entry)
+						.Append("   Projects affected:");
+					entry.Projects.ForEach(p => result.AppendLine()
+						.AppendPrefix(entry)
+						.Append("      - ")
 						.Append(ToConsole(p, OutputMessage.ProjInfo.NameAndPath)));
 				}
 
 				if (entry.Dependencies.Any())
 				{
-					result.Append("\nDependencies affected:");
-					entry.Dependencies.ForEach(d => result.Append("\n  - ")
+					result.AppendLine()
+						.AppendPrefix(entry)
+						.Append("   Dependencies affected:");
+					entry.Dependencies.ForEach(d => result.AppendLine()
+						.AppendPrefix(entry)
+						.Append("      - ")
 						.Append(ToConsole(d, OutputMessage.DepInfo.FullDescription)));
 				}
 			}
@@ -154,6 +170,22 @@ namespace org.pescuma.dependencychecker.presenter.output.results
 				default:
 					throw new InvalidDataException();
 			}
+		}
+	}
+
+	internal static class StringBuilderExtensions
+	{
+		public static StringBuilder AppendPrefix(this StringBuilder result, OutputEntry entry)
+		{
+			result.Append("[");
+			if (entry is DependencyRuleMatch && ((DependencyRuleMatch) entry).Allowed)
+				result.Append("ALLOWED");
+			else
+				result.Append(entry.Severity.ToString()
+					.ToUpper());
+			result.Append("] ");
+
+			return result;
 		}
 	}
 }

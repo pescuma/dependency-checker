@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.presenter.output;
@@ -8,9 +9,12 @@ namespace org.pescuma.dependencychecker.presenter.rules
 {
 	public class UniqueDependenciesRule : BaseRule
 	{
-		public UniqueDependenciesRule(Severity severity, ConfigLocation location)
+		private readonly Func<Dependency, bool> filter;
+
+		public UniqueDependenciesRule(Severity severity, Func<Dependency, bool> filter, ConfigLocation location)
 			: base(severity, location)
 		{
+			this.filter = filter ?? (d => true);
 		}
 
 		public override List<OutputEntry> Process(DependencyGraph graph, Library element)
@@ -22,6 +26,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 			var result = new List<OutputEntry>();
 
 			var same = graph.OutEdges(proj)
+				.Where(d => filter(d))
 				.GroupBy(d => d.Target)
 				.Where(g => g.Count() > 1);
 

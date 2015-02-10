@@ -33,9 +33,14 @@ namespace org.pescuma.dependencychecker.presenter
 			return new Project("NO NAME", "NO LIB NAME", new Guid(), "PROJ.PATH", null) { IsLocal = false };
 		}
 
-		public static Dependency Dependency(Project p1, Project p2)
+		public static Dependency ProjectDependency(string p1, string p2)
 		{
-			return model.Dependency.WithProject(p1, p2, new Location("F", 1));
+			return Dependency.WithProject(ProjWithName(p1), ProjWithName(p2), new Location("F", 1));
+		}
+
+		public static Dependency LibraryDependency(string p1, string p2, string path)
+		{
+			return Dependency.WithLibrary(ProjWithName(p1), ProjWithName(p2), new Location("F", 1), path);
 		}
 
 		public static DependencyGraph Graph(params object[] os)
