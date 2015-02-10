@@ -40,27 +40,41 @@ namespace org.pescuma.dependencychecker.presenter.output.results
 			result.AppendPrefix(entry)
 				.Append(ToConsole(entry.Messsage));
 
-			if (entry is RuleOutputEntry)
+			if (!verbose)
 			{
-				result.AppendLine()
-					.AppendPrefix(entry)
-					.Append("   ")
-					.Append(Simplify(((RuleOutputEntry) entry).Rule.Location.LineText));
+				entry.ProcessedFields.Where(f => f.Matched)
+					.Where(f => !f.Field.EndsWith("Library Name"))
+					.ForEach(f =>
+					{
+						result.AppendLine()
+							.AppendPrefix(entry)
+							.Append("   ")
+							.Append(f.Field)
+							.Append(": ")
+							.Append(f.Value);
+					});
 			}
-
-			entry.ProcessedFields.Where(f => f.Matched)
-				.ForEach(f =>
+			else
+			{
+				if (entry is RuleOutputEntry)
 				{
 					result.AppendLine()
 						.AppendPrefix(entry)
 						.Append("   ")
-						.Append(f.Field)
-						.Append(": ")
-						.Append(f.Value);
-				});
+						.Append(Simplify(((RuleOutputEntry) entry).Rule.Location.LineText));
+				}
 
-			if (verbose)
-			{
+				entry.ProcessedFields.Where(f => f.Matched)
+					.ForEach(f =>
+					{
+						result.AppendLine()
+							.AppendPrefix(entry)
+							.Append("   ")
+							.Append(f.Field)
+							.Append(": ")
+							.Append(f.Value);
+					});
+
 				if (entry.Projects.Any())
 				{
 					result.AppendLine()

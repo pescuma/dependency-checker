@@ -38,9 +38,9 @@ namespace org.pescuma.dependencychecker.presenter.rules
 
 			var messsage = new OutputMessage();
 			messsage.Append("Dependency between ")
-				.Append(dep.Source, OutputMessage.ProjInfo.NameAndGroup)
+				.Append(dep.Source, OutputMessage.ProjInfo.Name)
 				.Append(" and ")
-				.Append(dep.Target, OutputMessage.ProjInfo.NameAndGroup)
+				.Append(dep.Target, OutputMessage.ProjInfo.Name)
 				.Append(Allow ? "" : " not")
 				.Append(" allowed");
 
