@@ -3,6 +3,7 @@ using System.Linq;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.presenter.config;
 using org.pescuma.dependencychecker.presenter.output;
+using org.pescuma.dependencychecker.presenter.rules;
 
 namespace org.pescuma.dependencychecker.presenter.architecture
 {
@@ -10,6 +11,11 @@ namespace org.pescuma.dependencychecker.presenter.architecture
 	{
 		public static ArchitectureGraph Load(Config config, DependencyGraph graph)
 		{
+			var rules = config.Rules.OfType<DepenendencyRule>()
+				.Where(r => r.Severity == Severity.Error)
+				.Cast<Rule>()
+				.ToList();
+
 			var libs = graph.Vertices.Where(v => v.GroupElement != null)
 				.ToList();
 
@@ -27,14 +33,23 @@ namespace org.pescuma.dependencychecker.presenter.architecture
 					if (allowed.Contains(dep) && notAllowed.Contains(dep))
 						continue;
 
-					var match = RulesMatcher.FindMatch(config.Rules, Dependency.WithProject(p1, p2, new Location("a", 1))) as DependencyRuleMatch;
-					if (match == null)
-						continue;
+					var match = RulesMatcher.FindMatch(rules, Dependency.WithProject(p1, p2, new Location("a", 1))) as DependencyRuleMatch;
+					if (match != null)
+					{
+						if (match.Allowed)
+							allowed.Add(dep);
+						else
+							notAllowed.Add(dep);
+					}
 
-					if (match.Allowed)
-						allowed.Add(dep);
-					else
-						notAllowed.Add(dep);
+					match = RulesMatcher.FindMatch(rules, Dependency.WithLibrary(p1, p2, new Location("a", 1), null)) as DependencyRuleMatch;
+					if (match != null)
+					{
+						if (match.Allowed)
+							allowed.Add(dep);
+						else
+							notAllowed.Add(dep);
+					}
 				}
 			}
 
