@@ -17,7 +17,7 @@ namespace org.pescuma.dependencychecker.utils
 		public readonly string Name;
 		public readonly string Filename;
 
-		private static XNamespace ns = "http://schemas.microsoft.com/developer/msbuild/2003";
+		private static readonly XNamespace ns = "http://schemas.microsoft.com/developer/msbuild/2003";
 
 		public VSProjReader(string csproj)
 		{
@@ -25,7 +25,14 @@ namespace org.pescuma.dependencychecker.utils
 			Name = Path.GetFileNameWithoutExtension(csproj);
 			Filename = Path.GetFullPath(csproj);
 
-			xdoc = XDocument.Load(csproj, LoadOptions.SetLineInfo);
+			try
+			{
+				xdoc = XDocument.Load(csproj, LoadOptions.SetLineInfo);
+			}
+			catch (Exception e)
+			{
+				throw new IOException("Error reading '" + csproj + "': " + e.Message, e);
+			}
 
 			if (xdoc.Root == null || xdoc.Root.Name != ns + "Project")
 				throw new IOException("Invalid csproj file: " + csproj);
@@ -90,7 +97,7 @@ namespace org.pescuma.dependencychecker.utils
 
 		private static string Attribute(XElement node, string name)
 		{
-			var attr = node.Attribute(name);
+			XAttribute attr = node.Attribute(name);
 			if (attr == null)
 				return null;
 
@@ -133,11 +140,11 @@ namespace org.pescuma.dependencychecker.utils
 			{
 				get
 				{
-					var hintPath = Node(node, "HintPath");
+					XElement hintPath = Node(node, "HintPath");
 					if (hintPath == null)
 						return null;
 
-					var result = hintPath.Value;
+					string result = hintPath.Value;
 					if (string.IsNullOrWhiteSpace(result))
 						return null;
 

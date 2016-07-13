@@ -12,7 +12,7 @@ namespace org.pescuma.dependencychecker.presenter.input
 	{
 		public static DependencyGraph LoadGraph(Config config, List<OutputEntry> warnings)
 		{
-			ProjectLoader[] loaders = { new VsprojectsLoader(), new EclipseProjectsLoader() };
+			ProjectLoader[] loaders = { new VsProjectsLoader(), new EclipseProjectsLoader() };
 
 			var builder = new DependencyGraphBuilder(config, warnings);
 

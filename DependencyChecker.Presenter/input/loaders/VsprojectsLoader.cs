@@ -9,7 +9,7 @@ using org.pescuma.dependencychecker.utils;
 
 namespace org.pescuma.dependencychecker.presenter.input.loaders
 {
-	public class VsprojectsLoader : ProjectLoader
+	public class VsProjectsLoader : ProjectLoader
 	{
 		public void LoadProjects(List<string> paths, DependencyGraphBuilder builder, List<OutputEntry> warnings)
 		{
@@ -25,18 +25,18 @@ namespace org.pescuma.dependencychecker.presenter.input.loaders
 				new HashSet<string>(paths.SelectMany(folder => Directory.GetFiles(folder, filenamePattern, SearchOption.AllDirectories))
 					.Select(Path.GetFullPath));
 
-			var csprojs = csprojsFiles.Select(f => new VSProjReader(f))
+			List<VSProjReader> csprojs = csprojsFiles.Select(f => new VSProjReader(f))
 				.OrderBy(n => n.Filename, StringComparer.CurrentCultureIgnoreCase)
 				.ToList();
-			foreach (var csproj in csprojs)
+			foreach (VSProjReader csproj in csprojs)
 			{
-				var proj = builder.AddProject(csproj.Name, csproj.AssemblyName, csproj.ProjectGuid, csproj.Filename, defaultLanguage);
+				object proj = builder.AddProject(csproj.Name, csproj.AssemblyName, csproj.ProjectGuid, csproj.Filename, defaultLanguage);
 
-				foreach (var csref in csproj.ProjectReferences)
+				foreach (VSProjReader.ProjectReference csref in csproj.ProjectReferences)
 					builder.AddProjectReference(proj, csref.Name, null, csref.ProjectGuid, csref.Include, new Location(csproj.Filename, csref.LineNumber),
 						defaultLanguage);
 
-				foreach (var csref in csproj.References)
+				foreach (VSProjReader.Reference csref in csproj.References)
 				{
 					IEnumerable<string> language;
 					if (csref.HintPath == null && csref.Include.GetPublicKey() == null)
@@ -49,7 +49,7 @@ namespace org.pescuma.dependencychecker.presenter.input.loaders
 						language);
 				}
 
-				foreach (var csref in csproj.COMReferences)
+				foreach (VSProjReader.COMReference csref in csproj.COMReferences)
 					builder.AddLibraryReference(proj, null, csref.Include, csref.Guid, null, new Location(csproj.Filename, csref.LineNumber), null);
 			}
 
@@ -58,11 +58,11 @@ namespace org.pescuma.dependencychecker.presenter.input.loaders
 				.Distinct()
 				.Where(f => !csprojsFiles.Contains(f))
 				.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase);
-			foreach (var externalCsprojFile in externalCsprojFiles)
+			foreach (string externalCsprojFile in externalCsprojFiles)
 			{
 				if (paths.Any(p => externalCsprojFile.StartsWith(p + Path.DirectorySeparatorChar)))
 				{
-					var msg = new OutputMessage().Append("Failed to load a referenced project: ")
+					OutputMessage msg = new OutputMessage().Append("Failed to load a referenced project: ")
 						.Append(externalCsprojFile);
 					warnings.Add(new LoadingOutputEntry("Referenced project not found", msg));
 					continue;
@@ -75,7 +75,7 @@ namespace org.pescuma.dependencychecker.presenter.input.loaders
 				}
 				catch (IOException)
 				{
-					var msg = new OutputMessage().Append("Failed to load a project outside of input folders: ")
+					OutputMessage msg = new OutputMessage().Append("Failed to load a project outside of input folders: ")
 						.Append(externalCsprojFile);
 					warnings.Add(new LoadingOutputEntry("External project not found", msg));
 				}
