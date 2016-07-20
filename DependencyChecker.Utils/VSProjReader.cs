@@ -85,6 +85,24 @@ namespace org.pescuma.dependencychecker.utils
 			}
 		}
 
+		public IEnumerable<string> Contents
+		{
+			get
+			{
+				return Nodes("Content")
+					.Concat(Nodes("None"))
+					.Select(c =>
+					{
+						string include = Attribute(c, "Include");
+						if (string.IsNullOrWhiteSpace(include))
+							return null;
+
+						return Path.Combine(folder, include);
+					})
+					.Where(i => i != null);
+			}
+		}
+
 		private IEnumerable<XElement> Nodes(string name)
 		{
 			return xdoc.Descendants(ns + name);
