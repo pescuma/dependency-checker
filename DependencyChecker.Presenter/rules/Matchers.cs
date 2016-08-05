@@ -231,7 +231,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 			}
 		}
 
-		private static List<Func<string, bool>> CreateStringMatchers(string names)
+		public static List<Func<string, bool>> CreateStringMatchers(string names)
 		{
 			return names.Split('|')
 				.Select(CreateStringMatcher)

@@ -16,7 +16,7 @@ namespace org.pescuma.dependencyconsole.commands
 
 		protected override void InternalHandle(Output result, string anArgs, DependencyGraph graph)
 		{
-			var args = anArgs.Split(new[] { "->" }, StringSplitOptions.None)
+			List<string> args = anArgs.Split(new[] { "->" }, StringSplitOptions.None)
 				.Select(e => e.Trim())
 				.ToList();
 			if (args.Count != 2)
@@ -25,8 +25,8 @@ namespace org.pescuma.dependencyconsole.commands
 				return;
 			}
 
-			var libs0 = FilterLibs(graph, args[0]);
-			var libs1 = FilterLibs(graph, args[1]);
+			List<Library> libs0 = FilterLibs(graph, args[0]);
+			List<Library> libs1 = FilterLibs(graph, args[1]);
 
 			if (!libs0.Any() || !libs1.Any())
 			{
@@ -37,34 +37,36 @@ namespace org.pescuma.dependencyconsole.commands
 				return;
 			}
 
-			foreach (var source in libs0)
+			bool found = false;
+			foreach (Library source in libs0)
 			{
-				foreach (var target in libs1)
+				foreach (Library target in libs1)
 				{
-					OutputPath(result, graph, source, target);
-					OutputPath(result, graph, target, source);
+					found = OutputPath(result, graph, source, target) || found;
+					found = OutputPath(result, graph, target, source) || found;
 				}
 			}
+
+			if (!found)
+				result.AppendLine("No path found");
 		}
 
-		private void OutputPath(Output result, DependencyGraph graph, Library source, Library target)
+		private bool OutputPath(Output result, DependencyGraph graph, Library source, Library target)
 		{
-			result.AppendLine("Path(s) between {0} and {1}:", GetName(source), GetName(target));
-			result.IncreaseIndent();
+			var tryGetPaths = graph.ShortestPathsDijkstra(e => 1, source);
+			IEnumerable<Dependency> path;
+			if (!tryGetPaths(target, out path))
+				return false;
+
 			try
 			{
-				var tryGetPaths = graph.ShortestPathsDijkstra(e => 1, source);
-				IEnumerable<Dependency> path;
-				if (!tryGetPaths(target, out path))
-				{
-					result.AppendLine("No path found");
-					return;
-				}
+				result.AppendLine("Path between {0} and {1}:", GetName(source), GetName(target));
+				result.IncreaseIndent();
 
-				var line = result.StartLine();
+				Output.LineOutput line = result.StartLine();
 
 				line.Append(GetName(source));
-				foreach (var edge in path)
+				foreach (Dependency edge in path)
 					line.Append(" -> ")
 						.Append(GetName(edge.Target));
 
@@ -75,6 +77,8 @@ namespace org.pescuma.dependencyconsole.commands
 				result.DecreaseIndent();
 				result.AppendLine();
 			}
+
+			return true;
 		}
 	}
 }

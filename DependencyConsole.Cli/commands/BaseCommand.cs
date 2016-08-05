@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using org.pescuma.dependencychecker.model;
 using org.pescuma.dependencychecker.presenter.config;
@@ -60,7 +61,7 @@ namespace org.pescuma.dependencyconsole.commands
 
 			if (search != "")
 			{
-				var matcher = new ConfigParser().ParseLibraryMatcher(search, new ConfigLocation(1, search));
+				LibraryMatcher matcher = ParseLibraryOrGroupMatcher(search);
 
 				libs = libs.Where(l => matcher(l, Matchers.NullReporter));
 			}
@@ -71,6 +72,16 @@ namespace org.pescuma.dependencyconsole.commands
 		protected string GetName(Library l)
 		{
 			return string.Join(" or ", l.SortedNames);
+		}
+
+		protected LibraryMatcher ParseLibraryOrGroupMatcher(string search)
+		{
+			LibraryMatcher proj = new ConfigParser().ParseLibraryMatcher(search, new ConfigLocation(1, search));
+
+			List<Func<string, bool>> ms = Matchers.CreateStringMatchers(search);
+			LibraryMatcher group = (l, r) => l.GroupElement != null && ms.Any(m => m(l.GroupElement.Name));
+
+			return (l, r) => proj(l, r) || group(l, r);
 		}
 	}
 }
