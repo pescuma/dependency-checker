@@ -29,7 +29,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 			if (!File.Exists(filename))
 				throw new ConfigParserException("Config file doesn't exits: " + filename);
 
-			var lines = File.ReadAllLines(filename);
+			string[] lines = File.ReadAllLines(filename);
 
 			return ParseLines(filename, lines);
 		}
@@ -104,25 +104,25 @@ namespace org.pescuma.dependencychecker.presenter.config
 
 		private void ParseInput(string line, ConfigLocation configLocation)
 		{
-			var absolute = PathUtils.ToAbsolute(basePath, line);
+			string absolute = PathUtils.ToAbsolute(basePath, line);
 			config.Inputs.Add(PathUtils.RemoveSeparatorAtEnd(absolute));
 		}
 
 		private void ParseGroup(string line, ConfigLocation location)
 		{
-			var pos = line.IndexOf(GROUP_ELEMENT, StringComparison.CurrentCultureIgnoreCase);
+			int pos = line.IndexOf(GROUP_ELEMENT, StringComparison.CurrentCultureIgnoreCase);
 			if (pos < 0)
 				throw new ConfigParserException(location, "Invalid group (should contain Name " + GROUP_ELEMENT + " Contents)");
 
-			var name = line.Substring(0, pos)
+			string name = line.Substring(0, pos)
 				.Trim();
 			if ("<No Group>".Equals(name, StringComparison.CurrentCultureIgnoreCase))
 				name = null;
 
-			var matchLine = line.Substring(pos + DEPENDS.Length)
+			string matchLine = line.Substring(pos + DEPENDS.Length)
 				.Trim();
 
-			var matcher = ParseLibraryMatcher(matchLine, location);
+			LibraryMatcher matcher = ParseLibraryMatcher(matchLine, location);
 
 			config.Groups.Add(new Config.Group(name, matcher, location));
 		}
@@ -142,7 +142,7 @@ namespace org.pescuma.dependencychecker.presenter.config
 				{
 					"not:", (line, loc) =>
 					{
-						var matcher = ParseInternediaryLibraryMatcher(line, loc);
+						InternediaryLibraryMatcher matcher = ParseInternediaryLibraryMatcher(line, loc);
 						result = (library, reporter) => !matcher(library, (f, v, m) => reporter(f, v, !m));
 					}
 				},

@@ -28,13 +28,13 @@ namespace org.pescuma.dependencychecker.cli
 			{
 				var warnings = new List<OutputEntry>();
 
-				var config = new ConfigParser().Parse(args[0]);
+				Config config = new ConfigParser().Parse(args[0]);
 
-				var graph = ProjectsLoader.LoadGraph(config, warnings);
+				DependencyGraph graph = ProjectsLoader.LoadGraph(config, warnings);
 
 				new GroupsLoader(config, graph, warnings).FillGroups();
 
-				var architecture = ArchitectureLoader.Load(config, graph);
+				ArchitectureGraph architecture = ArchitectureLoader.Load(config, graph);
 
 				warnings.AddRange(RulesMatcher.Match(graph, config.Rules));
 
@@ -94,15 +94,15 @@ namespace org.pescuma.dependencychecker.cli
 			if (!filenames.Any())
 				return;
 
-			var projs = projects.ToList();
+			List<Library> projs = projects.ToList();
 			projs.Sort(Library.NaturalOrdering);
 
-			var names = projs.Select(p => string.Join(" or ", p.SortedNames))
+			List<string> names = projs.Select(ConsoleOutputer.ProjectGlance)
 				.ToList();
 
-			foreach (var filename in filenames)
+			foreach (string filename in filenames)
 			{
-				// ReSharper disable once AssignNullToNotNullAttribute
+// ReSharper disable once AssignNullToNotNullAttribute
 				Directory.CreateDirectory(Path.GetDirectoryName(filename));
 				File.WriteAllLines(filename, names);
 			}
@@ -115,11 +115,11 @@ namespace org.pescuma.dependencychecker.cli
 
 			var result = new Output("  - ");
 			ConsoleOutputer.GroupsToConsole(result, projects);
-			var text = result.ToString();
+			string text = result.ToString();
 
-			foreach (var filename in filenames)
+			foreach (string filename in filenames)
 			{
-				// ReSharper disable once AssignNullToNotNullAttribute
+// ReSharper disable once AssignNullToNotNullAttribute
 				Directory.CreateDirectory(Path.GetDirectoryName(filename));
 				File.WriteAllText(filename, text);
 			}

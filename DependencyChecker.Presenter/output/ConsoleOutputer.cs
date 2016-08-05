@@ -15,8 +15,8 @@ namespace org.pescuma.dependencychecker.presenter.output
 
 			groups.Sort((e1, e2) =>
 			{
-				var g1 = e1.Key;
-				var g2 = e2.Key;
+				GroupElement g1 = e1.Key;
+				GroupElement g2 = e2.Key;
 
 				if (Equals(g1, g2))
 					return 0;
@@ -36,15 +36,20 @@ namespace org.pescuma.dependencychecker.presenter.output
 
 				result.IncreaseIndent();
 
-				var projs = g.ToList();
+				List<Library> projs = g.ToList();
 				projs.Sort(Library.NaturalOrdering);
-				projs.ForEach(p => result.AppendLine(string.Join(" or ", p.SortedNames)));
+				projs.ForEach(p => result.AppendLine(ProjectGlance(p)));
 
 				result.DecreaseIndent();
 				result.AppendLine();
 			});
 
 			return result.ToString();
+		}
+
+		public static string ProjectGlance(Library p)
+		{
+			return string.Join(" or ", p.SortedNames) + " (" + (p is Project ? "project" : "library") + (p.IsLocal ? " local" : "") + ")";
 		}
 	}
 }

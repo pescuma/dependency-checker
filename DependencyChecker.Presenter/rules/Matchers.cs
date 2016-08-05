@@ -30,7 +30,7 @@ namespace org.pescuma.dependencychecker.presenter.rules
 				if (names == "*")
 					return (p, r) => true;
 
-				var candidates = CreateStringMatchers(names);
+				List<Func<string, bool>> candidates = CreateStringMatchers(names);
 
 				return (proj, reporter) => proj.Names.Any(n =>
 				{

@@ -11,7 +11,7 @@ namespace org.pescuma.dependencyconsole
 {
 	internal class Program
 	{
-		private static Command[] commands =
+		private static readonly Command[] commands =
 		{
 			new LibsCommand(),
 			new InfoCommand(),
@@ -34,7 +34,7 @@ namespace org.pescuma.dependencyconsole
 				return -1;
 			}
 
-			var graph = LoadGraph(args[0]);
+			DependencyGraph graph = LoadGraph(args[0]);
 
 			Console.WriteLine("Graph loaded");
 			Console.WriteLine("Type ? for help");
@@ -91,7 +91,7 @@ namespace org.pescuma.dependencyconsole
 
 		private static DependencyGraph LoadGraph(string filename)
 		{
-			var doc = XDocument.Load(filename);
+			XDocument doc = XDocument.Load(filename);
 
 			if (doc.Root == null || doc.Root.Name != "DependencyChecker-Depedencies")
 				throw new IOException("Invalid dependencies XML file: " + filename);
