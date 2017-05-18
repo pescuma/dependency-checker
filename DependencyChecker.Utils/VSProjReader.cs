@@ -136,7 +136,8 @@ namespace org.pescuma.dependencychecker.utils
 						{
 							string path = Path.Combine(folder, c.Value, assemblyName);
 							return Path.GetFullPath(path);
-						});
+						})
+						.Distinct();
 			}
 		}
 		public IEnumerable<string> DocumentationFiles
@@ -144,11 +145,13 @@ namespace org.pescuma.dependencychecker.utils
 			get
 			{
 				return Nodes("DocumentationFile")
+						.Where(c => !string.IsNullOrWhiteSpace(c.Value))
 						.Select(c =>
 						{
 							string path = Path.Combine(folder, c.Value);
 							return Path.GetFullPath(path);
-						});
+						})
+						.Distinct();
 			}
 		}
 
