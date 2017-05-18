@@ -37,15 +37,10 @@ namespace org.pescuma.dependencyconsole.commands
 				return;
 			}
 
-			bool found = false;
+			var found = false;
 			foreach (Library source in libs0)
-			{
 				foreach (Library target in libs1)
-				{
 					found = OutputPath(result, graph, source, target) || found;
-					found = OutputPath(result, graph, target, source) || found;
-				}
-			}
 
 			if (!found)
 				result.AppendLine("No path found");

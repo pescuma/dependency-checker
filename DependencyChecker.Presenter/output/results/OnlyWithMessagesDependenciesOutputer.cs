@@ -17,7 +17,7 @@ namespace org.pescuma.dependencychecker.presenter.output.results
 
 		public void Output(DependencyGraph graph, ArchitectureGraph architecture, List<OutputEntry> warnings)
 		{
-			var filtered = Filter(graph, warnings);
+			DependencyGraph filtered = Filter(graph, warnings);
 
 			next.Output(filtered, architecture, warnings);
 		}

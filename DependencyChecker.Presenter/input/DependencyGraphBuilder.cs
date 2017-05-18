@@ -30,12 +30,10 @@ namespace org.pescuma.dependencychecker.presenter.input
 			this.warnings = warnings;
 		}
 
-		public object AddProject(string name, string libraryName, Guid? guid, string filename, IEnumerable<string> languages)
+		public object AddProject(string name, string libraryName, Guid? guid, string filename, IEnumerable<string> outputFiles,
+			IEnumerable<string> documentationFiles, IEnumerable<string> languages)
 		{
-			languages = languages.EmptyIfNull()
-				.ToList();
-
-			var proj = new TempProject(name, libraryName, guid, filename, languages);
+			var proj = new TempProject(name, libraryName, guid, filename);
 
 			TempProject result;
 			if (!projs.TryGetValue(proj, out result))
@@ -46,7 +44,15 @@ namespace org.pescuma.dependencychecker.presenter.input
 
 			result.Names.Add(name);
 			result.LibraryNames.Add(name);
-			result.Languages.AddRange(languages);
+
+			if (outputFiles != null)
+				result.OutputPaths.AddRange(outputFiles);
+
+			if (documentationFiles != null)
+				result.DocumentationPaths.AddRange(documentationFiles);
+
+			if (languages != null)
+				result.Languages.AddRange(languages);
 
 			return result;
 		}
@@ -71,9 +77,11 @@ namespace org.pescuma.dependencychecker.presenter.input
 			{
 				p.Project = new Project(p.Name, p.LibraryName, p.Guid, p.Filename, p.Languages);
 				p.Project.Names.AddRange(p.Names.Where(n => !p.Project.Names.Contains(n))
-					.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase));
+						.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase));
 				p.Project.LibraryNames.AddRange(p.LibraryNames.Where(n => !p.Project.LibraryNames.Contains(n))
-					.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase));
+						.OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase));
+				p.Project.OutputPaths.AddRange(p.OutputPaths);
+				p.Project.DocumentationPaths.AddRange(p.DocumentationPaths);
 				p.Ignored = Ignore(p.Project);
 			});
 
@@ -84,10 +92,10 @@ namespace org.pescuma.dependencychecker.presenter.input
 
 			CreateLibraryReferences();
 
-			var libraries = db.QueryAll();
+			List<Library> libraries = db.QueryAll();
 
 			libraries.Where(l => !l.Languages.Any())
-				.ForEach(l => l.Languages.Add("Unknown"));
+					.ForEach(l => l.Languages.Add("Unknown"));
 
 			libraries.ForEach(UpdateIsLocal);
 
@@ -106,7 +114,7 @@ namespace org.pescuma.dependencychecker.presenter.input
 		{
 			UpdateIsLocal(library);
 
-			foreach (var ignore in config.Ignores)
+			foreach (Config.Ignore ignore in config.Ignores)
 			{
 				if (ignore.Matches(library, Matchers.NullReporter))
 				{
@@ -120,10 +128,10 @@ namespace org.pescuma.dependencychecker.presenter.input
 		private void CreateInitialProjects()
 		{
 			projs.Keys.Where(i => !i.Ignored)
-				.ForEach(i => db.AddProject(i.Project));
+					.ForEach(i => db.AddProject(i.Project));
 
 			projs.Keys.Where(i => !i.Ignored)
-				.ForEach(i => db.AddIgnoredProject(i.Project));
+					.ForEach(i => db.AddIgnoredProject(i.Project));
 		}
 
 		private void AddLibrary(Library newLibrary)
@@ -139,17 +147,17 @@ namespace org.pescuma.dependencychecker.presenter.input
 				others.AddRange(otherByLibName);
 
 			var sameLibraries = others.Where(p => AreTheSame(p, newLibrary))
-				.ToList();
+					.ToList();
 			if (sameLibraries.Any())
 			{
 				sameLibraries.Add(newLibrary);
 
 				var msg = new StringBuilder();
 				msg.Append("There are ")
-					.Append(sameLibraries.Count)
-					.Append(" projects that are the same:");
+						.Append(sameLibraries.Count)
+						.Append(" projects that are the same:");
 				sameLibraries.ForEach(p => msg.Append("\n  - ")
-					.Append(((Project) p).ProjectPath));
+						.Append(((Project) p).ProjectPath));
 
 				throw new ConfigException(msg.ToString());
 			}
@@ -171,13 +179,13 @@ namespace org.pescuma.dependencychecker.presenter.input
 
 		private void CreateProjectReferences()
 		{
-			foreach (var tmp in refs.Where(r => r.Type == Dependency.Types.ProjectReference && !r.Source.Ignored))
+			foreach (TempReference tmp in refs.Where(r => r.Type == Dependency.Types.ProjectReference && !r.Source.Ignored))
 			{
-				var projRef = tmp;
-				var proj = projRef.Source.Project;
+				TempReference projRef = tmp;
+				Project proj = projRef.Source.Project;
 
 				// Dummy reference for logs in case of errors
-				var dep = Dependency.WithProject(proj, null, projRef.ReferenceLocation);
+				Dependency dep = Dependency.WithProject(proj, null, projRef.ReferenceLocation);
 
 				List<Library> found = null;
 
@@ -211,7 +219,7 @@ namespace org.pescuma.dependencychecker.presenter.input
 
 				if (found == null)
 					found = CreateFakeProject(proj, dep, projRef)
-						.AsList<Library>();
+							.AsList<Library>();
 
 				if (found == null || !found.Any())
 					continue;
@@ -224,13 +232,13 @@ namespace org.pescuma.dependencychecker.presenter.input
 
 		private void CreateLibraryReferences()
 		{
-			foreach (var tmp in refs.Where(r => r.Type == Dependency.Types.LibraryReference && !r.Source.Ignored))
+			foreach (TempReference tmp in refs.Where(r => r.Type == Dependency.Types.LibraryReference && !r.Source.Ignored))
 			{
-				var projRef = tmp;
-				var proj = projRef.Source.Project;
+				TempReference projRef = tmp;
+				Project proj = projRef.Source.Project;
 
 				// Dummy reference for logs in case of errors
-				var dep = Dependency.WithLibrary(proj, null, projRef.ReferenceLocation, projRef.ReferenceFilename);
+				Dependency dep = Dependency.WithLibrary(proj, null, projRef.ReferenceLocation, projRef.ReferenceFilename);
 
 				List<Library> found = null;
 
@@ -270,7 +278,7 @@ namespace org.pescuma.dependencychecker.presenter.input
 
 		private void Merge(List<Library> targets, TempReference source)
 		{
-			foreach (var target in targets)
+			foreach (Library target in targets)
 			{
 				if (source.ReferenceFilename != null)
 					target.Paths.Add(source.ReferenceFilename);
@@ -345,20 +353,20 @@ namespace org.pescuma.dependencychecker.presenter.input
 
 		private OutputEntry CreateMultipleReferencesWarning(List<Library> candidates, Project proj, Dependency dep, string refName)
 		{
-			var message = new OutputMessage().Append("The project ")
-				.Append(proj, OutputMessage.ProjInfo.NameAndProjectPath)
-				.Append(" references the project ")
-				.Append(refName)
-				.Append(", but there are ")
-				.Append(candidates.Count)
-				.Append(" projects that match:");
+			OutputMessage message = new OutputMessage().Append("The project ")
+					.Append(proj, OutputMessage.ProjInfo.NameAndProjectPath)
+					.Append(" references the project ")
+					.Append(refName)
+					.Append(", but there are ")
+					.Append(candidates.Count)
+					.Append(" projects that match:");
 
 			candidates.ForEach(c => message.Append("\n  - ")
-				.Append(c, OutputMessage.ProjInfo.ProjectPath));
+					.Append(c, OutputMessage.ProjInfo.ProjectPath));
 			message.Append("\nMultiple dependencies will be created.");
 
 			return new LoadingOutputEntry("Multiple projects found", message, candidates.Select(dep.WithTarget)
-				.ToArray());
+					.ToArray());
 		}
 
 		private void WarnIfSimilarFound(List<Library> result, Project proj, Dependency dep, string filename, string refName)
@@ -366,48 +374,49 @@ namespace org.pescuma.dependencychecker.presenter.input
 			if (result == null || !result.Any())
 				return;
 
-			var message = new OutputMessage().Append("The project ")
-				.Append(proj, OutputMessage.ProjInfo.Name)
-				.Append(" references the project ")
-				.Append(filename)
-				.Append(" but it could not be loaded. Using project")
-				.Append(result.Count > 1 ? "s" : "")
-				.Append(" ")
-				.Append(refName)
-				.Append(" instead:");
+			OutputMessage message = new OutputMessage().Append("The project ")
+					.Append(proj, OutputMessage.ProjInfo.Name)
+					.Append(" references the project ")
+					.Append(filename)
+					.Append(" but it could not be loaded. Using project")
+					.Append(result.Count > 1 ? "s" : "")
+					.Append(" ")
+					.Append(refName)
+					.Append(" instead:");
 
 			if (result.Count == 1)
 				result.ForEach(p => message.Append(result.First(), OutputMessage.ProjInfo.ProjectPath));
 			else
 				result.ForEach(p => message.Append("\n  - ")
-					.Append(p, OutputMessage.ProjInfo.ProjectPath));
+						.Append(p, OutputMessage.ProjInfo.ProjectPath));
 
 			warnings.Add(new LoadingOutputEntry("Only similar project found", message, result.Select(dep.WithTarget)
-				.ToArray()));
+					.ToArray()));
 		}
 
 		private Project CreateFakeProject(Project proj, Dependency dep, TempReference reference)
 		{
 			var result = new Project(reference.ReferenceName ?? reference.ReferenceLibraryName,
-				reference.ReferenceLibraryName ?? reference.ReferenceName, reference.ReferenceGuid ?? Guid.NewGuid(), reference.ReferenceFilename, null);
+				reference.ReferenceLibraryName ?? reference.ReferenceName, reference.ReferenceGuid ?? Guid.NewGuid(), reference.ReferenceFilename,
+				null);
 
 			if (Ignore(result))
 				return null;
 
 			if (reference.ReferenceName == null || reference.ReferenceLibraryName == null)
 			{
-				var guessed = reference.ReferenceName == null ? "project name" : "library name";
-				var used = reference.ReferenceName == null ? "library name" : "project name";
+				string guessed = reference.ReferenceName == null ? "project name" : "library name";
+				string used = reference.ReferenceName == null ? "library name" : "project name";
 
-				var msg = new OutputMessage().Append("The project ")
-					.Append(proj, OutputMessage.ProjInfo.Name)
-					.Append(" references the project ")
-					.Append(reference.ReferenceFilename ?? reference.ReferenceName ?? reference.ReferenceLibraryName)
-					.Append(" but it could not be loaded. Guessing the ")
-					.Append(guessed)
-					.Append(" to be the same as the ")
-					.Append(used)
-					.Append(".");
+				OutputMessage msg = new OutputMessage().Append("The project ")
+						.Append(proj, OutputMessage.ProjInfo.Name)
+						.Append(" references the project ")
+						.Append(reference.ReferenceFilename ?? reference.ReferenceName ?? reference.ReferenceLibraryName)
+						.Append(" but it could not be loaded. Guessing the ")
+						.Append(guessed)
+						.Append(" to be the same as the ")
+						.Append(used)
+						.Append(".");
 
 				warnings.Add(new LoadingOutputEntry("Project not found", msg, dep.WithTarget(result)));
 			}
@@ -436,14 +445,16 @@ namespace org.pescuma.dependencychecker.presenter.input
 			public readonly string LibraryName;
 			public readonly Guid? Guid;
 			public readonly string Filename;
-			public readonly HashSet<string> Names = new HashSet<string>();
-			public readonly HashSet<string> LibraryNames = new HashSet<string>();
-			public readonly HashSet<string> Languages = new HashSet<string>();
+			public readonly ISet<string> Names = new HashSet<string>();
+			public readonly ISet<string> LibraryNames = new HashSet<string>();
+			public readonly ISet<string> OutputPaths = new HashSet<string>();
+			public readonly ISet<string> DocumentationPaths = new HashSet<string>();
+			public readonly ISet<string> Languages = new HashSet<string>();
 
 			public Project Project;
 			public bool Ignored;
 
-			public TempProject(string name, string libraryName, Guid? guid, string filename, IEnumerable<string> languages)
+			public TempProject(string name, string libraryName, Guid? guid, string filename)
 			{
 				Argument.ThrowIfNull(name);
 				Argument.ThrowIfNull(libraryName);
@@ -455,8 +466,6 @@ namespace org.pescuma.dependencychecker.presenter.input
 				Filename = filename;
 
 				Names.Add(name);
-				LibraryNames.Add(libraryName);
-				Languages.AddRange(languages.EmptyIfNull());
 			}
 
 			private bool Equals(TempProject other)
@@ -481,19 +490,13 @@ namespace org.pescuma.dependencychecker.presenter.input
 			{
 				unchecked
 				{
-					var hashCode = (Name != null
-						? Name.ToLower(CultureInfo.CurrentCulture)
-							.GetHashCode()
-						: 0);
-					hashCode = (hashCode * 397) ^ (LibraryName != null
-						? LibraryName.ToLower(CultureInfo.CurrentCulture)
-							.GetHashCode()
-						: 0);
+					var hashCode = (Name != null ? Name.ToLower(CultureInfo.CurrentCulture)
+							.GetHashCode() : 0);
+					hashCode = (hashCode * 397) ^ (LibraryName != null ? LibraryName.ToLower(CultureInfo.CurrentCulture)
+							           .GetHashCode() : 0);
 					hashCode = (hashCode * 397) ^ Guid.GetHashCode();
-					hashCode = (hashCode * 397) ^ (Filename != null
-						? Filename.ToLower(CultureInfo.CurrentCulture)
-							.GetHashCode()
-						: 0);
+					hashCode = (hashCode * 397) ^ (Filename != null ? Filename.ToLower(CultureInfo.CurrentCulture)
+							           .GetHashCode() : 0);
 					return hashCode;
 				}
 			}

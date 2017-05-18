@@ -18,7 +18,7 @@ namespace org.pescuma.dependencychecker.presenter.input
 
 			loaders.ForEach(l => l.LoadProjects(config.Inputs, builder, warnings));
 
-			var graph = builder.Build();
+			DependencyGraph graph = builder.Build();
 
 			return graph;
 		}

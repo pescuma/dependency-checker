@@ -10,6 +10,8 @@ namespace org.pescuma.dependencychecker.model
 		public readonly string ProjectName;
 		public readonly string ProjectPath;
 		public readonly Guid? Guid;
+		public readonly ISet<string> OutputPaths = new HashSet<string>();
+		public readonly ISet<string> DocumentationPaths = new HashSet<string>();
 
 		public override string Name
 		{
@@ -64,22 +66,22 @@ namespace org.pescuma.dependencychecker.model
 			var result = new StringBuilder();
 
 			result.Append(Name)
-				.Append("[");
+					.Append("[");
 
 			if (LibraryName != null)
 				result.Append(LibraryName)
-					.Append(", ");
+						.Append(", ");
 
 			if (Guid != null)
 				result.Append(Guid)
-					.Append(", ");
+						.Append(", ");
 
 			if (ProjectPath != null)
 				result.Append(ProjectPath)
-					.Append(", ");
+						.Append(", ");
 
 			result.Append("Paths: ")
-				.Append(string.Join(", ", Paths));
+					.Append(string.Join(", ", Paths));
 
 			result.Append("]");
 

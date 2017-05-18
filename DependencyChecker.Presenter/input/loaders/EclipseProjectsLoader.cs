@@ -16,7 +16,7 @@ namespace org.pescuma.dependencychecker.presenter.input.loaders
 		public void LoadProjects(List<string> paths, DependencyGraphBuilder builder, List<OutputEntry> warnings)
 		{
 			var projectFiles = new HashSet<string>(paths.SelectMany(folder => Directory.GetFiles(folder, ".project", SearchOption.AllDirectories))
-				.Select(Path.GetFullPath));
+					.Select(Path.GetFullPath));
 			foreach (var projectFile in projectFiles)
 			{
 // ReSharper disable once AssignNullToNotNullAttribute
@@ -27,7 +27,7 @@ namespace org.pescuma.dependencychecker.presenter.input.loaders
 
 		private void LoadProject(DependencyGraphBuilder builder, string projectFile, string classpathFile)
 		{
-			var xproject = XDocument.Load(projectFile, LoadOptions.SetLineInfo);
+			XDocument xproject = XDocument.Load(projectFile, LoadOptions.SetLineInfo);
 			if (xproject.Root == null || xproject.Root.Name != "projectDescription")
 				throw new IOException("Invalid .project file: " + projectFile);
 
@@ -39,16 +39,16 @@ namespace org.pescuma.dependencychecker.presenter.input.loaders
 					throw new IOException("Invalid .classpath file: " + classpathFile);
 			}
 
-			var name = xproject.XPathSelectElement("/projectDescription/name")
-				.Value;
+			string name = xproject.XPathSelectElement("/projectDescription/name")
+					.Value;
 
-			var basePath = Path.GetDirectoryName(classpathFile);
+			string basePath = Path.GetDirectoryName(classpathFile);
 
-			var languages = FindLanguages(xproject);
+			HashSet<string> languages = FindLanguages(xproject);
 
-			var proj = builder.AddProject(name, name, null, projectFile, languages);
+			object proj = builder.AddProject(name, name, null, projectFile, null, null, languages);
 
-			var referencedProjects = AddReferencesFromClassPath(builder, proj, xclasspath, basePath, classpathFile);
+			HashSet<string> referencedProjects = AddReferencesFromClassPath(builder, proj, xclasspath, basePath, classpathFile);
 
 			AddReferencesFromProject(builder, proj, xproject, projectFile, referencedProjects);
 		}
@@ -57,7 +57,7 @@ namespace org.pescuma.dependencychecker.presenter.input.loaders
 		{
 			var result = new HashSet<string>();
 
-			foreach (var xtarget in xproject.XPathSelectElements("/projectDescription/natures/nature"))
+			foreach (XElement xtarget in xproject.XPathSelectElements("/projectDescription/natures/nature"))
 			{
 				var nature = xtarget.Value;
 
@@ -86,9 +86,9 @@ namespace org.pescuma.dependencychecker.presenter.input.loaders
 				foreach (var xcpe in xclasspath.Descendants("classpathentry"))
 				{
 					var kind = xcpe.Attribute("kind")
-						.Value;
+							.Value;
 					var path = xcpe.Attribute("path")
-						.Value;
+							.Value;
 
 					if (string.IsNullOrWhiteSpace(kind) || string.IsNullOrWhiteSpace(path))
 						continue;
@@ -114,9 +114,9 @@ namespace org.pescuma.dependencychecker.presenter.input.loaders
 		private static void AddReferencesFromProject(DependencyGraphBuilder builder, object proj, XDocument xproject, string projectFile,
 			HashSet<string> referencedProjects)
 		{
-			foreach (var xtarget in xproject.XPathSelectElements("/projectDescription/projects/project"))
+			foreach (XElement xtarget in xproject.XPathSelectElements("/projectDescription/projects/project"))
 			{
-				var targetProjectName = xtarget.Value;
+				string targetProjectName = xtarget.Value;
 				if (!referencedProjects.Contains(targetProjectName))
 					builder.AddProjectReference(proj, targetProjectName, null, null, null, ToLocation(projectFile, xtarget), null);
 			}
@@ -156,7 +156,8 @@ namespace org.pescuma.dependencychecker.presenter.input.loaders
 		{
 			var ms = versionRegex.Matches(name);
 			if (ms.Count > 0)
-				return name.Substring(0, ms[0].Index);
+				return name.Substring(0, ms[0]
+						.Index);
 			else
 				return name;
 		}

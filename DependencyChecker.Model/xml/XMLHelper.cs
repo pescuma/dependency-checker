@@ -12,8 +12,8 @@ namespace org.pescuma.dependencychecker.model.xml
 		public static List<XElement> ToXML(IEnumerable<Library> libraries)
 		{
 			return libraries.SortBy(Library.NaturalOrdering)
-				.Select(ToXML)
-				.ToList();
+					.Select(ToXML)
+					.ToList();
 		}
 
 		public static XElement ToXML(Library library)
@@ -30,6 +30,8 @@ namespace org.pescuma.dependencychecker.model.xml
 					result.Add(new XAttribute("ProjectPath", proj.ProjectPath));
 				if (proj.Guid != null)
 					result.Add(new XAttribute("Guid", proj.Guid.Value));
+				proj.OutputPaths.ForEach(p => result.Add(new XElement("OutputPath", p)));
+				proj.DocumentationPaths.ForEach(p => result.Add(new XElement("DocumentationPath", p)));
 			}
 			else
 			{
@@ -58,7 +60,7 @@ namespace org.pescuma.dependencychecker.model.xml
 
 		private static string Attr(XElement el, string attribute)
 		{
-			var result = el.Attribute(attribute);
+			XAttribute result = el.Attribute(attribute);
 			if (result == null)
 				return null;
 			else
@@ -67,7 +69,7 @@ namespace org.pescuma.dependencychecker.model.xml
 
 		private static string Element(XElement el, string attribute)
 		{
-			var result = el.Element(attribute);
+			XElement result = el.Element(attribute);
 			if (result == null)
 				return null;
 			else
@@ -82,56 +84,61 @@ namespace org.pescuma.dependencychecker.model.xml
 
 			Library result;
 
-			var type = Attr(el, "Type");
+			string type = Attr(el, "Type");
 			if (type == "Project")
 			{
-				var projectName = Attr(el, "ProjectName");
-				var libraryName = Attr(el, "LibraryName");
-				var projectPath = Attr(el, "ProjectPath");
-				var guid = Attr(el, "Guid");
+				string projectName = Attr(el, "ProjectName");
+				string libraryName = Attr(el, "LibraryName");
+				string projectPath = Attr(el, "ProjectPath");
+				string guid = Attr(el, "Guid");
 
 				result = new Project(projectName, libraryName, guid != null ? new Guid(guid) : (Guid?) null, projectPath, null);
+
+				((Project) result).OutputPaths.AddRange(el.Descendants("OutputPath")
+						.Select(e => e.Value));
+				((Project) result).DocumentationPaths.AddRange(el.Descendants("DocumentationPath")
+						.Select(e => e.Value));
 			}
 			else if (type == "Library")
 			{
-				var libraryName = Attr(el, "LibraryName");
+				string libraryName = Attr(el, "LibraryName");
 
 				result = new Library(libraryName, null);
 			}
 			else
 				throw new IOException("Invalid type: " + type);
 
-			var xgroup = el.Element("Group");
+			XElement xgroup = el.Element("Group");
 			if (xgroup != null)
 			{
-				var name = Attr(xgroup, "Name");
+				string name = Attr(xgroup, "Name");
 
-				var rule = xgroup.Element("Rule");
+				XElement rule = xgroup.Element("Rule");
 				if (rule == null)
 					throw new IOException("Missing Rule inside Group");
 
-				var configLine = int.Parse(Attr(rule, "Line"));
-				var configText = rule.Value;
+				int configLine = int.Parse(Attr(rule, "Line"));
+				string configText = rule.Value;
 
-				var group = GetGroup(groups, name);
+				Group group = GetGroup(groups, name);
 
 				result.GroupElement = new GroupElement(group, new ConfigLocation(configLine, configText), result);
 			}
 
 			result.IsLocal = bool.Parse(Attr(el, "Local"));
 			result.Names.AddRange(el.Descendants("Name")
-				.Select(e => e.Value));
+					.Select(e => e.Value));
 			result.Languages.AddRange(el.Descendants("Language")
-				.Select(e => e.Value));
+					.Select(e => e.Value));
 			result.Paths.AddRange(el.Descendants("Path")
-				.Select(e => e.Value));
+					.Select(e => e.Value));
 
 			return result;
 		}
 
 		private static Group GetGroup(Dictionary<string, Group> groups, string name)
 		{
-			var result = groups.Get(name);
+			Group result = groups.Get(name);
 			if (result == null)
 			{
 				result = new Group(name);
@@ -143,8 +150,8 @@ namespace org.pescuma.dependencychecker.model.xml
 		public static List<XElement> ToXML(IEnumerable<Dependency> deps)
 		{
 			return deps.SortBy(Dependency.NaturalOrdering)
-				.Select(ToXML)
-				.ToList();
+					.Select(ToXML)
+					.ToList();
 		}
 
 		public static XElement ToXML(Dependency dep)
@@ -168,19 +175,19 @@ namespace org.pescuma.dependencychecker.model.xml
 
 		public static Dependency DependencyFromXML(XElement el, Dictionary<string, Library> libsByKey)
 		{
-			var typeName = Attr(el, "Type");
+			string typeName = Attr(el, "Type");
 			Dependency.Types type;
 			if (!Enum.TryParse(typeName, out type))
 				throw new IOException("Wrong type: " + typeName);
 
-			var source = FromXMLAsKey(el.Element("Source"), libsByKey);
-			var target = FromXMLAsKey(el.Element("Target"), libsByKey);
+			Library source = FromXMLAsKey(el.Element("Source"), libsByKey);
+			Library target = FromXMLAsKey(el.Element("Target"), libsByKey);
 
-			var xlocation = el.Element("Location");
-			var locFile = Attr(xlocation, "File");
-			var locLine = int.Parse(Attr(xlocation, "Line"));
+			XElement xlocation = el.Element("Location");
+			string locFile = Attr(xlocation, "File");
+			int locLine = int.Parse(Attr(xlocation, "Line"));
 
-			var referencedPath = Element(el, "ReferencedPath");
+			string referencedPath = Element(el, "ReferencedPath");
 
 			return new Dependency(source, target, type, new Location(locFile, locLine), referencedPath);
 		}
@@ -188,22 +195,22 @@ namespace org.pescuma.dependencychecker.model.xml
 		public static void ToXML(XElement xroot, DependencyGraph graph)
 		{
 			ToXML(graph.Vertices)
-				.ForEach(xroot.Add);
+					.ForEach(xroot.Add);
 
 			ToXML(graph.Edges)
-				.ForEach(xroot.Add);
+					.ForEach(xroot.Add);
 		}
 
 		public static DependencyGraph DependencyGraphFromXML(XElement xroot)
 		{
 			var libs = xroot.Descendants("Element")
-				.Select(LibraryFromXML)
-				.ToList();
+					.Select(LibraryFromXML)
+					.ToList();
 
 			var libsByKey = libs.ToDictionary(ToKey, l => l);
 
 			var deps = xroot.Descendants("Dependency")
-				.Select(el => DependencyFromXML(el, libsByKey));
+					.Select(el => DependencyFromXML(el, libsByKey));
 
 			var graph = new DependencyGraph();
 			graph.AddVertexRange(libs);

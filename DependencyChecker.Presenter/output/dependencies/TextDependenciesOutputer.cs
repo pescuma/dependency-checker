@@ -27,17 +27,18 @@ namespace org.pescuma.dependencychecker.presenter.output.dependencies
 
 		private void AppendProjects(StringBuilder result, DependencyGraph graph)
 		{
-			var projs = graph.Vertices.ToList();
+			List<Library> projs = graph.Vertices.ToList();
 			projs.Sort(Library.NaturalOrdering);
 
-			foreach (var lib in projs)
+			foreach (Library lib in projs)
 			{
-				if (lib is Project)
+				var proj = lib as Project;
+
+				if (proj != null)
 				{
-					var proj = (Project) lib;
 					result.Append("Project ")
-						.Append(proj.ProjectName)
-						.Append("\n");
+							.Append(proj.ProjectName)
+							.Append("\n");
 					AppendProperty(result, "Library name", proj.LibraryName);
 					if (proj.ProjectPath != null)
 						AppendProperty(result, "Project path", proj.ProjectPath);
@@ -47,8 +48,8 @@ namespace org.pescuma.dependencychecker.presenter.output.dependencies
 				else
 				{
 					result.Append("Library ")
-						.Append(lib.LibraryName)
-						.Append("\n");
+							.Append(lib.LibraryName)
+							.Append("\n");
 				}
 
 				if (lib.GroupElement != null)
@@ -56,9 +57,15 @@ namespace org.pescuma.dependencychecker.presenter.output.dependencies
 
 				lib.Languages.ForEach(p => AppendProperty(result, "Language", p));
 
-				var projectPath = (lib is Project ? ((Project) lib).ProjectPath : null);
+				if (proj != null)
+				{
+					proj.OutputPaths.ForEach(p => AppendProperty(result, "Output path", p));
+					proj.DocumentationPaths.ForEach(p => AppendProperty(result, "Documentation path", p));
+				}
+
+				string projectPath = (proj != null ? proj.ProjectPath : null);
 				lib.Paths.Where(p => p != projectPath)
-					.ForEach(p => AppendProperty(result, "Path", p));
+						.ForEach(p => AppendProperty(result, "Path", p));
 
 				result.Append("\n");
 			}
@@ -66,16 +73,16 @@ namespace org.pescuma.dependencychecker.presenter.output.dependencies
 
 		private void AppendDependencies(StringBuilder result, DependencyGraph graph)
 		{
-			var deps = graph.Edges.ToList();
+			List<Dependency> deps = graph.Edges.ToList();
 			deps.Sort(Dependency.NaturalOrdering);
 
-			foreach (var dep in deps)
+			foreach (Dependency dep in deps)
 			{
 				result.Append("Dependency: ")
-					.Append(dep.Source.Name)
-					.Append(" depends on ")
-					.Append(dep.Target.Name)
-					.Append("\n");
+						.Append(dep.Source.Name)
+						.Append(" depends on ")
+						.Append(dep.Target.Name)
+						.Append("\n");
 
 				AppendProperty(result, "Reference type", dep.Type == Dependency.Types.LibraryReference ? "library" : "project");
 
@@ -89,10 +96,10 @@ namespace org.pescuma.dependencychecker.presenter.output.dependencies
 		private void AppendProperty(StringBuilder result, string name, object value)
 		{
 			result.Append("  - ")
-				.Append(name)
-				.Append(": ")
-				.Append(value)
-				.Append("\n");
+					.Append(name)
+					.Append(": ")
+					.Append(value)
+					.Append("\n");
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -9,6 +10,7 @@ using System.Xml.Linq;
 namespace org.pescuma.dependencychecker.utils
 {
 	// http://stackoverflow.com/questions/4649989/reading-a-csproj-file-in-c-sharp
+	[DebuggerDisplay("{Name}")]
 	public class VSProjReader
 	{
 		private readonly string folder;
@@ -43,8 +45,18 @@ namespace org.pescuma.dependencychecker.utils
 			get
 			{
 				return new Guid(Nodes("ProjectGuid")
-					.Select(n => n.Value)
-					.First());
+						.Select(n => n.Value)
+						.First());
+			}
+		}
+
+		public string OutputType
+		{
+			get
+			{
+				return Nodes("OutputType")
+						.Select(n => n.Value)
+						.First();
 			}
 		}
 
@@ -53,8 +65,8 @@ namespace org.pescuma.dependencychecker.utils
 			get
 			{
 				return Nodes("AssemblyName")
-					.Select(n => n.Value)
-					.First();
+						.Select(n => n.Value)
+						.First();
 			}
 		}
 
@@ -63,7 +75,7 @@ namespace org.pescuma.dependencychecker.utils
 			get
 			{
 				return Nodes("Reference")
-					.Select(n => new Reference(this, n));
+						.Select(n => new Reference(this, n));
 			}
 		}
 
@@ -72,7 +84,7 @@ namespace org.pescuma.dependencychecker.utils
 			get
 			{
 				return Nodes("ProjectReference")
-					.Select(n => new ProjectReference(this, n));
+						.Select(n => new ProjectReference(this, n));
 			}
 		}
 
@@ -81,7 +93,7 @@ namespace org.pescuma.dependencychecker.utils
 			get
 			{
 				return Nodes("COMReference")
-					.Select(n => new COMReference(n));
+						.Select(n => new COMReference(n));
 			}
 		}
 
@@ -89,18 +101,70 @@ namespace org.pescuma.dependencychecker.utils
 		{
 			get
 			{
-				return Nodes("Content")
-					.Concat(Nodes("None"))
-					.Select(c =>
-					{
-						string include = Attribute(c, "Include");
-						if (string.IsNullOrWhiteSpace(include))
-							return null;
+				List<string> ignored = Nodes("WCFMetadataStorage")
+						.Select(c => Attribute(c, "Include"))
+						.Where(i => !string.IsNullOrWhiteSpace(i))
+						.Select(i =>
+						{
+							if (!i.EndsWith("\\"))
+								return i + "\\";
+							else
+								return i;
+						})
+						.ToList();
 
-						return Path.Combine(folder, include);
-					})
-					.Where(i => i != null);
+				return Nodes("Content")
+						.Concat(Nodes("None"))
+						.Select(c => Attribute(c, "Include"))
+						.Where(c => !string.IsNullOrWhiteSpace(c) && !ignored.Any(i => c.StartsWith(i, StringComparison.CurrentCultureIgnoreCase)))
+						.Select(c => Path.Combine(folder, c));
 			}
+		}
+
+		public IEnumerable<string> OutputFiles
+		{
+			get
+			{
+				string extension = ToExtension(OutputType);
+				if (extension == null)
+					return new List<string>();
+
+				string assemblyName = AssemblyName + extension;
+
+				return Nodes("OutputPath")
+						.Select(c =>
+						{
+							string path = Path.Combine(folder, c.Value, assemblyName);
+							return Path.GetFullPath(path);
+						});
+			}
+		}
+		public IEnumerable<string> DocumentationFiles
+		{
+			get
+			{
+				return Nodes("DocumentationFile")
+						.Select(c =>
+						{
+							string path = Path.Combine(folder, c.Value);
+							return Path.GetFullPath(path);
+						});
+			}
+		}
+
+		private string ToExtension(string outputType)
+		{
+			if ("Exe".Equals(outputType, StringComparison.InvariantCultureIgnoreCase))
+				return ".exe";
+
+			else if ("WinExe".Equals(outputType, StringComparison.InvariantCultureIgnoreCase))
+				return ".exe";
+
+			else if ("Library".Equals(outputType, StringComparison.InvariantCultureIgnoreCase))
+				return ".dll";
+
+			else
+				return null;
 		}
 
 		private IEnumerable<XElement> Nodes(string name)
@@ -194,7 +258,7 @@ namespace org.pescuma.dependencychecker.utils
 				get
 				{
 					return new Guid(Node(node, "Guid")
-						.Value);
+							.Value);
 				}
 			}
 
@@ -241,7 +305,7 @@ namespace org.pescuma.dependencychecker.utils
 				get
 				{
 					return new Guid(Node(node, "Project")
-						.Value);
+							.Value);
 				}
 			}
 
